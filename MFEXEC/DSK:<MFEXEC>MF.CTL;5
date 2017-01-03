@@ -1,0 +1,8 @@
+@ref
+@CONN MFEXEC
+@MACRO
+*MF.ASM@
+@RUN LINK10
+*@MF.LNK
+@DEL *.TMP;*
+@LOGO

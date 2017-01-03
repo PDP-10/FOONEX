@@ -1,0 +1,8 @@
+;	%IAC.==1	;An IAC assembly
+;	%ISI.==1	;An ISI assembly
+;	%SRI.==1	;An SRI assembly
+;	%ECL.==1	;An ECL assembly
+;	%BBN.==1	;An BBN assembly
+	%SCRC.==1	;A Symbolics assembly
+;	TEST==1		; A TEST ASSEMBLY
+

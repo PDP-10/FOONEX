@@ -1,0 +1,171 @@
+;<FOONEX>CHABUG.MAC;2 14-Mar-81 15:07:24, Edit by MMCM
+
+	EXTERN BUGCHK,BUGHLT,BUGNTE
+BUGINF==BUGNTE			;BUGINF'S ARE BUGNOTE'S HERE
+
+DEFINE DEFBUG(TYPE,NAME,WHERE,WHAT,MSG,IGNORE,IGNORE)<
+DEFINE NAME<
+BUG(TYPE,MSG)
+>>
+
+DEFINE CHABUG(NAME,IGNORE)<
+NAME
+>
+
+DEFBUG(INF,CHCFRX,CHAOS,SOFT,<CHAOS - RAN OUT OF FORK SLOTS>,,<
+
+Cause:	Incompetence
+
+Action:	Panic
+>)
+
+DEFBUG (HLT,CHIFRK,CHAOS,SOFT,<CHAINI: CFORK failed for background Chaos fork>,,<
+>)
+
+DEFBUG (HLT,CHLFRK,CHAOS,SOFT,<CHAINI: CFORK failed for local-routing fork>,,<
+>)
+
+DEFBUG(CHK,CHACLB,CHAOS,SOFT,<CHFCC: NOSKDP/OKSKDP lock over-decremented>,<<T1,LOCK>>,<
+>)
+
+DEFBUG(INF,CHADWN,CHAOS,SOFT,<CHAOSnet now logically down>,,<
+>)
+
+DEFBUG(INF,CHADNV,CHAOS,SOFT,<Orphaned NVT connection released>,,<
+>)
+
+DEFBUG(INF,CHAGCO,CHAOS,SOFT,<CHAGCF: killing tardy server fork>,,<
+>)
+
+DEFBUG(CHK,CHAIAB,CHAOS,SOFT,<CHIACK: releasing packet pending a send>,<<PKT,PKTREF>,<T3,LINK>,<T2,MAGIC>>,<
+>)
+
+DEFBUG(CHK,CHAIDO,CHAOS,SOFT,<CHIDAT: duplicate packet seen on out-of-order list>,,<
+>)
+
+DEFBUG(CHK,CHAINH,CHAOS,SOFT,<CHSINI: didn't get my hardware host address from -11>,,<
+>)
+
+DEFBUG(CHK,CHALCK,CHAOS,SOFT,<CHKLCK: routine called unprotectedly>,,<
+>)
+
+DEFBUG(CHK,CHAMCR,CHAOS,SOFT,<CHADCL: quick-close request for non-NVT>,,<
+>)
+
+DEFBUG(CHK,CHSLCR,CHAOS,SOFT,<CHALCR: locally-routed packet has bad LH link>,,<
+>)
+
+DEFBUG(CHK,CHANCV,CHAOS,SOFT,<Invalid NVT index found in connection>,<<CONN,CONREF>,<T1,CHASTA>>,<
+>)
+
+DEFBUG(CHK,CHANFP,CHAOS,SOFT,<RELPKT: Packet not freeable now>,<<PKT,PKTREF>>,<
+>)
+
+DEFBUG(CHK,CHANHT,CHAOS,SOFT,<CHSINI: Problems finding or reading SYSTEM:HOSTS2.BIN>,<<T1,PROB>>,<
+>)
+
+DEFBUG(INF,CHANRU,CHAOS,SOFT,<No Room for unhandled RFC (in packet space or in RFC handler window)>,,<
+>)
+
+DEFBUG(INF,CHAOLP,CHAOS,SOFT,<CHAPGC: Very old but still active packet found>,<<Q2,PKTREF>,<T1,OLD>>,<
+>)
+
+DEFBUG(CHK,CHAOOL,CHAOS,SOFT,<CHIDT2: Out of order list disappeared (?)>,,<
+>)
+
+DEFBUG(CHK,CHAORP,CHAOS,SOFT,<CHAPGC: Orphaned packet found; freeing it>,<<Q2,PKTREF>,<T1,OLD>,<T3,SIZE>>,<
+>)
+
+DEFBUG(CHK,CHAPGL,CHAOS,SOFT,<CHAPGC: looping forever in packet GC>,,<
+>)
+
+DEFBUG(CHK,CHAPOO,CHAOS,SOFT,<CHPKIA: Packet still on out-of-order list!>,,<
+>)
+
+DEFBUG(CHK,CHAQHI,CHAOS,SOFT,<CHAQCK: Inactive Q header passed to Q routine>,,<
+>)
+
+DEFBUG(CHK,CHARBC,CHAOS,SOFT,<RELCON: Bad connection index found>,,<
+>)
+
+DEFBUG(CHK,CHARFB,CHAOS,SOFT,<RFCFRE: RCTAB entry deletion problems>,,<
+>)
+
+DEFBUG(CHK,CHASPS,CHAOS,SOFT,<SNDPKT: handed non-vanilla packet>,<<PKT,PKTREF>,<T1,LINK>>,<
+>)
+
+DEFBUG(INF,CHATBF,CHAOS,SOFT,<Chaos background fork appears hung>,<<T2,WHAT>,<T3,WHEN>,<T4,FLAGS>,<Q2,NOW>>,<
+>)
+
+DEFBUG(CHK,CHATSO,CHAOS,SOFT,<CHATTS: non-NVT connection marked as having NVT output>,,<
+>)
+DEFBUG(INF,CHAUHR,CHAOS,SOFT,<Unhandled RFC>,<<T1,CONTC1>,<T2,CONTC2>,<T3,LENGTH>>,<
+>)
+
+DEFBUG(INF,CHAUPN,CHAOS,SOFT,<CHAOSnet now logically up>,,<
+>)
+
+DEFBUG(CHK,CHAVSN,CHAOS,SOFT,<CHAVSO: Asked to start output on non-NVT>,,<
+>)
+
+DEFBUG(CHK,CHAXIB,CHAOS,SOFT,<CHAXIN: packet not xmit-active when done to -11>,<<T1,WHAT>,<PKT,PKTREF>,<T2,MAGIC>>,<
+	[T2 (MAGIC) is only valid when debugging]
+>)
+
+DEFBUG(CHK,CHAXMP,CHAOS,SOFT,<CHAXMT: pending-xmit flag set already illegally>,<<PKT,PKTREF>>,<
+>)
+
+DEFBUG(CHK,CHAXOD,CHAOS,SOFT,<CHXMTT: Packet waiting too long for room in -11>,,<
+>)
+
+DEFBUG(CHK,CHAZWN,CHAOS,SOFT,<CHISTS: ATTEMPT TO SET WINDOW TO LEQ 0>,<<T1,WINSIZ>,<CONN,CONREF>>,<
+>)
+
+DEFBUG(CHK,CHA11S,CHAOS,SOFT,<CHFCC: NFE-11 seems to be wedged>,,<
+>)
+
+DEFBUG(CHK,CHABDC,CHAOS,SOFT,<CHKCNB: invalid connection ref>,<<CONN,CONREF>,<T2,WHERE>>,<
+
+Cause:	Someone has given a bad connection-block reference to someone else.
+	CONREF is the bad reference, and WHERE is the caller to CHKCNB (+1).
+
+Action:	Suspect something may be wrong.
+>)
+
+DEFBUG(CHK,CHABDP,CHAOS,SOFT,<CHKPKT: invalid packet ref>,<<PKT,PKTREF>,<T2,WHERE>,<T3,WHY>,<T4,LINKS>>,<
+>)
+
+DEFBUG(CHK,CHABDR,CHAOS,SOFT,<CHKPKT: invalid packet link field>,<<PKT,PKTREF>,<T2,WHERE>,<T3,WHY>,<T4,LINKS>>,<
+>)
+
+DEFBUG(HLT,CHNVBQ,CHAOS,SOFT,<CHINVT: NVT-has-data Q screwed up>,,<
+
+Cause: Incompetence, or timing screw
+
+Action: Curse, watch system reload self
+>)
+
+DEFBUG(CHK,CHT7IN,CHAOS,SOFT,<CHTTC7: Bad conn in NVT-has-data Q>,,<
+
+Cause:	Incompetence, or timing screw
+
+Action: Shrug shoulders
+>)
+
+DEFBUG(HLT,CHT7QB,CHAOS,SOFT,<CHTTC7: NVT-has-data Q screwed up>,,<
+
+Cause:	Incompetence, or timing screw
+
+Action: Curse, watch system reload self
+>)
+
+DEFBUG(INF,CHVTNA,TTYSRV,SOFT,<CHVTNA: input Q'd for inactive Chaos NVT>,,<
+
+Cause:	Chaos NVT has become inactive behind your back.
+
+Action: Try wondering what's going on.  The input packets have ostensibly
+	been freed (good luck)!
+>)
+
+DEFBUG(HLT,CHDR1F,CHAOS,SORT,<CHARLD: cannot make initial input packets>,,<
+>)

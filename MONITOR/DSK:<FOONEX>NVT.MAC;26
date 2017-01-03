@@ -1,0 +1,1055 @@
+;<FOONEX>NVT.MAC;1 19-Mar-81 22:26:24, Edit by MMCM
+; Separated out from IMPDV so that it can be used by chaosnet as well
+
+	SEARCH	STENEX,PROLOG,MACSYM
+	TITLE	NVT
+
+; Parameters
+NEGTM0==:^D30000	; Negotiation time-out (between 1 & 2 of these)
+
+; NVT special characters
+
+IACCH==377		; Initiate command
+DNTCH==376		; DON'T
+DOCH==375		; DO
+WNTCH==374		; WON'T
+WILCH==373		; WILL
+SBCH==372		; SB beginning of sub negotiation
+GACH==371		; GA go ahead
+ELCH==370		; EL erase line
+ECCH==367		; EC erase character
+AYTCH==366		; AYT are you there?
+AOCH==365		; AO abort output
+IPCH==364		; IP interrupt process
+BRKCH==363		; BREAK
+DMCH==362		; DM data mark
+NOPCH==361		; NOP
+SECH==360		; SE end of subnegotiation
+
+; Nvt option definitions
+
+BINOPT==0		; Binary
+ECHOPT==1		; Echo
+RCNOPT==2		; Reconnection
+SGAOPT==3		; Suppress ga
+NAMOPT==4		; Negotiate message size
+STSOPT==5		; Status
+TMKOPT==6		; Timing mark option
+RCTOPT==7		; RCTE option
+WILOPT==10		; Offset for requests
+MAXOPT==^D18		; Only 1 half word of option bits
+
+; Bits in ttnetw
+
+NVTCRP==1		; Bit in ttnetw -- last char out was cr
+IMPTB2==2		; Bit in ttnetw, last char in was cr
+NVTGAB==4		; Bit in ttnetw -- suppress go-ahead
+			; Bits 12-14 used for nvtstp
+NEGTMO==100		; Negotiation time-out started
+NEWNVB==200		; New style nvt
+NVTNMT==400		; Characters out (for timing mark suppression)
+NVTRCS==1000		; RCTE CHAAGE IN STATE
+NVTWKS==2000		; RCTE WAKEUP SEEN
+NVTCHS==:4000		; This is a chaosnet NVT (as opposed to arpanet)
+
+; The following nvt states are stored in ttnetw bits 12-14 (nvtstp)
+
+DFRWIL==1		; Deferred will
+DFRWNT==2		; Deferred wont
+DFRDO==3		; Deferred do
+DFRDNT==4		; Deferred dont
+DFRIAC==5		; Deferred iac
+
+; Linkage to nvt
+
+INTERN NVTDOB,NVTCOB,NVTPAR,NTTCSO,NVTCAP,NVTRCC
+INTERN NVTCHO,NVTXCR,NVTXGA,NVTMOD,NEGCHK,NEGCH1
+INTERN ASNAVT,ASNCVT,NVTDET,TTNETW,NVTSTP,NVTSTD
+INTERN CKNNVT,NETTOO,NETTEO,NVTRRR,NVTINI,DETCVT
+INTERN .ATNVT,.ATPTY
+
+EXTERN	TTOCT,TTECT,TTICT,TTCHI,TTYLMD,TTFORK,NVTCOF,TTPSI,TTCOBI,TTCIBF
+EXTERN	TTRLOB,TTOOUT,TTEOUT,WRPMSK,TTIMAX,TTOMAX,TCOB,TCOBQ,TTFLGS
+EXTERN	TCOTST,AVTCOB,BHC,BITS,BUGCHK,CHADTB,CHKJFN,EDISMS
+EXTERN	MENTR,MRETNE,NEGTIM,NETTCF,NVTPTR,TODCLK
+EXTERN AVTDET,PTNETI,PTNETO,AVTRSV,AATNVT,AVTCAP
+EXTERN CVTDET,CHAFLG,PTCONN,CATNVT,CVTCAP
+EXTERN XTTFLG,TTINPW,INSKED,CAPENB
+
+; Pointers to various fields
+
+PTINTC:	POINT 3,TTNETW(2),5	; Count, sync-ins
+NVTSTP:	POINT 3,TTNETW(2),14	; Current nvt state
+PBRCNT::POINT 9,TTBRKC(2),8	; OUTSTANDING BREAKS COUNT
+MAXBRC==777
+
+; Storage for nvts
+
+LS TTNETX,NNVTLN	; Stuff for nvt's
+LS TTBRKX,NNVTLN	; BREAK CLASSES FOR NVT'S
+TTNETW=<Z TTNETX-NVTLO>	; Relative to 0
+TTBRKC=<Z TTBRKX-NVTLO>	; RELATIVE TO 0
+			; BITS 0-8: OUTSTANDING BREAK COUNT
+			; BITS 9-17: LAST RCTE COMMAND SENT
+			; BITS 18-35: LAST BREAK CLASSES SENT
+LS NVTOPX,NNVTLN	; Lh -- bit for each option in progress
+			; Rh -- bit for result of each option
+NVTOPF=:<Z NVTOPX-NVTLO>; Relative to 0
+
+; Initialization
+NVTINI:	MOVSI 1,-NNVTLN		; Count through nvt lines
+	SETOM TTNETX(1)		; Init all net lines to free
+	AOBJN 1,.-1
+	RET
+
+; Network tty logic
+; For connection driven via the tty service routines
+
+; Assign a pseudo (network) tty
+; 1/ receive unit
+; 2/ send unit (if for arpanet)
+; Returns 1/ line number
+
+ASNCVT:	PUSH P,[-1]
+	SKIPA
+ASNAVT:	PUSH P,[0]		; Remember this was arpanet
+ASNNVT:	MOVEI 3,NVTLO		; Nvt's start after scanner ttys
+	NOSKED
+ASNPT1:	SKIPGE TTNETW(3)	; Free?
+	JRST ASNPT3		; Yes
+ASNPT2:	CAIGE 3,NVTHI		; Looked at all nvt's?
+	AOJA 3,ASNPT1		; No
+	OKSKED			; Yes,
+	SUB P,BHC+1		; Flush type flag
+	RET			; Return bad
+
+ASNPT3:	SKIPL TTFORK(3)		; Tty already attached?
+	 JRST ASNPT2		; Yes, don't use
+	TLNN 1,(1B2)		; New nvt protocol request?
+	 TLZA 3,-1		; No, make zeroes
+	  HRLI 3,NEWNVB		; Yes, make new nvb bit
+	SKIPE 0(P)
+	 TLO 3,NVTCHS		; Mark if for chaosnet
+	HLLZM 3,TTNETW(3)	; Clear ttnetw except for newnvb
+	SETZM NVTOPF(3)		; Clear option status
+IFDEF ITPP,<
+	TLNN 1,(1B3)		; Unless ITP requested
+	 TDZA 4,4
+	 MOVSI 4,(1B0)
+	MOVEM 4,TTINPW(3)
+	SKIPE 4
+	 SKIPA 4,[26]
+>
+	MOVEI 4,7		; Start terminal out as NVT
+IFDEF SYMBLX,<
+	MOVE 7,CAPENB
+	TRNN 7,WHEEL+OPER
+	 JRST .+3
+	TLNE 1,(1B4)
+	 TLO 4,(3B2)		; Set no password bit for line and enables ok
+>
+	MOVEM 4,XTTFLG(3)
+	OKSKED
+	EXCH 2,3
+	SKIPN 0(P)		; Was it arpanet?
+	 JRST [	DPB 1,PTNETI	; Remeber units
+		DPB 3,PTNETO
+		JRST .+2]
+	 DPB 1,PTCONN
+	SUB P,BHC+1
+	CALL TTCOBI
+	CALL TTCIBF		; Clear buffers
+	MOVEI 1,3
+	DPB 1,[POINT 2,TTFLGS(2),33]
+	MOVEI 1,1
+	DPB 1,[POINT 2,TTFLGS(2),29]
+	MOVEI 1,0(2)		; Return line number
+	RETSKP			; Return good
+
+; Close a full duplex net tty connection
+
+DETCVT:				; Name known to chaosnet
+NVTDET:	PUSH P,2
+	SKIPL TTFORK(2)		; Line attached?
+	CALL NVTCOF		; Yes, initiate carrier off psi
+	MOVE 2,0(P)
+	SKIPG T1,TTNETW(2)	; Reasonable units?
+	JRST NVTDT1		; No
+	TLNN T1,NVTCHS		; Chaosnet nvt?
+	 JRST [	CALL AVTDET	; No, flush arpanet nvt
+		JRST NVTDT1]
+	CALL CVTDET		; Flush Chaosnet nvt
+NVTDT1:	POP P,2
+	SETZM NVTOPF(2)
+	SETOM TTNETW(2)
+	SETZM TTPSI(2)
+	CALL TTCOBI
+	CALL TTCIBF
+	RET
+
+; Called from tci
+
+NVTCAP:	SKIPGE T1,TTNETW(2)	; Still connected?
+	 RET			; No
+	TLNN T1,NVTCHS		; Chaosnet?
+	 JRST AVTCAP
+	JRST CVTCAP
+
+; Check if this nvt is using new protocol
+
+CKNNVT:	PUSH P,1
+	MOVSI 1,NEWNVB
+	TDNE 1,TTNETW(2)
+	 AOS -1(P)
+	POP P,1
+	RET
+
+; Check for special nvt output processing
+; Called from tcoutx for nvt's
+
+NVTCHO:	PUSHJ P,CKNNVT		; Check if new nvt
+	 RET			; Not. no special processing
+	PUSH P,1		; Save character
+	MOVSI 3,NVTCRP
+	TDNE 3,TTNETW(2)	; Was previous char cr?
+	 JRST [	ANDCAM 3,TTNETW(2)	; Yes, clear it
+		CAIE 1,12	; Must be followed by lf
+		CAIN 1,0	; Or null
+		 JRST .+1
+		SETZ 1,		; If not follow it with null
+		PUSHJ P,TCOBQ
+		MOVE 1,0(P)	
+		JRST .+1]
+	CAIN 1,IACCH		; Iac?
+	PUSHJ P,TCOBQ		; Yes. double the special character
+	POP P,1
+	RET
+
+; Set NVTCRP called from TTYSRV
+
+NVTXCR:	LDB A,TTYLMD		; Get terminal modes
+	JUMPE A,.+2		; If binary don't add <NULL>
+	 CALL CKNNVT
+	 RET
+	MOVSI 3,NVTCRP
+	IORM 3,TTNETW(2)
+	RET
+
+; Called from tcout
+
+NTTCSO:	SKIPGE TTNETW(2)	; HAS NVT GONE AWAY?
+	 JRST TTCOBI		; YES, CLEAR BUFFERS
+	PUSH P,1
+	MOVSI 1,NVTNMT		; Mark that characters are outstanding
+	IORM 1,TTNETW(2)
+IFDEF IMPCHN,<
+	AOS TTNOF		; Request tty scan
+	AOS IMPFLG
+>
+IFDEF CHAOS,<
+	MOVX T1,CH%TTY		; Both ways
+	IORM T1,CHAFLG
+>
+	POP P,1
+	RET
+
+; CHECK FOR ECHOS DONE BY RCTE
+; RETURNS
+;	+1	; NO RCTE ACTION
+;	+2	; CHARACTER NOT A BREAK CHARACTER
+;	+3	; CHARACTER IS A RCTE BREAK
+; THE 400 BIT IS SET IN THE CHARACTER IN AC1 IF RCTE DID THE ECHO.
+
+NVTRCC::CAIL 2,NVTLO
+	CAILE 2,NVTHI
+	 JRST RSKP
+	PUSH P,3		; STASH AC3
+	MOVEI 3,(1B<RCTOPT+WILOPT>)
+	TDNN 3,NVTOPF(2)
+	 JRST NVTRC1		; RCTE NOT ON
+	MOVEI 3,0(1)		; THE CHARACTER
+	ANDI 3,177		; RETAIN LOW BITS
+	LSH 3,-2		; DIVIDE BY 4 BYTES PER WORD
+	TRNE 1,2		; IF SECOND TWO BYTES WANTED
+	 SKIPA 3,CHWTB(3)	; GET THEM
+	  MOVS 3,CHWTB(3)	; ELSE GET FIRST TWO BYTES
+	TRNN 1,1		; IF BYTE 0 OR 2
+	LSH 3,-9		; SHIFT OVER
+	HRROS 3
+	AND 3,TTBRKC(2)		; RETAIN BITS SPECIFIED AS BREAKS
+	TRNN 3,777		; IS THIS CHAR ONE OF THEM?
+	 LSH 3,-1		; YES, SHIFT BIT 15 INTO BIT 16
+	TLNE 3,2		; WAS ECHO SUPPRESSED?
+NVTRC1:	 AOSA -1(P)		; YES, INDICATE RCTE HAS DONE NOUGHT
+	  IORI 1,400		; ELSE INDICATE ECHO GENERATED
+	POP P,3			; RESTORE AC3
+	RET
+
+; Send ga
+
+NVTXGA:	CAIL 2,NVTLO
+	CAILE 2,NVTHI
+	 RET
+	MOVSI 1,NVTGAB
+	TDNN 1,TTNETW(2)	; GA SUPPRESSED
+	CALL CKNNVT		; OR NOT NEW PROTOCOL?
+	 JRST NVTXG1
+	MOVEI 1,GACH
+	CALL NVTSSP
+NVTXG1:	MOVEI 3,(1B<RCTOPT+WILOPT>)
+	TDNN 3,NVTOPF(2)	; IS RCTE TURNED ON?
+	 RET			; NO. RETURN
+	LDB 1,PBRCNT
+	ADDI 1,1
+	CAILE 1,MAXBRC
+	 BUG(CHK, <NVTXG1: TOO MANY BREAKS OUTSTANDING>)
+	DPB 1,PBRCNT
+	MOVSI 3,NVTWKS
+	ANDCAM 3,TTNETW(2)	; CANCEL WAKEUP SEEN
+NVTRRR:	PUSH P,BHC+0		; ASSUME ZERO COMMAND
+	MOVSI 3,NVTRCS
+	TDNN 3,TTNETW(2)	; UNLESS ANY CHANGE IN STATE?
+	 JRST NVTRR1		; NO, BYPASS THIS NONSENSE.
+	CALL GTBRKC		; GET BREAK CLASSES
+	MOVEM 1,0(P)		; SAVE THAT
+	CALL GTSPCC
+	IORM 1,0(P)		; MUST BREAK ON ALL OF THEM
+	SKIPE 1			; ANY SPECIAL BREAKS?
+	 MOVEI 1,2		; YES, SUPPRESS ECHO OF BREAKS
+	MOVE 3,TTFLGS(2)
+	TRNN 3,3B25		; NO ECHO WANTED?
+	 IORI 1,6		; SUPPRESS ALL ECHOES
+	TRC 3,3B25
+	TRCN 3,3B25		; SUPPRESS ECHOES OF BREAKS?
+	 IORI 1,2		; YES, ...
+	IORI 1,11		; CAUSE BREAK CLASS TO CHANGE
+	HRLM 1,(P)		; SAVE THE COMMAND
+	SKIPA 1,[^D10]		; NEED 4 CHARS FOR BREAK CLASSES
+NVTRR1:	MOVEI 1,6		; NEED 6 FOR SB ETC
+	CALL NVTRSV		; RESERVE SPACE
+	 JRST [	SUB P,BHC+1
+		RET]
+	MOVEI 1,SBCH
+	CALL NVTSSP		; SEND IAC-SB
+	MOVEI 1,RCTOPT
+	CALL TCOBQ		; SAY WHICH OPTION WE ARE CHANGING
+	HLRZ 1,0(P)		; GET COMMAND
+	CALL TCOB		; SEND THE COMMAND
+	 JUMPE 1,NVTRR3		; NO CHANGE, SKIP THE FOLLOWING
+	HRRZ 1,0(P)		; GET NEW BREAK CLASSES
+	LSH 1,-8		; GET HIGH ORDER BYTE
+	CALL TCOB		; SEND IT
+	HRRZ 1,0(P)		; AND LOW ORDER TOO.
+	ANDI 1,377
+	CALL TCOB		; SEND LOW ORDER BYTE
+NVTRR3:	MOVEI 1,SECH
+	CALL NVTSSP		; SEND SE
+	LDB 1,PBRCNT		; GET OUTSTANDING BREAKS
+	POP P,3
+	SKIPE 3
+	MOVEM 3,TTBRKC(2)	; SET NEW CURRENT BREAK CLASSES
+	SOS 1			; DECREMENT OUTSTANDING BRKS
+	DPB 1,PBRCNT		; STORE BACK
+	MOVSI 3,NVTRCS
+	ANDCAM 3,TTNETW(2)	; CANCEL STATE CHANGE
+	OKSKED
+	JUMPN 1,NVTRRR		; REPEAT IF BREAKS STILL OUTSTANDING
+	RET
+
+; TABLE OF BREAK CLASS FOR EACH CHARACTER
+
+U==1
+L==2
+N==4
+FC==10
+CC==20
+P6==40
+P7==100
+P8==200
+P9==400
+
+CHWTB:	BYTE(9)CC,CC,CC,CC,CC,CC,CC,CC	; ^@ - ^G
+	BYTE(9)FC,FC,FC,FC,FC,FC,CC,CC	; ^H - ^O
+	BYTE(9)CC,CC,CC,CC,CC,CC,CC,CC	; ^P - ^W
+	BYTE(9)CC,CC,CC,CC,CC,CC,CC,FC	; ^X - EOL
+	BYTE(9)P9,P6,P8,P8,P8,P8,P8,P8	; SPACE - '
+	BYTE(9)P7,P7,P8,P8,P6,P8,P6,P8	; ( - /
+	BYTE(9)N,N,N,N,N,N,N,N		; DIGITS
+	BYTE(9)N,N,P6,P6,P7,P8,P7,P6	; 8, 9 - ?
+	BYTE(9)P8,U,U,U,U,U,U,U		; @ - G
+	BYTE(9)U,U,U,U,U,U,U,U		; H - O
+	BYTE(9)U,U,U,U,U,U,U,U		; P - W
+	BYTE(9)U,U,U,P7,P8,P7,P8,P8	; X - _
+        BYTE(9)P8,L,L,L,L,L,L,L		; ' - g
+	BYTE(9)L,L,L,L,L,L,L,L		; h - o
+	BYTE(9)L,L,L,L,L,L,L,L		; p - w
+	BYTE(9)L,L,L,P7,P7,P7,P8,CC	; x - RUBOUT
+
+; GET TERMINAL BREAK CLASSES
+
+GTBRKC:	SETZ 1,
+	MOVE 3,TTFLGS(2)
+	TRNE 3,1B23		; BREAK ON ALPHANUMERICS
+	 TRO 1,7		; UPPER AND LOWER CASE AND NUMBERS
+	TRNE 3,1B22		; PUNCTUATION
+	 TRO 1,740
+	TRNE 3,1B21		; NON-FORMATTING CONTROLS
+	 TRO 1,20
+	TRNE 3,1B20		; FORMATTERS
+	 TRO 1,10
+	RET
+
+; GET BREAK CLASS FOR CHARACTERS NEEDING SPECIAL ECHOES
+
+GTSPCC:	CALL TTYGPI##		; GET PI CHARACTERS AS COCFORMAT
+	PUSH P,1		; SAVE
+	PUSH P,3
+	CALL TTRCOC##		; GET CONTROL CHAR OUTPUT MODES
+	ANDCMI 3,377		; ONLY CONTROL CHARACTERS
+	IORI 3,2B<40*2-^D36+1>	; FAKE A NORMAL ECHO FOR SPACE
+	ANDCM 3,0(P)		; FORCE ZEROES FOR INT CHARS
+	ANDCM 1,-1(P)
+	XOR 1,NVTNMD		; COMPARE TO ASSUMED ECHO MODE
+	XOR 3,NVTNMD+1
+	PUSH P,[FC]		; ASSUME NEED FORMATTERS
+	TDZN 1,[BYTE (2)0,0,0,0,0,0,0,0,3,3,3,3,3,3]
+	TDNE 3,[BYTE (2)0,0,0,0,0,0,0,0,0,0,0,0,0,3]
+	 SKIPA
+	 SETZM 0(P)		; NOT NEEDED AFTER ALL
+	TDZN 1,[BYTE (2)3,3,3,3,3,3,3,3,0,0,0,0,0,0,3,3,3,3]
+	TDNE 3,[BYTE (2)3,3,3,3,3,3,3,3,3,3,3,3,3,0,0,3]
+	 MOVEI 1,CC		; NEED SPECIAL ECHO FOR NON-FORMATTERS
+	IOR 1,0(P)
+	TRNE 3,<BYTE (2)0,0,0,0,0,0,0,0,0,0,0,0,0,0,3>	; SPACE?
+	 IORI 1,P9		; NEED SPECIAL ECHO FOR SPACE
+	SUB P,BHC+3
+	RET
+
+; NORMAL MODES FOR ECHO (MUST AGREE WITH THAT IN USER TELNET)
+
+NVTNMD:	BYTE (2)0,0,0,0,0,0,0,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2
+
+; RCTE SET NVTWKS
+
+NVTXWW::CAIL 2,NVTLO
+	CAILE 2,NVTHI
+	 RET
+	PUSH P,3
+	MOVSI 3,NVTWKS
+	IORM 3,TTNETW(2)
+	POP P,3
+	RET
+
+; RCTE CHECK FOR READING BREAK CHARACTERS AND SEND RCTRST IF NEEDED
+
+NVTXWK::CAIL 2,NVTLO		; IS THIS AN NVT?
+	CAILE 2,NVTHI
+	 RET			; NO
+	SKIPL TTNETW(2)		; THAT IS STILL CONNECTED
+	CALL CKNNVT		; AND USING NEW PROTOCOL
+	 RET			; NO, RETURN
+	PUSH P,3		; PRESERVE AC3
+	MOVEI 3,(1B<RCTOPT+WILOPT>)
+	TDNN 3,NVTOPF(2)		; RCTE OPTION TURNED ON?
+	 JRST NVTXWX		; NO, GET OUT
+	MOVSI 3,NVTWKS
+	TDNN 3,TTNETW(2)	; JUST SAW WAKEUP?
+	 JRST NVTXW1		; SEND A RCTE RESET
+	PUSH P,1
+	CALL NVTXGA		; NOW SEND THIS ONE
+	POP P,1			; RESTORE AC1
+NVTXW1:	CALL WAKCHK##		; IS THIS A WAKEUP CHAR?
+	 JRST NVTXWX		; NO
+	MOVSI 3,NVTWKS		; YES
+	IORM 3,TTNETW(2)	; REMEMBER WE SAW IT
+NVTXWX:	POP P,3
+	RET
+
+; NVT CLEAR INPUT BUFFER
+; NEEDS NEW PROTOCOL FEATURE TO WORK PROPERLY
+
+NVTCIB::CAIL 2,NVTLO
+	CAILE 2,NVTHI
+	 RET
+	SKIPL TTNETW(2)		; STILL CONNECTED TO NETWORK?
+	CALL CKNNVT		; AND NEW STYLE NVT?
+	 RET			; NO. DONE
+	RET			; Temporary
+	MOVEI 1,RCTOPT		; USE RCTE OPTION IN REVERSE
+	SKIPN NSKED
+	 CALL NVTNGT		; TO CLEAR INPUT BUFFER
+	SETZ 1,
+	DPB 1,PBRCNT
+	RET
+
+; NOTE CHANGE IN PSI SET
+
+NVTXPI::CAIL 2,NVTLO
+	CAILE 2,NVTHI
+	 RET
+	CALL CKNNVT
+	 RET
+	PUSH P,3
+	MOVE 3,NVTOPF(2)	; GET CURRENTLY ON OPTIONS
+	TRNN 3,(1B<RCTOPT+WILOPT>)
+	 JRST NVTXP1
+	MOVSI 3,NVTRCS
+	IORM 3,TTNETW(2)	; NOTE STATE CHANGE
+NVTXP1:	POP P,3
+	RET
+
+; Called from ttcobf
+
+NVTCOB:	SKIPG T1,TTNETW(2)
+	 RET
+	NOINT			; Protect possible ilocks
+	TLNN T1,NVTCHS		; If arpanet tty
+	 CALL AVTCOB
+	CALL CKNNVT		; New style nvt?
+	 JRST NVTCO1		; Old style
+	MOVEI 1,DMCH
+	CALL NVTSSP		; Send new dm
+	OKINT
+	RET
+
+NVTCO1:	MOVEI 1,200
+	CALL TCOB
+	OKINT
+	RET
+
+; Perform dobe sequence called from ttdobe
+
+NVTDOB:	CALL CKNNVT		; New nvt?
+	 RET			; No. just return
+	MOVSI 1,NVTNMT
+	TDNN 1,TTNETW(2)	; Characters that might need timing mark?
+	 RET
+	ANDCAM 1,TTNETW(2)	; Clear chars out flag
+	MOVEI 1,TMKOPT		; Timing mark option
+	PUSHJ P,NVTNGT		; Go negotiate option
+	 JFCL			; Ignore failure
+	RET
+
+; Check stpar argument and negotiate any needed options
+
+NVTPAR:	CAIL 2,NVTLO
+	CAILE 2,NVTHI
+	 RET			; Return if not nvt
+	CALL CKNNVT		; New nvt?
+	 JRST [	PUSH P,1
+		XOR 1,TTFLGS(2)
+		TRNN 1,14
+		 JRST NVTPAX
+		MOVE 1,0(P)
+		TRNE 1,14	; Is new full?
+		 SKIPA 1,[204]	; No. send "you echo"
+		  MOVEI 1,203	; Yes. send "i echo"
+		CALL TCOB
+		JRST NVTPAX]
+	MOVE 3,1		; Copy new state
+	PUSH P,1		; Save
+	XOR 1,TTFLGS(2)		; Get difference
+	TRNN 1,14		; Change in echo?
+	 JRST NVTPA1		; No, try next
+	PUSH P,1		; Save difference
+	TRNN 3,14		; Negotiate on?
+	SKIPA 3,[NVTNGT]	; Yes
+	MOVEI 3,NVTNGF		; No
+	MOVEI 1,ECHOPT+WILOPT
+	CALL @3
+	 JRST [	MOVEI 1,14
+		IORM 1,-1(P)
+		JRST .+1]
+	POP P,1
+NVTPA1:					; Other checks go here if any
+NVTPAX:	POP P,1
+	RET
+
+; Check sfmod argument and negotiate any options needed
+
+NVTMOD:	CAIL 2,NVTLO
+	CAILE 2,NVTHI
+	 RET			; Return if not nvt
+	CALL CKNNVT		; New nvt?
+	 RET			; No. do nothing
+	MOVE 3,1		; Copy of argument
+	PUSH P,1		; Save it
+	XOR 1,TTFLGS(2)		; Get bit difference
+	PUSH P,1
+	TRNN 1,100		; Change in binary?
+	 JRST NVTMO1
+	MOVE 3,-1(P)
+	TRNN 3,100
+	SKIPA 3,[NVTNGT]
+	MOVEI 3,NVTNGF
+	PUSH P,3
+	MOVEI 1,BINOPT
+	CALL @3
+	 JRST [	MOVEI 1,100
+		IORM 1,-2(P)
+		SUB P,BHC+1
+		JRST NVTMO1]
+	MOVEI 1,BINOPT+WILOPT
+	POP P,3
+	CALL @3
+	 JRST [	MOVEI 1,BINOPT
+		CALL NVTNGF
+		 JFCL
+		MOVEI 1,100
+		IORM 1,-1(P)
+		JRST NVTMO1]
+NVTMO1:	MOVE 3,0(P)		; GET BIT DIFFERENCE
+	MOVEI 1,(1B<RCTOPT+WILOPT>)
+	TDNE 1,NVTOPF(2)	; NO RCTE ON?
+	TRNN 3,77B23+3B25	; OR NO CHANGE IN WAKEUP SET
+	 JRST NVTMO2		; NO,, SKIP FOLLOWING
+	MOVSI 3,NVTRCS
+	IORM 3,TTNETW(2)	; NOTE CHANGE IN RCTE SETTINGS
+NVTMO2:	POP P,1			; GET BACK DIFFERENCE
+	POP P,1			; AND ARGUMENT
+	RET
+
+; Negotiate an option
+
+NVTNGT:	MOVE 3,[NVTXWL,,NVTXDO]
+	CALL NVTNGC
+	 AOS 0(P)
+	RET
+
+NVTNGF:	MOVE 3,[NVTXWN,,NVTXDN]
+NVTNGC:	CAIL 1,MAXOPT
+	 RET
+	PUSH P,1
+	PUSH P,3
+	MOVE 3,BITS(1)
+	IORM 3,NVTOPF(2)	; Set option negotiation in progress bit
+	TRZE 1,WILOPT
+	MOVSS 0(P)
+	POP P,3
+	CALL 0(3)		; Say "do, wil, dont, wont"
+	MOVE 1,0(P)
+	ROT 1,-9		; Into top 9 bits
+	TLO 1,(2)		; Line number in 9-17
+	HRRI 1,NVTNTT		; Activation test
+	JSYS EDISMS
+	MOVSI 1,NEGTMO
+	ANDCAM 1,TTNETW(2)	; Cancel any time-out in progress
+	POP P,1
+	MOVS 3,BITS(1)
+	TDNN 3,NVTOPF(2)
+	 AOS 0(P)		; Skip if successful
+	RET
+
+NVTNTT:	LDB 3,[POINT 9,1,26]	; Get option number
+	MOVE 3,BITS(3)
+	ANDI 1,777		; Line number
+	SKIPL TTNETW(1)		; Satisfied if disconnected
+	TDNN 3,NVTOPF(1)
+	 JRST 1(4)		; Negotiation complete
+	JRST 0(4)
+
+; Check overdue negotiations, called by imp process
+
+NEGCHK:
+IFDEF CHAOS,<
+	RET			; If have both chaosnet and arpanet, let chaos
+>				; fork handle this for all.
+NEGCH1:	MOVE 2,NVTPTR		; Pointer to nvts
+NEGCKL:	SKIPGE TTNETW(2)	; Attached?
+	 JRST NEGCKE		; No, skip it
+	MOVSI 3,NEGTMO
+	HLLZ 1,NVTOPF(2)	; Get outstanding options
+	 JUMPE 1,[ANDCAM 3,TTNETW(2)	; None, cancel time-out if any
+		JRST NEGCKE]
+	XORB 3,TTNETW(2)	; Yes, count counter
+	TLNN 3,NEGTMO		; Count from 1 to 0?
+	 HRRZS NVTOPF(2)	; Yes, cancel outstanding option
+NEGCKE:	AOBJN 2,NEGCKL
+	MOVE 1,TODCLK
+	ADDI 1,NEGTM0
+	MOVEM 1,NEGTIM
+	RET
+
+; Get chars for output from echo buffer
+
+NETTOO:	SKIPN 1,TTOOUT(2)
+	RET			; Stuff vanished, return 0
+	TDNN 1,WRPMSK
+	HRR 1,1-TTSIZ(1)
+	MOVEM 1,TTOOUT(2)
+	ILDB 1,TTOOUT(2)
+	SOS TTOCT(2)
+	RET
+
+; Get chars for output from echo buffer
+
+NETTEO:	SKIPN 1,TTEOUT(2)
+	RET			; Stuff vanished, return 0
+	TDNN 1,WRPMSK
+	HRR 1,1-TTSIZ(1)
+	MOVEM 1,TTEOUT(2)
+	ILDB 1,TTEOUT(2)
+	SOS TTECT(2)
+	RET
+
+; Dispatch for nvt input 
+NVTSTD:	NVTNRM			; Nothing deferred
+	NVTWIL			; Deferred will
+	NVTWNT			; Deferred wont
+	NVTDO			; Deferred do
+	NVTDNT			; Deferred dont
+	NVTIAC			; Deferred iac
+	NVTNRM			; Not used
+	NVTNRM			; Not used
+
+NVTNRM:	CAIL 1,200
+	 JRST NVTCTL		; Process possible nvt control character
+NVTDCH:	LDB 3,TTYLMD
+	JUMPE 3,NVTUPB		; Binary, skip special checks
+	MOVSI 3,IMPTB2
+	TDNE 3,TTNETW(2)	; Was last char a CR?
+	 JRST [	ANDCAM 3,TTNETW(2) ; Yes, clear "last char was CR" flag
+		CAIE 1,12	; Followed by a LF
+		 JUMPN 1,.+1	;  or a NULL?
+		RET]		; Yes, ignore LF or NULL
+	CAIN 1,15		; Is this char a CR?
+	 IORM 3,TTNETW(2)	; Yes, remember that last char was a CR
+NVTUPB:	SETZ 6,			; No special flags
+	PUSH P,Q1
+	NOSKD1			; Ttchi expects to be called nosked
+	CALL TTCHI		; Stuff it in tty buffer
+	OKSKD1
+	POP P,Q1
+	RET
+
+; Telnet control codes received
+; 1/ code
+; 2/ line
+
+NVTCTL:	SKIPGE TTNETW(2)	; If no sockets attached,
+	 JRST NVTDCH			; Ignore char
+	PUSHJ P,CKNNVT		; New style nvt?
+	 JRST NVTCT0		; No, look for old style commands
+	CAIE 1,IACCH		; Yes, is iac
+	 JRST NVTDCH		; No, continue processing
+	JRST NVTCL4		; Yes. take care of it
+
+NVTCT0:	CAIN 1,202		; Nop
+	 RET
+	CAIN 1,200		; Sync char?
+	 JRST NVTCL1
+	CAIN 1,203		; Echo off?
+	 JRST NVTCL2
+	CAIN 1,204		; Echo on?
+	 JRST NVTCL3
+	JRST NVTDCH
+
+NVTCL1:	LDB 1,PTINTC
+	ADDI 1,1		; Sync counts 1, ins counts -1
+	DPB 1,PTINTC
+	RET
+
+NVTCL3:	TDZA 1,1		; Zero ac and skip
+NVTCL2:	MOVEI 1,3
+	DPB 1,[POINT 2,TTFLGS(2),33] ; Set duplex mode full/half
+	RET
+
+; Process iac
+
+NVTCL4:	MOVEI 3,DFRIAC
+	DPB 3,NVTSTP
+	RET
+
+; Process byte after iac
+
+NVTIAC:	CAIGE 1,SECH
+	 RET			; Not a valid command
+	MOVSI 3,NEWNVB
+	IORM 3,TTNETW(2)	; Mark this new protocol
+	SETZ 3,			; Next state if any
+	XCT NVTDTB-SECH(1)	; Dispatch on the character
+	 JRST NVTDCH		; Special function character
+	DPB 3,NVTSTP		; Next state
+	RET
+
+NVTDTB:	RET			; (360) end of subnegotiation
+	RET			; (361) nop -- ignore
+	JRST NVTCL1		; (362) new data mark
+	RET			; (363) break -- ignore
+	MOVEI 1,3		; (364) ip -- convert to ^c
+	MOVEI 1,"O"-100		; (365) ao -- convert to ^o
+	MOVEI 1,"T"-100		; (366) ayt -- convert to ^t
+	MOVEI 1,"A"-100		; (367) ec -- convert to ^a
+	MOVEI 1,"Q"-100		; (370) el -- convert to ^q
+	RET			; (371) ga -- ignore
+	RET			; (372) sb -- shouldn't get this
+	TROA 3,DFRWIL		; (373) defer will
+	TROA 3,DFRWNT		; (374) defer wont
+	TROA 3,DFRDO		; (375) defer do
+	TROA 3,DFRDNT		; (376) defer dont
+	JFCL			; (377) iac iac -- iac
+
+; Send special character
+
+NVTSSP:	PUSH P,1
+	MOVEI 1,2
+	PUSHJ P,NVTRSV		; Reserve space in buffer (nosked)
+	 JRST [	POP P,1
+		RET]
+	HRROI 1,IACCH		; SAME AS 377, BUT PREVENT ITS DOUBLING
+	CALL TCOB		; CALL TCOB TO GET CR-NULL IF NEEDED
+	POP P,1
+	CALL TCOBQ
+	OKSKD1
+	RET
+
+; Reserve space in buffer for characters specified in 1
+
+NVTRSV:	NOSKD1			; Make sure space doesn't disappear
+	MOVSI 3,NVTCRP		; CR preceding?
+	TDNE 3,TTNETW(2)
+	 AOS 1			; Need one char for null after CR
+NVTRS1:	LDB 3,TTOMAX
+	SUB 3,TTOCT(2)		; Space in output buffers
+	CAML 3,1
+	 JRST RSKP		; Enough room, return skip
+	OKSKD1
+IFDEF CHAOS,<
+	SKIPN INSKED		; In the scheduler
+	SKIPE NSKED		; or NOSKED?
+	RETBAD			; Yes tell him there was no room
+>
+IFDEF IMPCHN,<
+	MOVE 3,FORKX
+	CAMN 3,NCPFRK		; Is this the ncp fork?
+	 JRST NVTRV1		; Yes, attempt to send the buffer
+>
+	PUSH P,1		; No. wait for space
+	MOVEI 1,TCOTST
+	HRL 1,2
+	JSYS EDISMS		; Wait for space
+	POP P,1
+	NOSKD1
+	JRST NVTRS1
+
+IFDEF IMPCHN,<
+NVTRV1:	CALL AVTRSV		; Send as much as possible
+	JRST NVTRSV		; And try again
+>
+
+; Send wont (refuse)
+
+NVTRFU:	MOVEI 1,WNTCH
+
+; Send reply in 1 for option on stack
+
+NVTSRP:	PUSH P,1
+	MOVEI 1,3
+	CALL NVTRSV		; Reserve space for three characters
+	 JRST [	SUB P,BHC+2
+		RET]
+	HRROI 1,IACCH		; SAME AS 377 BUT PREVENT DOUBLING
+	PUSHJ P,TCOB		; USE TCOB TO GET CR-NULL IF NEEDED
+	POP P,1
+	PUSHJ P,TCOBQ
+	POP P,1
+	PUSHJ P,TCOBQ
+	OKSKD1
+	RET
+
+; Send will
+
+NVTXWL:	PUSH P,1		; Save option
+NVTSWL:	MOVEI 1,WILCH		; Enter here when option is on stack
+	JRST NVTSRP		; Send reply
+
+; Send no reply
+
+NVTSNR:	SUB P,BHC+1		; No reply necessary or possible
+	RET
+
+; Send wont
+
+NVTXWN:	PUSH P,1		; Save option
+NVTSWN:	MOVEI 1,WNTCH		; Enter here when option already pushed
+	JRST NVTSRP
+
+; Send "do"
+
+NVTXDO:	PUSH P,1		; Save option
+NVTSDO:	MOVEI 1,DOCH		; Enter here when option already pushed
+	JRST NVTSRP
+
+; Send "dont"
+
+NVTXDN:	PUSH P,1		; Save option
+NVTSDN:	MOVEI 1,DNTCH		; Enter here when option already pushed
+	JRST NVTSRP
+
+; Process "do"
+
+NVTDO:	CAIL A,WILOPT
+	 JRST NVTDO1
+	MOVE 3,BITS+WILOPT(1)
+	TDNE 3,NVTOPF(2)
+	 JRST NVTWI2
+NVTDO1:	PUSH P,1		; Remember the option
+	MOVSS 3			; Put bit in "options on" half
+	TDNE 3,NVTOPF(2)	; Is the option on?
+	 JRST NVTSNR		; Yes, send no reply
+	CAIGE 1,NVTLOP		; Do we know about this option
+	 CALL @NVTDOD(1)	; Yes. attempt execution
+	  JRST NVTRFU		; Can't do it -- refuse
+	IORM 3,NVTOPF(2)	; Set option on
+	JRST NVTSWL		; And send "will"
+
+NVTDOD:	R			; Binary xmit -- refuse for now
+	NVTECN			; Turn echos on
+	R			; Reconnect -- refuse for now
+	NVTSGA			; Suppress ga -- wonderful news
+	R			; Message size -- refuse
+	R			; Status -- refuse
+	NVTDTM			; Timing mark -- try to do it
+	NVTDRC			; Remote controlled trans & echo
+NVTLOP=.-NVTDOD
+
+; Action routines for "do"
+; Turn echoes on
+
+NVTECN:	MOVEI 1,3B33
+	ANDCAM 1,TTFLGS(2)	; Set to full duplex
+	JRST RSKP
+
+; Set suppress ga bit
+
+NVTSGA:	MOVSI 1,NVTGAB
+	IORM 1,TTNETW(2)
+	JRST RSKP
+
+; Do timing mark protocol
+
+NVTDTM:	JRST RSKP
+
+; TURN ON RCTE
+
+NVTDRC:	MOVSI 1,NVTRCS		; SEND CURRENT STATE INFO WITH FIRST CMD
+	IORM 1,TTNETW(2)
+	SETZM TTBRKC(2)		; CLEAR BREAK STATUS INFO
+	MOVEI 1,1
+	DPB 1,PBRCNT		; SEND ONE RCTE COMMAND TO START
+	JRST RSKP		; We are happy to do RCTE
+
+
+; Process "dont"
+
+NVTDNT:	CAIL A,WILOPT
+	 JRST NVTDN1
+	MOVE 3,BITS+WILOPT(1)
+	TDNE 3,NVTOPF(2)
+	 JRST NVTWN2
+NVTDN1:	PUSH P,1
+	MOVSS 3			; Put bit in "option on" half
+	TDNN 3,NVTOPF(2)	; Option already off?
+	 JRST NVTSNR		; Yes. send no reply
+	CAIGE 1,NVTLOP		; Do we know about this option?
+	 CALL @NVTDND(1)	; Yes. perform action
+	ANDCAM 3,NVTOPF(2)	; Clear the option
+	JRST NVTSWN		; And send "won't"
+
+NVTDND:	R			; Dilemma -- he wants off, but we can't
+	NVTECF			; Echo off
+	R			; Option not on, no reply
+	NVTAGA			; He wont suppress ga -- nuts
+	R			; Message size option
+	R			; Status option
+	R			; Timing mark -- huh?
+	R			; Turn off RCTE
+
+; "dont" action routines
+; Turn echos off
+
+NVTECF:	MOVEI 1,3B32
+	IORM 1,TTFLGS(2)
+	RET
+
+; Turn off suppress ga bit
+
+NVTAGA:	MOVSI 1,NVTGAB
+	ANDCAM 1,TTNETW(2)
+	RET
+
+; Process "will"
+
+NVTWIL:	CAIL A,WILOPT		; Only wilopt options
+	 JRST NVTWI1		; Others cannot be outstanding
+	MOVE 3,BITS(1)		; Get the bit for the option
+	TDNN 3,NVTOPF(2)	; Is this option outstanding?
+	 JRST NVTWI1		; No.
+NVTWI2:	MOVS 1,3
+	IORM 1,NVTOPF(2)	; Set will bit
+	ANDCAM 3,NVTOPF(2)	; And clear outstanding bit
+	RET
+
+NVTWI1:	PUSH P,1		; save the option
+	MOVSS 3			; Put bit in "optons on" half
+	TDNE 3,NVTOPF(2)	; Is option already on?
+	 JRST NVTSNR		; Yes. send no reply
+	CAIGE 1,NVTLOP
+	 CALL @NVTWID(1)	; Call action routine
+	  JRST NVTSDN		; Unimplemented option or can't comply
+	IORM 3,NVTOPF(2)	; Done. set option "on"
+	JRST NVTSDO		; And send "do"
+
+NVTWID:	R			; Will binary -- dont
+	R			; Will echo -- dont
+	R			; Reconnect -- dont
+	RSKP			; Suppress ga -- do, do, do , do!
+	R			; Message size -- dont
+	R			; Status -- dont
+	R			; Timing mark -- huh?
+	R			; What's he trying to do?
+
+; Process "wont"
+
+NVTWNT:	CAIL 1,MAXOPT
+	 JRST NVTWN1		; Option not handled
+	MOVE 3,BITS(1)		; Get bit for option
+	TDNN 3,NVTOPF(2)	; Is this option outstanding
+	 JRST NVTWN1		; No. request
+NVTWN2:	HLR 3,3			; Yes. neg acknowledge
+	ANDCAM 3,NVTOPF(2)	; Clear both outstand and will flags
+	RET
+
+NVTWN1:	PUSH P,1
+	MOVSS 3			; Put bit in "options on" half
+	TDNN 3,NVTOPF(2)	; Option already off?
+	 JRST NVTSNR		; Yes. send no rply
+	ANDCAM 3,NVTOPF(2)	; Strangely enough, the user end
+	JRST NVTSDN		; Never has any options to turn off
+
+; Attach sockets to pty
+; Call:	1	; Receive jfn of opened network connection
+;	2	; Send jfn of opened network connection (if arpanet)
+;	ATNVT
+; Returns
+;	+1	; Cannot attach
+;	+2	; Ok.  the jfns are released, ac 1 has line number of
+;		; Attached pty.
+
+.ATPTY::
+.ATNVT::JSYS MENTR
+	UMOVE JFN,1
+	HRRZS JFN
+	PUSHJ P,CHKJFN		; Check jfn of receive connection
+	 JRST ATPER0		; Only real jfns are legal
+	 JRST ATPER0
+	 JRST ATPER0
+	HRRZ B,DEV
+	CAIE B,CHADTB
+	 JRST AATNVT
+	JRST CATNVT
+
+ATPER0:	MOVEI A,ATPX1		; Bad receive jfn
+	JRST MRETNE
+
+	END

@@ -1,0 +1,3106 @@
+;<INQUIR>CERBER.FAI;1  4-Apr-81 14:15:10, Edit by MMCM
+; Tenex version
+
+	title	cerberus - system daemon to handle random tasks
+	search	monsym
+
+	subttl	definitions
+
+ifndef	tnxsw,<
+ife .osfail-<sixbit /TENEX/>,<tnxsw__1>
+ifn .osfail-<sixbit /TENEX/>,<tnxsw__0>
+>
+
+define	tenex <	ifn tnxsw >
+define	tops20 < ife tnxsw >
+
+tenex,<
+define	comnd <
+jsys	.comnd##
+>
+define	inqfil ' (x) <
+asciz	/<INQUIR>'x/
+>
+define	subfil ' (x) <
+asciz	/<SUBSYS>'x/
+>
+define	sysfil ' (x) <
+asciz	/<INQUIR>'x/
+>
+	.requir comnd.rel
+
+opdef	$pmap	[pmap]
+define	pmap	<call .pmap>
+opdef	gtblt	[jsys 634]
+>;tenex
+
+tops20,<
+define	inqfil ' (x) <
+asciz	/SYS:'x/
+>
+define	subfil ' (x) <
+asciz	/SYS:'x/
+>
+define	sysfil ' (x) <
+asciz	/SYSTEM:'x/
+>
+>;tops20
+
+tenex,<
+ifndef	symsw,<
+symsw	__ -1
+mitsw	__ 0
+ipcfsw	__ 0
+birtsw	__ -1
+>
+>
+
+ifndef	decsw,<
+decsw	__ 0
+>
+
+ifndef	mitsw,<
+mitsw	__ -1
+ifndef	xxsw,< xxsw __ 0 >
+ifndef	eesw,< eesw __ 0 >
+ifndef	ppsw,< ppsw __ 0 >
+ife	xxsw!eesw!ppsw, <xxsw __ 1 >
+
+ifg	<xxsw+eesw+ppsw>-1, <.fatal More than one MIT site selected>
+ipcfsw	__ -1
+birtsw	__ -1
+>
+
+for @' site in (dec,mit,xx,ee,pp,sym)
+<	ifndef	site'sw	< site'sw __ 0 >
+	define	site	< ifn 	site'sw >
+	define	no'site	< ife	site'sw >
+>
+	
+xx,<	arpasw __ 1
+	chasw  __ 1
+	pupsw  __ 1 >
+ee,<	chasw __ 1 >
+pp,<	chasw __ 1 >
+sym,<	chasw __ 1 >
+
+for @' net in (arpa,cha,pup)
+<	ifndef	net'sw	< net'sw __ 0 >
+	define	net	< ifn	net'sw >
+	define	no'net	< ife	net'sw >
+>
+
+define	ipcf <	ifn ipcfsw >
+define	noipcf <ife ipcfsw >
+
+define	birth <	ifn birtsw >
+define	nobirt <ife birtsw >
+
+dec,<	printx DEC version >
+mit,<	printx MIT version >
+sym,<	printx Symbolics version >
+
+arpa,<	printx ARPA support >
+cha,<	printx CHAOS support >
+pup,<	printx PUP support >
+
+ipcf,<	printx IPCF support >
+
+f_0					; Flags
+a_1					; Temp acs
+b_2
+c_3
+d_4
+j_5					; Job index
+t_6					; Random index (tty, etc.)
+u_7					; Routine internal
+v_10
+w_11
+x_12					; Smashed by some interrupt routines
+y_13
+z_14
+s_15
+q_16
+p_17					; Pushdown pointer
+
+f%f1	__ 400000			; Temp flags for routines
+f%f2	__ 200000
+
+opdef	call	[pushj	p, 0]
+opdef	ret	[popj	p, 0]
+opdef	uerr	[1b8]
+tops20,<
+opdef	movslj	[016B8]
+>
+
+define	error	(x)
+   <	uerr	[asciz /x/]
+   >
+
+loc	41
+	jsr	.uuoh
+reloc
+
+	subttl	table definitions
+
+ntts	__ 400				; Max number of ttys we know about
+njbs	__ =128				; Max number of jobs we can handle
+nfs	__ 500				; Max number of forks we know about
+nusrs	__ 2000				; Max number of users we know about
+arpa,<
+nskts	__ 200				; Max number of network sockets
+>;arpa
+idllen	__ 10				; Length of idle message for a tty
+ttylen	__ 6				; Length of tty location
+persln	__ 4				; Number of words for personal names
+pup,<
+npupun	__ =25				; Number of PUP ports
+>;pup
+ipcf,<
+ipcfpg	__ 300				; ICPF page
+mymsg	__ ipcfpg9
+ipcfp1	__ ipcfpg+1
+hismsg	__ ipcfp19
+>;ipcf
+
+cha,<
+hstpag	__ 400				; HOSTS2.BIN page
+hstadr	__ hstpag9
+>;cha
+
+filpag	__ 500				; First page of the file
+
+page0	__ filpag			; Data page for update time, etc
+pg0adr	__ page09			; Start of that data
+updatm	_ pg0adr			; First word is time of last update
+nttys	_ updatm+1			; -<n>,,<n> for ttys # in system
+njobs	_ nttys+1			; Same for jobs
+nvtlo	_ njobs+1			; First Arpa NVT in system
+nvthi	_ nvtlo+1			; Last one
+opruno	_ nvthi+1			; User number for OPERATOR/SYSTEM
+pnvtlo	_ opruno+1			; First Pup NVT in system
+pnvthi	_ pnvtlo+1			; Last one
+cnvtlo	_ pnvthi+1			; First CHAOS NVT in system
+cnvthi	_ cnvtlo+1			; Last one
+ttlink	_ pg0adr+400			; Start of TTLINK table
+ifg ntts-400,<.fatal Not enough space for TTLINK table in file>
+
+idlpag	__ page0+1			; First page of IDLSRV data
+idladr	_ idlpag9
+nidlpg	__ 4				; Number of pages for IDLSRV data
+ifg ntts*idllen-nidlpg9,<.fatal Not enough space for IDLSRV data in file>
+
+ttylpg	__ idlpag+nidlpg		; Start of TTYLOC data
+ttylad	_ ttylpg9
+nttypg	__ 3				; Number of pages for it
+ifg ntts*ttylen-nttypg9,<.fatal Not enough space for TTYLOC data in file>
+
+usrpag	__ ttylpg+nttypg		; Start of user data
+usrper	_ usrpag9			; Start of personal names
+nperpg	__ 10
+ifg nusrs*persln-nperpg9,<.fatal Not enough space for personal names in file>
+usrtts	_ usrper+nperpg9		; TTY data for logins, etc
+usrlgi	_ usrtts+nusrs
+usrlgo	_ usrlgi+nusrs
+usrdet	_ usrlgo+nusrs
+usratt	_ usrdet+nusrs
+nuspgs	__ nusrs-9*<nperpg+4+1>
+
+jobpag	__ usrpag+nuspgs		; Start of job data
+jobbsz	__ =128				; Size of blocks in file
+ifg njbs-jobbsz,<.fatal Not enough room for job tables in file>
+jobadr	_ jobpag9
+jobuno	_ jobadr			; User number
+jobdno	_ jobuno+jobbsz			; Dir number
+jobtno	_ jobdno+jobbsz			; TTY state,,TTY #
+jobidl	_ jobtno+jobbsz			; Idle time (ms)
+jobfks	_ jobidl+jobbsz			; # forks,,working size
+jobpct	_ jobfks+jobbsz			; % of machine (long,,short)
+jobpnm	_ jobpct+jobbsz			; Program name
+jobrt	_ jobpnm+jobbsz			; Runtime
+jobltd	_ jobrt+jobbsz			; TIME of user login
+njbpgs	__ 3
+ifg jobltd+jobbsz-jobadr-njbpgs9,<.fatal Not enough room for job tables>
+
+usgpag  __ jobpag+njbpgs		; page for TTY usage data
+nusgs	_ usgpag9			; Number of times thru usage loop
+nuptty	_ nusgs+1			; Per TTY table
+
+usgend	__ nuptty+ntts
+nusgpg	__ 1
+ifg usgend-nusgs-nusgpg9,<.fatal Not enough space for USG data in file>
+
+tidpag	__ usgpag+nusgpg		; TTY idleness
+ttidle	_ tidpag9
+ntidpg	__ 1
+
+pagez	__ tidpag+ntidpg
+npages	__ pagez-filpag
+
+	subttl	impure storage
+
+ournam:					; Our host name
+xx,<	asciz /MIT-XX/ >
+ee,<	asciz /MIT-EECS/ >
+pp,<	asciz /MIT-SPEECH/ >
+dec,<	asciz // >			; God knows
+sym,<	asciz /SCRC-TENEX/ >
+
+filjfn:	0				; JFN for our data file
+arpa,<
+icpjfn:	0				; JFN for network FINGER ICP
+>
+rlogjf:	0				; Log file for REAPER
+inqjfn:	0				; INQUIR database
+
+todclk:	0				; System uptime
+oldtod:	0				; Time we last did %-age stuff
+looptm:	0				; Time at top of loop
+errtim:	0				; Time of last error
+
+zrovar::				; Zero these at each update pass
+nojobs:	0				; Number of operator jobs
+nujobs:	0				; Number of user jobs
+zroend	__ .-1
+
+ipcf,<
+idlpid:	0				; PID for "IDLSRV"
+ttypid:	0				; PID for "TTYLOC"
+>;ipcf
+
+eofdsp:	0				; Addr to dispatch to on EOF interrupt
+errdsp:	0				; Error dispatch
+psipc1:	0				; Lev 1 PSI PC
+psipc2:	0
+psipc3:	0
+
+arpa,<
+frnhst:	0				; Foreign host
+frnskt:	0				; Foreign socket
+netrcv:	0				; Receive jfn
+netsnd:	0				; Send jfn
+locskt:	30324,,76			; Local socket base
+icplck:	-1				; ICP routine interlock
+>
+
+rdettm:	^d<15*60*1000>			; Time for reaping detached jobs
+rdeftm:	^d<90*60*1000>			; Time for default
+
+dom:	block	1			; Current date and month
+year:	block	1			; Current year
+month:	block	1			; Current month (1 based)
+day:	block	1			; Current day of week (1 based)
+date:	block	1			; Current date of month
+
+maxbir	__ 10
+busers:	block	maxbir			; List of birthday folks
+birtst:	block	20			; Happy birthday string
+holstr:	block	20			; Holiday string
+typing:	block	1			; Nonzero if doing TTY output
+noburn:	block	1			; Counter for generating idle TTY msg
+					;  movement
+
+ptypar:	0				; PTYPAR table
+tenex,<
+cvtptr:	0				; Made up pointer to NVT tty's
+>
+lodavs:	block	3			; 3 load averages
+ifn <<1-tnxsw>&arpasw>!<tnxsw&<arpasw!chasw>>,<
+lhostn:	block	2			; LHOSTN table
+>;(or (and tops-20 arpa) (and tenex (or arpa chaos)))
+arpa,<
+netrdy:	block	2			; NETRDY table (part of it)
+>
+rttyt0:	0				; For detached jobs
+rttytb:	block	ntts			; Time for reaping on a tty
+idltty:	block	ntts			; Count of passes since idle message
+arpa,<
+ttyhst:	block	ntts			; Foreign host for network ttys
+>
+ttycpj:	block	ntts			; Controlling job for PTY
+ttyjob:	block	ntts			; TTYJOB table
+ttlnk1:	block	ntts			; Temp TTLINK table
+tops20,<
+ttactl:	block	ntts			; Dynamic pointer for ttys
+>;tops20
+tenex,<
+ttidl1:	block	ntts			; TTIDLE monitor table
+ifn chasw!arpasw,<
+ttnetw:	block	ntts
+>;chasw!arpasw
+>;tenex
+pup,<
+nvtpup:	block	ntts			; PUP NVT pointers
+pupfpt:	block	npupun			; PUP port indicies
+puppar:	block	3			; Random PUP constants
+pupbuf:	block	<<<<=30*npupun>+777>/1000>>*1000 ; Random PUP free storage
+>;pup
+rusrtb:	block	nusrs			; Time for reaping a particular user
+rwarnc:	block	njbs			; Number of times have warned for reap
+jobid1:	block	njbs			; Temp copy for jobidl
+jobfk1:	block	njbs			; And one for jobfks
+jobtty:	block	njbs			; JOBTTY table
+jobort:	block	njbs			; Runtime at last pass
+fkpt:	block	nfs			; FKPT monitor table
+fkq2:	block	nfs			; FKQ2 monitor table
+fkpgst:	block	nfs			; Time fork entered a wait queue
+fkwsp:	block	nfs			; Number of pages in forks working set
+fkjob:	block	nfs			; Job number for this fork
+arpa,<
+netbuf:	block	nskts			; Network tty # for a connection
+netsts:	block	nskts			; Status of connection
+netawd:	block	nskts			; Foreign host of connection
+>
+
+nlfks	__ 30				; Number of inferiors we know about
+frktab:	block	nlfks			; Data on inferiors
+
+tenex,<
+tmpacs:	block	20			; For JSYS simulation routines
+>
+
+npdl	__ 177				; Size of ...
+pdl:	block	npdl			; Pushdown stack
+arpa,<
+netstr:	block	20			; For constructing NET: filenames
+>
+tmpbsz	__ 200				; Size of tmpbuf buffer
+idlmsg::				; Also for idle message
+tmpbuf:	block	tmpbsz			; Temporary string buffer
+nwinnr	__ 20				; Allow reasonable amount of winners
+winp:	repeat	nwinnr,<-1>
+
+cmdblk:	0				; COMND state block
+cmdjfn:	.-.,,.nulio			; JFNs for it
+	point	7, [asciz //]
+	point	7, tmpbuf
+	point	7, tmpbuf
+	tmpbsz*5/2
+	0
+	point	7, tmpbuf+tmpbsz/2
+	tmpbsz*5/2
+	0
+
+.uuoh:	0				; JSR here for uuo handler
+	jrst	uuoh
+
+savacs:	0				; Come here to save the ac's
+	jrst	[adjsp	p, 17
+		 movem	16, (p)
+		 movei	16, -16(p)
+		 blt	16, -1(p)
+		 jrst	@savacs]	; Make this be in pure area
+
+snooad::				; Where SNOOPed symbols get put
+nfks:	0				; Parallel to snootb
+ndhl:	0				; Note this is physical TTY's
+wtlst:	0
+peekt1::				; Symbols that we use for peeking
+fkpt0:	0				; Parallel to peekt2
+tops20,<
+fkq20:	0
+>
+fkpgs0:	0
+fkwsp0:	0
+fkjob0:	0
+tops20,<
+ttact0:	0
+npeekt	__ .-peekt1
+>
+ttlnk0:	0
+ttidl0:	0
+tops20,<
+cha,<
+cvtptr:	0
+ttnetw:	0
+>>;tops20&cha
+tenex,<
+ifn chasw!arpasw,<
+ttnet0:	0
+>;chasw!arpasw
+npeekt	__ .-peekt1
+>;tenex
+cha,<
+chafrn:	0
+>
+nsnoop	__ .-snooad
+
+sysgt2::
+gtab1s:					; Table indices for GTBLT put here
+ifn <<1-tnxsw>&arpasw>!<tnxsw&<arpasw!chasw>>,<
+	-1,,.-.				; LHOSTN
+>;(or (and tops-20 arpa) (and tenex (or arpa chaos)))
+tops20,<
+	-1,,.-.				; PTYPAR
+>
+pup,<
+	-1,,.-.				; PUPPAR
+>;pup
+ngtb1s	__ .-gtab1s
+gtab1t::				; More table indices
+ttyjb0:	-1,,.-.				; TTYJOB
+jobtt0:	-1,,.-.				; JOBTTY
+jobrt0:	-1,,.-.				; JOBRT
+	-1,,.-.				; JOBPNM
+arpa,<
+netbf0:	-1,,.-.				; NETBUF
+	-1,,.-.				; NETSTS
+	-1,,.-.				; NETAWD
+	0,,.-.				; NETRDY
+>
+tops20,<
+	14,,.-.				; SYSTAT
+>
+tenex,<
+	3,,.-.				; LOADTB
+>
+pup,<	-1,,.-.				; NVTPUP
+	-1,,.-.				; PUPFPT
+	-1,,.-.				; PUPBUF
+> ;pup
+ngtb1t	__ .-gtab1t
+nsysgt	__ .-sysgt2
+
+ipcf,<
+	subttl	IPCF storage
+
+getpid:	.mucre				; Create a PID
+	.fhslf				; For this process
+mypid:	0				; Returned here
+gtpidl	__ .-getpid			; Length of this block
+
+ipckil:	.mudes				; Kill a pid
+kilpid:	0				; This one
+ipkill	__ .-ipckil
+
+ipcinf:	ip%cfv				; Message to INFO, page of data
+infpid:	0				; Stick the PID here
+	0				; Receiver is <SYSTEM>INFO
+	1000,,ipcfpg			; Length of the msg to info
+ipinfl	__ .-ipcinf			; Length of this block
+
+ipcint:	.mupic				; Set interrupt chan
+intpid:	0				; The pid
+pidchn:	0				; The channel
+ipintl	__ .-ipcint			; Length of this block
+
+ipcrec:	ip%cfb!ip%cfv			; Get a msg from a pid, return if none
+hispid:	0				; Where it will have come from
+recpid:	0				; What to receive for
+recptr:	1000,,ipcfp1			; Pointer to message
+	0
+hiscap:	0				; Enabled caps of user
+iprecl	__ .-ipcrec			; Length of block
+
+ipcjob:	.mufoj				; Get job number for a pid
+jobpid:	0				; The pid in question
+pidjob:	0				; What the job is
+ipcjbl	__ .-ipcjob			; Length of this block
+
+ipcsnd:	ip%cfv				; Send a message
+sndpid:	0				; Who is sending it
+hisndp:	0				; Whom it goes to
+	1000,,ipcfpg			; Pointer to message we'll send
+ipsndl	__ .-ipcsnd			; Length of this block
+
+idpdnm:	.ipcii				; Set a name
+	0
+	asciz	/IDLSRV/		; Name for IDLSRV
+idpnml	__ .-idpdnm			; Length of this block
+
+ttpdnm:	.ipcii				; Set name
+	0
+	asciz	/TTYLOC/
+ttpnml	__ .-idpdnm			; Length of this block
+
+idlok:	asciz	/ [IDLSRV: OK]/		; Message for ok IDLSRV response
+ildokl	__ .-idlok			; Length of it
+
+idlrej:	asciz	/ [IDLSRV: Not your terminal]/	; Rejection notice
+idlrjl	__ .-idlrej			; Length
+
+ttyok:	asciz	/ [TTYLOC: OK]/		; Ok for TTYLOC
+ttyokl	__ .-ttyok			; Length
+
+ttyrej:	asciz	/ [TTYLOC: Not a network terminal]/	; Access error
+ttyrjl	__ .-ttyrej			; Length
+
+>;ipcf
+
+	subttl	pure storage
+
+dbugsw:	-1				; -1 => debugging version
+intrvl:	^d<30*1000>			; Time to sleep for
+nidlps:	=10				; Number of passes for update idle ttys
+nreaps:	=20				; Number of passes for until reap
+rlogp:	-1				; Nonzero => log REAPER functions
+filnam:	inqfil(CERBERUS.PMAP)		; File we map in
+repfil:	sysfil(CERBERUS.CMD)		; File to read REAPER & other data from
+rlogfl:	sysfil(REAPER.LOG)		; Log file for REAPER functions
+arpa,<
+fngfil:	subfil(FINGER.EXE)		; File to run on FINGER SKT
+icpskt:	117				; Socket to listen on
+>
+winner:	repeat nwinnr,<-1>	; empty entries for winners, initially
+rkilms:	asciz	/
+** Autologout in 10 minutes if this job remains idle ***
+/
+
+levtab:	psipc1				; PC saver pointers
+	psipc2
+	psipc3
+chntab:	phase	0
+arpa,<
+icpchn::1,,icpint			; FINGER ICP (top level)
+ipcf,<
+ttychn::2,,ttyint			; TTYLOC IPCF interrupt (next)
+>
+noipcf,<
+	block 2
+>
+>
+noarpa,<
+	block 2
+>
+ipcf,<
+idlchn::2,,idlint			; IDLSRV IPCF interrupt
+>
+noipcf,<
+	block 1
+>
+tmrchn::3,,tmrint			; TIMER interrupt (bottom of ints)
+	block	.icpov-.
+	1,,pdlint			; Pushdown overflow
+	3,,eofh				; EOF handler
+arpa,<	1,,daeint >			; Data error (network probably)
+noarpa,<block 1>
+	block	.icili-.
+	1,,illint			; Illegal instruction
+	1,,illint			; IMR
+	1,,illint			; IMW
+	block	1
+arpa,<	3,,inftrm >			; Inferior termination
+noarpa,<block 1>
+	block	=36-.
+	dephase
+chnmsk	__ 1b0!1b1!1b2!1b3!1b10!1b11!1b12!1b15!1b16!1b17!1b19
+
+uslgit:	point	9, usrtts(u), 8		; TTY for last LOGIN
+uslgot:	point	9, usrtts(u), 17	; LOGOUT
+usdett:	point	9, usrtts(u), 26	; DETACH
+usattt:	point	9, usrtts(u), 35	; ATTACH
+
+sysgtb:					; SYSGT these table indices
+ifn <<1-tnxsw>&arpasw>!<tnxsw&<arpasw!chasw>>,<
+	sixbit	/LHOSTN/
+>;(or (and tops-20 arpa) (and tenex (or arpa chaos)))
+tops20,<
+	sixbit	/PTYPAR/
+>
+pup,<	sixbit	/PUPPAR/ >
+	sixbit	/TTYJOB/
+	sixbit	/JOBTTY/
+	sixbit	/JOBRT/
+tops20,<
+	sixbit	/JOBPNM/
+>
+tenex,<
+	sixbit	/JOBNM2/
+>
+arpa,<
+	sixbit	/NETBUF/
+	sixbit	/NETSTS/
+	sixbit	/NETAWD/
+	sixbit	/NETRDY/
+>
+tops20,<
+	sixbit	/SYSTAT/
+>
+tenex,<
+	sixbit	/LOADTB/
+>
+pup,<	sixbit	/NVTPUP/
+	sixbit	/PUPFPT/
+	sixbit	/PUPBUF/
+> ;pup
+ifn nsysgt-<.-sysgtb>,<.fatal sysgt2 and sysgtb not parallel>
+
+snootb:	radix5	0, NFKS			; SNOOP these symbols
+tops20,<
+	radix5	0, NDHL
+>
+tenex,<
+	radix5	0, NTTYS
+>
+	radix5	0, WTLST
+	radix5	0, FKPT
+tops20,<
+	radix5	0, FKQ2
+>
+	radix5	0, FKPGST
+	radix5	0, FKWSP
+	radix5	0, FKJOB
+tops20,<
+	radix5	0, TTACTL
+>
+	radix5	0, TTLINK
+	radix5	0, TTIDLE
+tops20,<
+cha,<
+	radix5	0, CVTPTR
+	radix5	0, TTNETW
+>>;tops20&cha
+tenex,<
+ifn chasw!arpasw,<
+	radix5	0, TTNETW
+>>;tenex&chasw!arpasw
+cha,<
+	radix5	0, CHAFRN
+>
+ifn nsnoop-<.-snootb>,<.fatal snooad and snootb not parallel>
+
+gtab2s:					; Local pointers, parallel to sysgtb
+ifn <<1-tnxsw>&arpasw>!<tnxsw&<arpasw!chasw>>,<
+	lhostn
+>;(or (and tops-20 arpa) (and tenex (or arpa chaos)))
+tops20,<
+	ptypar
+>
+pup,<	puppar >
+ifn ngtb1s-<.-gtab2s>,<.fatal gtab1s and gtab2s not parallel>
+gtab2t:	ttyjob				; Get these each time
+	jobtty
+	jobrt
+	jobpnm
+arpa,<
+	netbuf
+	netsts
+	netawd
+	2,,netrdy
+>
+	3,,lodavs
+pup,<	nvtpup
+	pupfpt
+	pupbuf
+> ;pup
+ifn ngtb1t-<.-gtab2t>,<.fatal gtab1t and gtab2t not parallel>
+
+peekt2:	fkpt				; User addrs for peek tables
+tops20,<
+	fkq2
+>;top20
+	fkpgst
+	fkwsp
+	fkjob
+tops20,<
+	ttactl
+>;tops20
+tenex,<
+	ttlnk1
+	ttidl1
+	ttnetw
+>;tenex
+ifn npeekt-<.-peekt2>,<.fatal peekt1 and peekt2 not parallel>
+
+	subttl	INQUIR definitions and storage
+
+strsiz	__ 77				; Maximum size of each field
+sizmxz	__ 3				; Five spare fields
+numfld	__ 17				; Number of fields in use
+maxfld	__ 22				; Twenty two possible fields (8)
+
+; Fields
+$dname	__ 0				; Directory name
+$hname	__ 1				; Human name
+$nname	__ 2				; Nick name
+$waddr	__ 3				; Work address
+$wphon	__ 4				; Work phone
+$haddr	__ 5				; Home address
+$hphon	__ 6				; Home phone
+$naddr	__ 7				; Network address
+$brday	__ 10				; Birthday
+$super	__ 11				; Supervisor's name
+$projn	__ 12				; Project name
+$accnt	__ 13				; Account
+$relat	__ 14				; Relationship
+$remrk	__ 15				; Remark
+$altby	__ 16				; Altered by
+
+ibuf:					; Beginning of individual buffers
+dname:	block	strsiz/5+1		; Directory name
+hname:	block	strsiz/5+1		; Human name
+nname:	block	strsiz/5+1		; Nick name
+waddr:	block	strsiz/5+1		; Work address
+wphon:	block	strsiz/5+1		; Work phone
+haddr:	block	strsiz/5+1		; Home address
+hphon:	block	strsiz/5+1		; Home phone
+naddr:	block	strsiz/5+1		; Network address
+brday:	block	strsiz/5+1		; Birthday
+super:	block	strsiz/5+1		; Supervisor's name
+projn:	block	strsiz/5+1		; Project name
+relat:	block	strsiz/5+1		; Relation
+accnt:	block	strsiz/5+1		; Account
+remrk:	block	strsiz/5+1		; Remark
+altby:	block	strsiz/5+1		; Altered by
+ibufz	__ .-1				; End
+
+varsz	__ strsiz*maxfld		; Max size of variable area
+
+blkadr:	0				; Length,,address of block in file
+blkdir:	0				; Directory number of block
+
+buf:
+	adate:	0			; Date and time last altered
+	sizmx:	block	sizmxz		; Size matrix
+	var:	block	varsz		; Variable area
+
+; Pointers for INQUIR entry
+pntrs:					; Beginning of pointer table for sizmx
+dnamep:	point	6, sizmx+0, 5		; Directory name
+hnamep:	point	6, sizmx+0, 11		; Human name
+nnamep:	point	6, sizmx+0, 17		; Nick name
+waddrp:	point	6, sizmx+0, 23		; Work address
+wphonp:	point	6, sizmx+0, 29		; Work phone
+haddrp:	point	6, sizmx+0, 35		; Home address
+hphonp:	point	6, sizmx+1, 5		; Home phone
+naddrp:	point	6, sizmx+1, 11		; Network address
+brdayp:	point	6, sizmx+1, 17		; Birthday
+superp:	point	6, sizmx+1, 23		; Supervisor's name
+projnp:	point	6, sizmx+1, 29		; Project name
+accntp:	point	6, sizmx+1, 35		; Account
+relatp:	point	6, sizmx+2, 5		; Relationship
+remrkp:	point	6, sizmx+2, 11		; Remark
+altbyp:	point	6, sizmx+2, 17		; Altered by
+
+ibufp:					; Pointers to individual buffers
+	point	7, dname		; Directory name
+	point	7, hname		; Human name
+	point	7, nname		; Nick name
+	point	7, waddr		; Work address
+	point	7, wphon		; Work phone
+	point	7, haddr		; Home address
+	point	7, hphon		; Home phone
+	point	7, naddr		; Network address
+	point	7, brday		; Birthday
+	point	7, super		; Supervisor's name
+	point	7, projn		; Project name
+	point	7, accnt		; Account
+	point	7, relat		; Relationship
+	point	7, remrk		; Remark
+	point	7, altby		; Altered by
+
+
+	subttl	startup initialisation
+
+go:	reset
+	move	p, [iowd npdl, pdl]
+	movei	1, diedie
+	movem	1, errdsp		; Bomb on inital errors
+	setz	f,
+arpa,<
+	gjinf
+	lsh	3, =15
+	addm	3, locskt
+>;arpa
+	movei	1, .fhslf
+	rpcap
+	ior	3, 2
+	epcap
+	move	2, [levtab,,chntab]	; Set up interrupt stuff
+	sir
+	eir
+	move	2, [chnmsk]		; Channels to arm
+	aic
+	call	filini			; Read in our PMAP file
+	call	tabini			; Init table pointers, etc.
+	call	repini			; Init reaper variables
+	call	idlini			; Init idle terminal stuff
+cha,<
+	call	hstini			; Init host table
+>;cha
+	movei	1, loop			; From now on
+	movem	1, errdsp		; Errors return to top level
+
+	subttl	main loop
+
+loop:	time
+	movem	1, looptm
+ipcf,<
+	skipn	idlpid			; Have a PID for IDLSRV?
+	 call	gidlpd			; No, get one
+	skipn	ttypid			; One for TTYLOC?
+	 call	gttypd
+>
+
+	call	update			; Get the relavant system tables
+	call	reap			; See if anyone needs flushing
+	call	idle			; Handle idle terminals
+arpa,<
+	call	chkicp			; Check status of FINGER ICP
+>;arpa
+	call	lnkchk			; Check TTLINK table
+	call	usgchk			; Check line usage
+	call	updatl			; Update "old" tables
+
+nap:	time
+	sub	1, looptm		; Get time we used doing that
+	sub	1, intrvl		; Less time to sleep for
+	jumpge	1, loop			; If took too long alread, go back
+	movm	1, 1			; Else sleep off the difference
+	disms
+	jrst	loop			; And then back to the top
+
+	subttl	initialisation subroutines
+
+; Read CERBERUS.CMD file and set things up from there.
+
+;;; Command table; dispatches are for handling each command.
+cmdtab:	ncmds,,ncmds
+	[asciz /Default/],,rindft
+	[asciz /Detached/],,rindet
+	[asciz /TTY-never-reaped/],,rintty
+	[asciz /User-never-reaped/],,rinnvr
+	[asciz /Winner/],,rinwnr
+ncmds	__ .-cmdtab-1
+
+repini:	setom	rwarnc		; Reset warn count
+	move	1, [rwarnc,,rwarnc+1]
+	blt	1, rwarnc+njbs-1
+	skipn	rlogp		; Want a log file for REAPER?
+	 jrst	repind		; No
+	movsi	1, (gj%sht)
+	hrroi	2, rlogfl	; Name of the file
+	gtjfn
+	 error	(Cant get REAPER log file)
+	move	2, [7b5+of%app]	; Open for append
+	openf
+	 error	(Cant open REAPER log file)
+	movem	1, rlogjf
+	seto	2,
+	setz	3,
+	odtim
+	hrroi	2, [asciz / REAPER in action.
+/]
+	sout
+	move	2, [1,,.fbctl]
+	movei	3, 3
+	gtfdb
+	tlnn	3, (fb%nxf)	; Does it exist?
+	 jrst	repind		; Yes, done with it for now
+	hrli	1, (co%nrj)	; Keep the jfn
+	closf			; Close
+	 trn
+	andi	1, -1
+	move	2, [7b5+of%app]
+	openf			; And open again so it will exist
+	 trn
+
+repind:	movsi	1, (gj%old!gj%sht) ; Now read in the data file
+	hrroi	2, repfil
+	gtjfn
+	 error	(Cant find Cerberus startup file)
+	move	2, [7b5+of%rd]
+	openf
+	 error	(Cant open Cerberus startup file)
+	hrlm	1, cmdjfn	; Setup as input for COMND calls
+	movei	1, rineof	; Setup EOF dispatch
+	movem	1, eofdsp
+	seto	t,		; T holds WINNER index during all this (pre-inc'ed)
+repinl:	movei	1, cmdblk	; Pointer to command state block
+	movei	2, [flddb. .cmini]
+	comnd			; Init for this line
+	 erjmp	rineof
+	movei	2, [flddb. .cmkey,,cmdtab]
+	comnd
+	 erjmp	rineof
+	tlne	1, (cm%nop)	; Was it parsed ok?
+	 error	(Bad command line in Cerberus startup file)
+	hrrz	2, (2)		; pick up dispatch address
+	jrst	(2)		; go to it
+
+;;; Come back here after parsing below to confirm and proceed to next line
+repin2:	movei	2, [flddb. .cmcfm] ; Confirm the whole line
+	comnd
+	 erjmp	rineof
+	tlnn	1, (cm%nop)
+	 jrst	repinl
+	error	(Bad line in Cerberus startup file)
+
+
+;;; Default <minutes>     ! default time for reaping check
+;;; Detached <minutes>    ! time limit jobs detached from net can stick around
+rindft:	skipa	4, [rdeftm]	; Default <seconds>
+rindet:	 movei	4, rdettm	; Detached <seconds>
+	movei	2, [flddb. .cmnum,,=10,]
+	comnd
+	 erjmp	rineof
+	tlne	1, (cm%nop)	; Was this used (assume confirm)
+	 skipa	2, [-1]		; No, assume huge limit (infinity, essentially)
+	 imuli	2, ^d<60*1000>	; Otherwise convert to ms
+	movem	2, (4)		; Stash this in proper place
+	jrst	repin2
+
+;;; TTY-never-reaped <tty #>	! never reap any jobs on this tty
+rintty:	movei	2, [flddb. .cmnum,,=8]	; Get tty number
+	comnd
+	 erjmp	rineof
+	tlne	1, (cm%nop)	; Worked?
+	 error	(Bad tty # in TTY-never-reaped command in Cerberus startup file)
+	cail	2, ntts		; Range-check the tty #
+	 error	(TTY # out of bounds in TTY command in Cerberus startup file)
+	setom	rttytb(2)	; Mark this tty as being unreapable
+	jrst	repin2
+
+;;; User-never-reaped <username> ! never reap this user
+rinnvr:	movei	2, [flddb. .cmusr]
+	comnd			; Get user number for user-never-reaped
+	 erjmp	rineof
+	tlne	1, (cm%nop)	; Worked?
+	error	(Bad user name in User command in Cerberus startup file)
+	setom	rusrtb(2)	; Got it; say don't reap this user
+	jrst	repin2
+
+;;; Winner <username>		! don't tattle on this user when spying
+rinwnr:	aos	t		; bump WINNER slot counter
+	cail	t, nwinnr	; check range
+	 error	(Out of Winner space during Cerberus startup file)
+	movei	2, [flddb. .cmusr] ; parse a user name
+	comnd
+	 erjmp	rineof		; if dies, must be EOF
+	tlne	1, (cm%nop)	; if get error in parsing,
+	 error	(Bad user name after Winner command in Cerberus startup file)
+	movem	2, winner(t)	; save in next available WINNER slot
+	jrst	repin2		; go back and confirm all this
+
+rineof:	setzm	eofdsp		; No more EOF handling
+	movei	1, .fhslf
+	movsi	2, (1b10)	; Disarm EOF from now on
+	dic
+	hlrz	1, cmdjfn
+	closf
+	 trn
+	ret			; And return
+
+; Init the PMAP file
+filini:	movsi	1, (gj%old!gj%sht)
+	hrroi	2, filnam
+	gtjfn
+	 error	(Cant find data file)
+	movei	2, of%rd+of%wr+of%thw
+	openf
+	 error	(Cant open data file)
+	movem	1, filjfn
+	hrlz	1, 1
+	move	2, [.fhslf,,filpag]
+	move	3, [pm%cnt+pm%rd+pm%wr+npages]
+	pmap
+	ret
+
+; Init pids and icp stuff
+idlini:	setom	idltty			; Reset message counts for all ttys
+	move	1, [idltty,,idltty+1]
+	blt	1, idltty+ntts-1
+	ret
+
+ipcf,<
+gidlpd:	movei	s, idlpid		; Where to stick the pid
+	movei	z, idpdnm		; What to name it
+	movei	y, idlchn
+	jrst	nampid			; Go give it a name
+
+gttypd:
+arpa,<	movei	s, ttypid
+	movei	z, ttpdnm
+	movei	y, ttychn
+	jrst	nampid
+> ;arpa
+noarpa,<ret>				; Don't set up TTYLOC server
+>;ipcf
+
+	subttl	table handling subroutines
+
+tabini:	movsi	t, -nsysgt		; First SYSGT all the table numbers
+tabin1:	move	1, sysgtb(t)
+	sysgt
+	jumpe	2, [error (SYSGT table not found)]
+	hrrm	2, sysgt2(t)		; Save table number
+	skipge	sysgt2(t)		; And if getting whole table
+	 hllm	2, sysgt2(t)		; Save size as well
+	aobjn	t, tabin1		; For all SYSGT tables
+
+	movsi	t, -nsnoop		; Now SNOOP all symbols
+	movei	1, .snpsy		; Get symbol
+	setz	3,			; Global value
+tabin2:	move	2, snootb(t)		; The symbol
+	snoop
+	 error	(SNOOP symbol lookup failed)
+	hrrm	2, snooad(t)		; Save the symbol
+	aobjn	t, tabin2
+
+	movsi	t, -ngtb1s		; Get once only tables
+tabin3:	skipge	1, gtab1s(t)		; Get table pointer
+	 hrli	1, -1			; Wants whole table
+	move	2, gtab2s(t)		; Get user pointer
+	gtblt
+	 error	(GTBLT failed for startup)
+	aobjn	t, tabin3		; For all initial tables
+
+	hlre	1, jobtt0		; Get number of jobs in system
+	hrlm	1, njobs
+	movm	1, 1
+	caile	1, njbs			; Range check it
+	 error	(Too many jobs in system)
+	hrrm	1, njobs
+
+tops20,<
+arpa,<	
+	hrrz	1, lhostn+1		; Number of first nvt
+	movem	1, nvtlo
+	hlre	2, lhostn+1		; -<Number of nvts>
+	sub	1, 2
+	movem	1, nvthi		; Number of last nvt
+> ;arpa
+cha,<
+	move	1, cvtptr		; Address of this table
+	hrli	1, 1			; Just one word
+	movei	2, cvtptr		; Read it once only
+	peek
+	 error	(PEEK failed in initialization)
+	hrrz	1, cvtptr		; Number of first CHAOS NVT
+	movem	1, cnvtlo
+	hlre	2, cvtptr		; -<Number of CHAOS NVTs>
+	sub	1, 2
+	movem	1, cnvthi
+>;cha
+>;tops20
+tenex,<
+cha,<
+	move	1, lhostn+1
+	movem	1, cvtptr		; Chaosnet and arpanet tty's the same
+>
+ifn arpasw!chasw,<
+	hrrz	1, lhostn+1		; Number of first nvt
+arpa,<
+	movem	1, nvtlo
+>
+cha,<
+	movem	1, cnvtlo
+>
+	hlre	2, lhostn+1		; -<Number of nvts>
+	sub	1, 2
+arpa,<
+	movem	1, nvthi		; Number of last nvt
+>
+cha,<
+	movem	1, cnvthi
+>
+>>;tenex&arpasw!chasw
+pup,<
+	hrrz	1, puppar		; Number of first PUP NVT
+	movem	1, pnvtlo
+	hlre	2, puppar		; -<Number of PUP NVTs>
+	sub	1, 2
+	movem	1, pnvthi
+>;pup
+	hlre	1, ttyjb0		; Number of ttys
+	hrlm	1, nttys
+	movm	1, 1
+	caile	1, ntts
+	 error	(Too many ttys in system)
+	hrrm	1, nttys
+tops20,<
+	hrlm	1, ttact0
+>
+tenex,<
+	hrlm	1, ttlnk0
+	hrlm	1, ttidl0
+ifn arpasw!chasw,<
+	hrlm	1, ttnet0
+>;arpasw!chasw
+>;tenex
+	move	1, nfks			; Number of forks in system
+	caile	1, nfs
+	 error	(Too many forks in system)
+	hrlm	1, fkpt0
+tops20,<
+	hrlm	1, fkq20
+>
+	hrlm	1, fkpgs0
+	hrlm	1, fkwsp0
+	hrlm	1, fkjob0
+	movn	1, 1
+	hrlm	1, nfks
+
+arpa,<
+	movsi	1, -nskts
+	camle	1, netbf0
+	 error	(Too many network sockets in system)
+> ;arpa
+	movsi	1, (rc%emo)
+tops20,<
+	hrroi	2, [asciz /OPERATOR/]
+>
+tenex,<
+	hrroi	2, [asciz /SYSTEM/]
+>
+	rcusr
+	movem	3, opruno		; Save directory number of operator
+
+	hlrz	1, ptypar		; Number of pseudo-terminals
+	movn	1, 1			; Make aobjn pointer out of it
+	hrlm	1, ptypar
+	setom	ttycpj
+	move	1, [ttycpj,,ttycpj+1]
+	blt	1, ttycpj+ntts-1
+
+	hrrz	1, ndhl			; Number of physical ttys
+	movn	1, 1
+	hrlm	1, ndhl			; Setup aobjn pointer for them
+	ret				; All done with init
+
+update:	setzm	zrovar			; Zero variables
+	move	1, [zrovar,,zrovar+1]
+	blt	1, zroend
+	gtad
+	movem	1, updatm
+
+	movsi	t, -ngtb1t		; Number of tables to GTBLT
+updt01:	skipg	1, gtab1t(t)		; Get table index
+	 hrli	1, -1			; Wants whole table
+	move	2, gtab2t(t)
+	gtblt
+	 error	(GTBLT failed in update)
+	aobjn	t, updt01
+
+	movsi	t, -npeekt		; Number of tables to PEEK
+updt02:	move	1, peekt1(t)
+	move	2, peekt2(t)
+	peek
+	 error	(PEEK failed in update)
+	aobjn	t, updt02
+
+	time				; Get system time
+	movem	1, todclk
+
+arpa,<
+	hllz	q, netbf0		; Number of network sockets
+updt10:	hrrz	t, netbuf(q)		; Get tty for this one
+	caml	t, nvtlo
+	 camle	t, nvthi		; Is it in range?
+	 jrst	updt11			; No, forget it
+	ldb	1, [point 4, netsts(q), 3]
+	caie	1, .nsopn		; OPND?
+	 jrst	updt11
+	ldb	2, [point 9, netawd(q), 17]	; Yes, get host number
+	hrrz	1, ttyhst(t)		; Get from last time
+	hrlm	1, ttyhst(t)		; Save it as old value
+	cain	2, (1)			; Same as before?
+	 jrst	updt11			; Yes
+	hrrm	2, ttyhst(t)		; Save it away
+	push	p, 2			; Save host number
+	movei	1, (t)			; TTY number
+	imuli	1, ttylen		; Times length of it
+	movei	1, ttylad(1)
+	hrli	1, (<point 7, 0>)
+	movei	2, [asciz /Net site /]
+	call	movstr
+	pop	p, 2
+	movei	3, 10			; Just in case
+	cvhst				; if it doesnt skip
+	 nout
+	 jfcl
+updt11:	aobjn	q, updt10		; For all sockets
+> ;arpa
+
+pup,<
+	hllz	q, puppar		; AOBJN ptr to PUP NVTs
+	move	w, puppar+1		; Monitor address of PUP free store
+
+updt12:	skipl	a, nvtpup(q)		; Get NVT table entry
+	 jrst	updt13			; Nothing there
+	hrrzi	t, (q)			; Get TTY #
+	add	t, pnvtlo
+	skipn	b, pupfpt(a)		; Get port table entry
+	 jrst	updt13			; Shouldn't be zero, but
+	subi	b, (w)			; Adjust out of monitor space
+	push	p, b
+	movei	1, (t)			; TTY number
+	imuli	1, ttylen		; Times length of it
+	movei	1, ttylad(1)
+	hrli	1, (<point 7, 0>)
+	movei	2, [asciz /Pup site /]
+	call	movstr
+	pop	p, b			; Get host back
+	addi	b, pupbuf+1
+	hrli	b, (1b1+1b2)		; Omit fields, allow hosts not in dir
+	setzm	1(b)			; Zero socket number
+	pupnm
+	 error	(PUPNM failed)		; Maybe just ignore failure
+updt13:	aobjn	q, updt12
+>;pup
+
+cha,<
+	move	q, cvtptr		; Pointers to CHAOSNET NVT's
+
+updt14:
+tops20,<
+	skipg	a, ttactl(q)		; Get NVT table entry
+	 jrst	updt16			; Nothing there
+	add	a, ttnetw		; Offset for connection
+	hrli	a, 1			; Just one word
+	movei	2, 2
+	peek
+	 error	(PEEK failed for table update)
+>
+tenex,<
+	move	2, ttnetw(q)		; Get NVT pointer
+	tlnn	2, 4000			; Chaosnet nvt?
+	 jrst	updt16			; No
+>
+	hrrz	1, 2
+	jumpe	1, updt16		; None there??
+	add	1, chafrn		; Offset for foreign host
+	hrli	1, 1
+	movei	2, 2
+	peek
+	 error	(PEEK failed for table update)
+	ldb	c, [point 16, 2, 15]	; Get foreign host
+	push	p, c			; Save it
+	hrli	c, nw%chs9
+	call	gfrnam
+	 move	b, (p)
+	movem	b, (p)			; Save string or number
+	hrrzi	t, (q)			; Get TTY #
+	movei	a, (t)			; TTY number
+	imuli	a, ttylen		; Times length of it
+	movei	a, ttylad(a)
+	hrli	a, (<point 7, 0>)
+	movei	b, [asciz /CHAOS site /]
+	call	movstr
+	pop	p, b
+	jumpl	b, [call movstr
+		    jrst updt15]
+	movei	c, "#"
+	idpb	c, a
+	movei	c, 10
+	nout
+	 jfcl
+updt15:	setz	b,
+	idpb	b, a
+updt16:	aobjn	q, updt14
+>;cha
+
+	hllz	j, njobs		; Number of jobs
+updt20:	skipge	jobrt(j)		; Job exists?
+	 jrst	updt21			; No
+	movei	1, (j)			; Job number again
+	move	2, [-2,,u]		; Where to put data
+	movei	3, .jiuno		; User number
+	getji				; u _ user; v _ dir
+updt21:	 setzb	u, v			; Not there, say not logged in for this
+	move	d, updatm		; Now
+	move	c, todclk		; Now also
+	jumpe	u, updt22
+	camn	u, opruno		; Operator job?
+	 aosa	nojobs			; Yes, count one more
+	 aos	nujobs			; Else user job
+updt22:	movem	v, jobdno(j)		; Update directory number
+	hlre	t, jobtty(j)		; Get job's tty
+	camn	u, jobuno(j)		; Same user as last time?
+	 jrst	updt23			; Yes, go check attach/detach status
+	movem	c, jobltd(j)		; Update TIME of user login
+	movem	d, usrlgi(u)		; Update user's login time
+	call	gnutty			; Get new host for this tty
+	dpb	s, uslgit		; Update user's login tty
+	exch	u, jobuno(j)		; Update job's user
+	movem	d, usrlgo(u)		; Time of logout for old user
+	hrre	s, jobtno(j)		; Get old tty for this job
+	call	goutt0			; Get old host for this tty (no race)
+	dpb	s, uslgot		; Update logout tty for this user
+	hrrm	t, jobtno(j)		; Update job's tty
+	jrst	updt25			; And go fix up tty state
+updt23:	hrre	1, jobtno(j)		; Get old value
+	camn	1, t			; Same?
+	 jrst	updt25			; Yes
+	jumpl	t, updt24		; Detached?
+	movem	d, usratt(u)		; No, attach time
+	hrrm	t, jobtno(j)		; Update job tty
+	call	gnutty			; Get net site maybe
+	dpb	s, usattt		; And update attach tty
+	jrst	updt25
+updt24:	exch	t, jobtno(j)		; Insert as detached
+	movem	d, usrdet(u)		; This is detached time
+	call	goutty			; Get net site maybe
+	dpb	s, usdett		; And update detach tty
+	jrst	updt26			; We know it was detached
+updt25:	jumpl	t, updt26		; Detached?
+	hrre	1, ttyjob(t)		; Get wait state
+	hrlm	1, jobtno(j)		; And update it for this job
+updt26:	aobjn	j, updt20
+
+	hrloi	1, 377777		; Infinity
+	movem	1, jobid1		; Use copy so no inconsistant data
+	move	1, [jobid1,,jobid1+1]
+	blt	1, jobid1+njbs-1
+	setzm	jobfk1			; Ditto
+	move	1, [jobfk1,,jobfk1+1]
+	blt	1, jobfk1+njbs-1
+	hllz	q, nfks			; Get pointer to forks
+	move	3, todclk
+	move	4, wtlst		; Speed things up a little bit
+updt30:	hlrz	2, fkpt(q)		; Get status of fork
+	trne	2, 400000		; Not in use any more?
+	 jrst	updt31
+	hrrz	2, fkq2(q)		; Get list address
+	hlrz	j, fkjob(q)		; Get job for this fork
+	hrrz	1, fkwsp(q)		; Get size of working set
+	hrli	1, 1
+	addm	1, jobfk1(j)		; Count number and size for this job
+	move	1, fkpgst(q)		; Time went onto wait list maybe
+	cain	2, (4)			; On the wait list?
+	 camg	1, jobltd(j)		; Consistancy check - after login time?
+	 tdza	1, 1			; No, say idle for zero
+	 subm	3, 1			; Yes, get idle time
+	jumpl	1, [setz 1,  jrst .+1]	; Correct race conditions
+	camge	1, jobid1(j)		; Less idle than other forks?
+	 movem	1, jobid1(j)		; Yes, use it
+updt31:	aobjn	q, updt30		; For all forks
+	move	1, [jobid1,,jobidl]	; Now install new version
+	blt	1, jobfks+njbs-1	; Of JOBIDL and JOBFKS
+
+tenex,<
+	hllz	t,nttys
+updt35:	move	2, ttidl1(t)		; Get TTIDLE for this tty
+	sub	2, todclk
+	movnm	2, ttidle(t)
+	aobjn	t, updt35
+>;tenex
+
+tops20,<
+mit,<					; New way of doing idleness
+	hllz	t,nttys			; AOBJN ptr to ttys
+updt35:	skipg	1, ttactl(t)		; See if any dynamic data for this one
+	 jrst	[setzm	ttidle(t)	; Nope, zero then
+		 jrst	updt36]
+	add	1, ttidl0		; Offset for TTIDLE entry
+	hrli	1, 1			; Just this word
+	movei	2, 2
+	peek
+	 move	2, todclk		; unoffset it by TODCLK
+	sub	2, todclk
+	movnm	2, ttidle(t)		; And store it
+updt36:	aobjn	t, updt35
+> ;mit
+>;tops20
+
+	move	c, todclk		; Now
+	subm	c, oldtod		; Get time elapsed since we last time
+	exch	c, oldtod		; We were here
+	hllz	j, njobs		; Pointer to jobs
+updt40:	skipge	1, jobrt(j)		; Get runtime
+	 jrst	updt41			; No job there
+	sub	1, jobort(j)		; Get runtime diff
+	imuli	1,=1000			; Make "percentage"
+	idiv	1, c			; Divide by elapsed system time
+	hrrm	1, jobpct(j)		; That's the "short" %-age of machine
+	move	1, jobrt(j)		; Get runtime again
+	imuli	1, =1000		; Will be a "percentage"
+	move	2, todclk		; Now
+	sub	2, jobltd(j)		; Less when he came on the machine
+	idiv	1, 2			; Runtime / time on the machine
+	hrlm	1, jobpct(j)		; That's the "long" %-age of machine
+updt41:	aobjn	j, updt40		; For all jobs
+
+tops20,<
+	move	t, ptypar		; Pointer for PTYs
+updt50:	skipge	ttyjob(t)		; Any job there?
+	 jrst	updt51			; No, skip it
+	movei	1, .ttdes(t)		; Device designator for the PTY
+	hrroi	2, j
+	movei	3, .jicpj		; Controlling job
+	getji
+	 jrst	updt51
+	jumpl	j, updt51		; No job there?
+	camn	j, ttycpj(t)		; Same job as before?
+	 jrst	updt52			; Yes, no update then
+	movem	j, ttycpj(t)		; Save update next time
+	move	1, [point 7, tmpbuf]	; Get some string space
+	movei	2, [asciz /Job /]
+	call	movstr
+	movei	2, (j)
+	movei	3, =10
+	nout
+	 trn
+	movei	2, [asciz /, /]
+	call	movstr
+	move	2, jobuno(j)
+	dirst
+	 erjmp	.+3			; Skip comma if no name
+	 movei	2, [asciz /, /]
+	 call	movstr
+	move	3, jobpnm(j)
+	call	movsix
+	idpb	3, 1			; End with null
+	movei	2, (t)			; TTY number
+	imuli	2, ttylen
+	movei	1, ttylad(2)
+	hrli	1, tmpbuf
+	blt	1, ttylad+ttylen-1(2)	; Move in tty location description
+	jrst	updt52			; Skip resetting
+updt51:	setom	ttycpj(t)		; Note not assigned
+updt52:	aobjn	t, updt50
+>;tops20
+
+	ret				; All done
+
+gnutty:	move	s, t			; Get host from this pass
+arpa,<
+	caml	s, nvtlo		; NVT?
+	 camle	s, nvthi
+	 ret				; No
+	hrrz	s, ttyhst(s)		; Get site
+	tro	s, 400			; And flag as such
+> ;arpa
+	ret
+
+goutty:	move	s, t			; Get host from last pass
+goutt0:
+arpa,<
+	caml	s, nvtlo		; NVT?
+	 camle	s, nvthi
+	 ret				; No
+	hlrz	s, ttyhst(s)		; Get site
+	tro	s, 400			; And flag as such
+> ;arpa
+	ret
+
+; Copy old runtime table for next pass
+updatl:	move	1,[jobrt,,jobort]
+	hrrz	2,njobs
+	blt	1,jobort-1(2)
+	ret
+
+	subttl	idle terminal handler
+
+; Check for terminals that have been idle for 1 pass
+idle:	hllz	t, ndhl			; Pointer for physical ttys
+tops20,<
+	hrri	t, 1			; They start with TTY1, though
+>
+	setzm	idlmsg			; Reset message
+idle0:	skipl	ttyjob(t)		; Any job in this terminal?
+	 jrst	[setom	idltty(t)	; Yes, reset count for it
+		 jrst	idle2]		; And go get the next one
+	aosn	q, idltty(t)		; Is this the first time for this one?
+	 jrst	idle2			; Yes, ignore it this pass
+	caie	q, 1			; If second time
+	 caml	q, nidlps		; Or time for an update
+	 call	idlmes			; Give the message to it
+idle2:	aobjn	t, idle0		; Next tty
+	ret				; All done
+
+idlmes:	aos	noburn			; Bump our randomizer (how unrandom!)
+	movei	1, 1			; Reset current count
+	movem	1, idltty(t)
+	movei	1, .ttdes(t)		; Get device designaotr
+	gttyp
+	 erjmp	cpopj			; Maybe line inactive
+	skipe	2, clrtb(2)		; Must be supported
+	 sobe				; And nothing in the buffer
+	 ret				; Else forget it
+	movei	q, -1(t)		; Compute address
+	imuli	q, idllen		; Times size for each tty
+	hrroi	q, idladr(q)
+	move	2, (q)			; Get what's there
+	camn	2, [-1]			; Wants nothing?
+	 ret				; Yes, return right away then
+	call	timron			; Timer on for this
+tops20,<
+	asnd				; Allocate dynamic data in monitor
+	 ret				; Failed, skip it
+>
+	rfmod
+	push	p, 2			; Save current mode word
+	trz	2, tt%dam
+	sfmod
+	 erjmp	[pop	p, 2
+		 jrst	typmsz]		; Random lossage, forget it
+	move	4, noburn		; This is randomizer
+	andi	4, 3			; (range 0-3)
+	skipn	idlmsg			; Have the poop line?
+	 call	mkimsg			; No, go make it then
+	setom	typing			; Doing TTY output
+	call	dpyclr			; Clear the screen
+	setz	3,			; Prepare for sout
+	hrroi	2, idlmsg		; Get current top-of-screen message
+	sout 
+	skipe	(q)			; 0 => "Take me, ..."
+	 skipa	2, q
+	 hrroi	2, [asciz /Take me, I'm yours!/]
+	call	dpymsg			; args in 2,3
+idldob:	dobe				; Wait for it to get out
+	setzm	typing			; No longer doing TTY output
+	pop	p, 2
+	sfmod				; Restore old mode
+typmsz:
+tops20,<
+	reld				; Deassign dynamic area
+	 trn
+>
+	jrst	timrof
+
+	subttl	Terminal support
+
+; Eventually this wil be VTS-ized
+
+dpyclr:	gttyp
+	setz	3,
+	xct	clrtb(2)
+	ret
+
+dpymsg:	move	4, 2			; Save string ptr
+	gttyp
+	setz	3,			; Prepare for souts
+	xct	msgtb(2)
+	ret
+
+; These are tables for MIT, God knows what the rest of the world uses
+mit,<
+clrtb:	
+repeat 4,<0>				; 0-3
+	0				; 4 - IMLACs
+	0				; 5 - DM2500
+	call	vtclr			; 6 - HP2640
+repeat 3,<0>				; 7-9
+	0				; 10 - VT05
+	0				; 11 - VT50
+repeat 3,<0>				; 12-14
+	call	vtclr			; 15 - VT52
+	0				; 16
+	call	foxclr			; 17 - Fox
+	call	vtclr			; 18 - VT100
+	call	vtclr			; 19 - Teleray
+	call	vtclr			; 20 - Heath 19
+	0				; 21 - Concept 100
+	0				; 22 - VT100 (ANSI)
+repeat 5,<0>				; 23-27
+	call	aaaclr			; 28 - Ambassador
+
+msgtb:
+repeat 4,<0>				; 0-3
+	0				; 4 - IMLACs
+	0				; 5 - DM2500
+	call hpmsg			; 6 - HP2640
+repeat 3,<0>				; 7-9
+	0				; 10 - VT05
+	0				; 11 - VT50
+repeat 3,<0>				; 12-14
+	call	vtmsg			; 15 - VT52
+    	0				; 16
+	call	foxmsg			; 17 - Fox
+	call	vt1msg			; 18 - VT100
+	call	vtmsg			; 19 - Teleray
+	call	vtmsg			; 20 - Heath 19
+	0				; 21 - Concept 100
+	0				; 22 - VT100 (ANSI)
+repeat 5,<0>				; 23-27
+	call	aaamsg
+
+> ;mit
+
+sym,<
+clrtb:
+repeat 14,<0>				; 0-13 not displays
+	0				; 14 - dm2500
+	0				; 15 - dm1520
+	call vtclr			; 16 - hp
+	0				; 17 - c100
+	call vtclr			; 20 - tl1061
+	0				; 21 - ann arbor
+	call vtclr			; 22 - vt100
+	call vtclr			; 23 - h19
+	call vtclr			; 24 - vt52
+	call aaaclr			; 25 - ambassador
+	0				; 26 - simlac
+	0				; 27 - la36
+
+msgtb:
+repeat 14,<0>				; 0-13 not displays
+	0				; 14 - dm2500
+	0				; 15 - dm1520
+	call vtmsg			; 16 - hp
+	0				; 17 - c100
+	call vtmsg			; 20 - tl1061
+	0				; 21 - ann arbor
+	call vt1msg			; 22 - vt100
+	call vtmsg			; 23 - h19
+	call vtmsg			; 24 - vt52
+	call aaamsg			; 25 - ambassador
+	0				; 26 - simlac
+	0				; 27 - la36
+>;sym
+
+; Standard DEC terminal tables
+dec,<
+
+clrtb:
+repeat 15,<0>				; 0-14
+	call	vtclr			; 15 - VT52
+	call	vt1clr			; 16 - VT100
+repeat 5,<0>				; 17-22
+
+msgtb:
+repeat 15,<0>				; 0-14
+	call	vtmsg			; 15 - VT52
+	call	vt1msg			; 16 - VT100
+repeat 5,<0>				; 17-22
+> ;dec
+
+; VT52 and isomorphisms
+vtclr:	hrroi	2, [asciz "HJ"]
+	sout
+	ret
+
+vtmsg:	hrroi	2,[asciz "Y+;"]
+	sout
+	move	2, 4
+	sout
+	hrroi	2, [asciz "H"]
+	sout
+	ret
+
+; VT100
+dec,<
+vt1clr:	hrroi	2,[asciz "[H[2J"]	; ]]
+	sout
+	ret
+> ;dec
+
+vt1msg:
+mit,<	hrroi	2, [asciz "<[12;10H#3"] ; ]> >
+dec,<	hrroi	2, [asciz "[12;10H#3"] ; ] >
+	sout
+	move	2, 4
+	sout
+	hrroi	2, [asciz "[13;10H#4"] ; ] 
+	sout
+	move	2, 4
+	sout
+mit,<	hrroi	2, [asciz "[H[?2l"] >	; ]] Home again
+dec,<	hrroi	2, [asciz "[H"] >	; ]
+	sout
+	ret
+
+ifn mitsw!symsw,<
+aaaclr:	hrroi	2, [asciz "[H[J[48;;;48p[1Q"]	;]]]]
+	sout				; Do lots of magic resetting
+	ret
+
+aaamsg:	hrroi	2, [asciz "[23;20H"]	; ]
+	sout
+	move	2, 4
+	sout
+	hrroi	2, [asciz "[H"]	; ]
+	sout
+	ret
+> ;mit!sym
+
+mit,<
+; HP 264x
+hpmsg:	hrroi	2, [asciz /&a27c11Y/]
+	sout
+	move	2, 4
+	sout
+	hrroi	2, [asciz /H/]
+	sout
+	ret
+
+; FOX
+foxclr:	call	vtclr			; A VT52
+	push	p,1
+	movei	1,120			; with some padding
+	disms
+	pop	p,1
+	ret
+
+foxmsg:	hrroi	2, [asciz /Y;X+/]
+	sout
+	move	2, 4
+	sout
+	hrroi	2, [asciz /H/]
+	sout
+	ret
+> ;mit
+
+; Compose the message for the top of the screen
+;   4/	randomizer (0-3)
+mkimsg:	push	p, 1			; Save work registers
+	push	p, 5
+	movei	5, 3			; This is our count-down index
+	move	1, [point 7, idlmsg]	; Where it goes
+
+mkimgl:	addi	4, 1			; Cycle to next in random loop
+	andi	4, 3			; Wrap appropriately
+	jrst	@[mki0  mki1  mki2  mki3] (4) ; Do one of our functions
+
+mki0:	movei	2, ournam		; Move in our host name
+	call	movstr
+	movei	2, " "
+	idpb	2, 1
+	seto	2,
+	movsi	3, (ot%scl)
+	odtim
+	movei	2, " "
+	idpb	2, 1
+	idpb	2, 1
+	jrst	mkimln
+
+mki1:	move	2, nujobs		; Number of user jobs
+	movei	3, =10
+	nout
+	 trn
+	movei	2, "+"
+	idpb	2, 1
+	move	2, nojobs		; Number of operator jobs
+	nout
+	 trn
+	movei	2, [asciz / Jobs  /]
+	call	movstr
+	jrst	mkimln
+
+mki2:	movei	2, [asciz/Loads /]
+	call	movstr
+	move	3, [fl%one!fl%pnt!2b23!2b29]
+	move	2, lodavs		; First load av
+	flout
+	 trn
+	movei	2, " "
+	idpb	2, 1
+	move	2, lodavs+1
+	flout
+	 trn
+	movei	2, " "
+	idpb	2, 1
+	move	2, lodavs+2
+	flout
+	 trn
+	movei	2, " "			; Pad out at the end
+	idpb	2, 1
+	idpb	2, 1
+	jrst	mkimln
+
+mki3:	movei	2, [asciz /Up /]
+	call	movstr
+	push	p, 1			; Save destination string ref
+	time				; Now, pick up system up-time
+	idiv	1, 2			; Turn into secs
+	move	2, 1			; Get into more convenient place
+	pop	p, 1			; Get back ref to what we're building
+	idivi	2, =3600		; Now, get hours
+	push	p, 3			; Save remainder
+	movei	3, =10			; Decimal format
+	nout				; Hours into string
+	 trn
+	movei	2, ":"			; Format nicely
+	idpb	2, 1
+	pop	p, 2			; Get back remainder after hour calculation
+	idivi	2, =60			; Get minutes
+	push	p, 3			; Save seconds (remainder)
+	move	3,[no%lfl!no%zro!<2,,0>!5+5] ; 2 cols, leading 0's
+	nout				; Minutes
+	 trn
+	movei	2, ":"			; Format nicely
+	idpb	2, 1
+	pop	p, 2			; Get back seconds
+	nout				; Output it
+	 trn
+	movei	2, " "			; Pad it out now, in case not last
+	idpb	2, 1
+	idpb	2, 1
+	; ...				; fall into loop control
+
+mkimln:	sojge	5, mkimgl		; Do all four parts of top message
+
+; ***** LPT/Canon stuff here *****
+
+; Birthday stuff
+birth,<
+	push	p, 1
+	call	upbirt			; Get uptodate birthday string
+	pop	p, 1
+	movei	2, birtst
+	call	movstr	
+>
+; Holiday stuff
+nobirth,<
+	push	p,1
+	call	holupd			; Get uptodate holiday string
+	pop	p,1
+>
+	movei	2,holstr
+	call	movst0
+	pop	p, 5			; Restore work reg
+	pop	p, 1			; Restore tty designator
+	ret
+
+birth,<
+; Birthday string maker
+
+upbirt:	seto	2,			; Is it still today?
+	setz	4,
+	odcnv
+	hrr	3,2			; Make day,,month
+	camn	3,dom			; Changed?
+	 ret				; No, string still valid
+	movem	3,dom			; Store new day and month
+	hlrzm	2,year			; And year
+	call	holupd			; Update holiday file as well
+	call	inqopn			; Open INQUIR file
+	 ret				; No file, no fun
+	setz	3,			; Get word 0
+	rin
+	hlrz	t,2			; Make AOBJN into users
+	movni	t,(t)
+	movsi	t,(t)
+	aoj	t,
+	movsi	q,-maxbir		; AOBJN into our table
+	
+upbir1:	hrrzi	u,(t)
+	push	p,t			; Preserve over INQRD
+	call	inqrd			; Get data
+	 jrst	[ pop	p,t		; None, we lose
+		  jrst	upbir5]	
+	pop	p,t
+	move	1,[point 7,brday]	; Make string for IDTIM
+	ildb	2,1
+	jumpn	2,.-1
+	movei	2,40			; Stick a space in
+	dpb	2,1
+	move	2,year			; Add year
+	movei	3,=10
+	nout
+	 error
+	setz	2,			; Terminate
+	idpb	2,1
+	hrroi	1,brday
+	movsi	2,(it%nti)
+	idtnc
+	 jrst	upbir5			; Bad date, ignore
+	hrr	3,2
+	came	3,dom			; Today?
+	 jrst	upbir5			; No such luck
+	hrrzm	t,busers(q)		; Happy bday!  Save user #
+	aobjp	q,upbir6		; Kick pointer
+upbir5:	aobjn	t, upbir1
+
+; Here we have collected the birthday folks in BUSERS.  Make the string
+
+upbir6:	tlz	q,-1			; Make # of folks
+	jumpe	q,upbirx		; No people today...
+	move	1,[point 7,birtst]
+	movei	2,[asciz /
+Happy Birthday to /]
+	call	movstr
+	movni	q,(q)			; New index to busers
+	movsi	q,(q)	
+upbir7:	move	2,busers(q)
+	hll	2,opruno		; Make it user number (sigh)
+	dirst
+	 erjmp	[movei	2,[asciz /??/]	; If invalid, note that
+		 call	movstr
+		 jrst	.+1]
+	aobjp	q,upbir9
+	movei	2,[asciz /, /]
+	call	movstr
+	jrst	upbir7
+
+upbir9:	setz	2,
+	idpb	2,1
+	call	inqcls
+	ret
+
+; Here for null string
+upbirx:	setzm	birtst
+	call	inqcls
+	ret
+>;birth
+
+; Holiday routines
+
+holupd:	setz	t,			; Pointer into holtab
+	setzm	holstr			; Null string to start with
+	seto	2,			; Get current data
+	setz	4,
+	odcnv
+	hlrzm	2, year
+	hrrzm	2, month
+	hlrzm	3, date			; Day of month
+	hrrzm	3, day			; Day of week
+	aos	month			; System uses 0-based, we use 1-based
+	aos	date
+	aos	day
+
+holup1:	skipn	z, holtab(t)		; Get entry
+	 ret				; None left
+	ldb	1, [point 2,z,1]	; Get type
+	xct	holdis(1)
+	 jrst	holup5			; Nope, not it.
+	move	1, [point 7,holstr]	; Got one...make string out of it
+	movei	2, [asciz /
+/]
+	call	movstr
+	movei	2, (z)
+	call	movst0
+	ret
+
+holup5:	aoja	t, holup1	
+
+; Dispatch table on entry type
+holdis:	error	(Bad HOLTAB entry)	; 0 - Illegal type
+	call	hldath			; 1 - Month, date type
+	call	hldayh			; 2 - Month, nth day type
+	call	hlspch			; 3 - special type
+
+; Month, date
+hldath:	ldb	1, [point 4,z,5]	; Get month
+	came	1, month
+	 ret
+	ldb	1, [point 5,z,10]	; Get date
+	came	1, date
+	 ret
+cpopj1:	aos	(p)
+	ret
+
+hldayh:	ldb	1, [point 4,z,5]	; Month
+	came	1, month
+	 ret
+	ldb	1, [point 3,z,8]	; Day of week
+	came	1, day
+	 ret
+	move	1, date			; OK, see if it's the nth
+	idivi	1, 7
+	ldb	2, [point 3,z,11]	; Nth
+	caie	1,-1(2)
+	 ret
+	jrst	cpopj1			; O wow.
+
+; Handle special holidays
+hlspch:	ldb	1, [point 16,z,17]
+	jrst	(1)
+
+; Easter (Clavius algorithm, from Knuth Vol I pg 155)
+holeas:	move	1, month		; See if we're in the ballpark
+	cail	1, 3			; If earlier than March
+	 caile	1, 4			; Or later than April
+	  ret				; No good
+	move	1, day			; Is it Sunday?
+	caie	1, 7
+	 ret				; Nope
+	move	c, year			; Compute year's Golden Number
+	idivi	c, =19
+	aos	v, d			; (G) = v
+	move	b, year			; Figure century
+	idivi	b, =100
+	movei	w, 1(b)			; (C) = w
+	movei	x, (w)			; Figure leap year corrections
+	imuli	x, 3
+	idivi	x, 4
+	subi	x, =12			; (X) = x
+	movei	a, (w)			; Magic moon number
+	imuli	a, =8
+	addi	a, 5
+	idivi	a, =25
+	subi	a, 5
+	move	y, a			; (Z) = y
+	move	a, year			; Figure date of Sundays
+	imuli	a, 5
+	idivi	a, 4
+	subi	a, =10(x)
+	move	z, a			; (D) = z
+	move	a, v			; Figure epact
+	imuli	a, =11
+	addi	a, =20(y)
+	subi	a, (x)
+	idivi	a, =30
+	skipge	b			; Make sure positive remainder
+	 addi	b, =30
+	caie	b, =25
+	 caie	b, =24
+	 caile	d, =11
+	 aoj	b			; (E)
+	movns	b			; Compute sunday after full moon
+	addi	b, =44
+	caige	b, =21			; First Sunday after March 21
+	 addi	b, =30
+	move	a, b			; Keep a copy
+	add	b, z
+	idivi	b, 7
+	addi	a, 7
+	sub	a, c			; That's March date!
+	movei	b, 3
+	caig	a, =31			; Convert to April if necc.
+	 jrst	.+2
+	aoj	b,
+	subi	a, =31
+	came	a, date
+	 ret
+	camn	b, month
+	 aoj	(p)
+	ret
+
+; Memorial day (last Monday in May)
+holmem:	move	1, month
+	caie	1, 5
+	 ret				; Not May
+	move	1, day
+	caie	1, 1
+	 ret				; Not Monday
+	move	1, day
+	caile	1, 24			; Last?
+	 aos	(p)			; Yes
+	ret
+
+; Holiday data (should really be in pure area but can't due to forward
+;   refs that arise)
+
+define	holdat	(month, date, str)
+  <	1=34!=<month>=30!=<date>=25![asciz /str/]
+  >
+
+define holday	(month, day, nth, str)
+  <	2=34!=<month>=30!<day>=27!<nth>=24![asciz /str/]
+  >
+
+define	holspc	(routine, str)
+  <	3=34!<routine>=18![asciz /str/]
+  >
+
+; Note: New Years, King's Bday, 4th, and Xmas all have legal equivalents on
+; monday if they fall on sunday...I'm ignoring those for now.
+
+holtab:	holdat	1,1,<Happy New Year>
+	holdat	1,15,<Martin Luther King's Birthday> 
+	holdat	2,2,<Happy Groundhog Day>
+	holdat	2,22,<Washington's Birthday>
+	holday	2,1,3,<Washington's Pseudobirthday>
+	holdat	2,14,<Valentine's Day>
+	holdat	2,29,<Leap Day>
+	holdat	3,17,<Saint Patrick's Day>
+	holdat	3,21,<Vernal Equinox>
+	holdat	3,25,<Gondorian New Year>
+	holspc	holeas,<Happy Easter>
+	holdat	4,1,<April Fool!>
+	holday	4,1,3,<Patriot's Day>
+	holspc	holmem,<Memorial Day>
+	holdat	5,1,<International Labor Solidarity Day>
+	holdat	7,4,<Independence Day>
+	holdat	7,14,<Bastille Day>
+	holdat	6,21,<Summer Solstice>
+	holday	9,1,1,<Labor Day>
+	holdat	9,21,<Diurnal Equinox>
+	holday	10,1,2,<Columbus Day>
+	holdat	10,31,<Halloween>
+	holdat	11,1,<All Saints' Day>
+	holdat	11,5,<Guy Fawke's Day>
+	holdat	11,11,<Armistice (sometimes known as Veteran's) Day>
+	holday	11,4,4,<Thanksgiving Day>
+	holdat	12,21,<Winter Solstice>
+	holdat	12,25,<Merry Christmas>
+	0
+
+	subttl	INQUIR interface
+
+birth,<
+
+; Get and open INQUIR database file
+; Skip if successful
+inqopn:	movsi	a, (gj%old+gj%sht)	; Try to get the data file
+	hrroi	b, [inqfil(PEOPLE.DATA)]
+	gtjfn
+	 ret				; Not there
+	move	b, [44B5+of%rd]		; Open it
+	openf
+	 ret				; Probably someone writing it, too bad
+	movem	a, inqjfn		; Save the handle on the file
+	aos	(p)
+	ret
+
+inqcls:	move	a, inqjfn
+	closf
+	 error	(Can't close INQUIR file)
+	setom	inqjfn
+	ret
+
+; Expects:	u/ the directory number of the user to read in
+; Returns:	+1 Nothing defined yet for this luser
+;		+2 Sucess, individual buffers all filled up
+
+inqrd1:	troa	f, f%f1			; Only read up to birthday
+inqrd:	 trz	f, f%f1
+	movem	u, blkdir		; Save it
+	movei	c, (u)			; Get directory number
+	move	a, inqjfn		; Read in directory entry
+	rin
+	movem	b, blkadr		; Save pointer for block
+	jumpe	b, [ret]		; Nothing defined yet
+	hlrz	t, b			; Save length of user block
+	tlz	b, -1
+	sfptr				; Set file pos to start of user block
+	 error	()
+	move	b, [point 36,buf]	; Read in data
+	movni	c, (t)			; Get negative length of block
+	sin
+	movsi	a, -numfld		; Make an aobjn pointer for fields
+	trne	f, f%f1			; Only want birthday?
+	 movsi	a, -<$brday+1>		; Yes
+	push	p, u
+	move	u, [point 7,var]	; Start at the beg of the var area
+read1:	ldb	t, pntrs(a)		; Get the size of the field
+	movei	w, strsiz		; Setup the destination string size
+	move	x, ibufp(a)		; Get a pointer to the destination buf
+	call	movstl
+	setz	b,			; Tack a null onto the end
+	idpb	b, x
+	aobjn	a, read1		; Get the next entry
+	pop	p, u
+	aos	(p)			; All done, return sucessfully
+	ret
+> ;birth
+
+	subttl	reap idle jobs
+
+reap:	hllz	j, njobs		; Pointer to jobs
+reap0:	hrre	t, jobtno(j)		; Get tty number for job
+	skipl	jobrt(j)		; If job exists
+tops20,<
+nomit,<	 skipn	q, jobidl(j)>		; Get time job has been idle
+mit,<	 skipn	q, ttidle(t)>		; Is it idle?
+>
+tenex,<
+	 skipn	q, ttidle(t)
+>
+	 jrst	noreap			; Fast check for not idle at all
+	move	1, jobrt(j)		; If used significant runtime
+	sub	1, jobort(j)		; then don't reap
+	cail	1, intrvl/=20
+	 jrst	noreap			; Nope, no reason to reap it
+	move	1, jobuno(j)		; User number
+	skipge	1, rusrtb(1)		; Get for this user
+	 jrst	noreap			; -1 means dont ever reap this user
+	skipge	2, rttytb(t)
+	 jrst	noreap			; Dont reap from this tty
+	jumpe	1, reap2		; Anything know about this user?
+	jumpe	2, reap3		; Yes, what about the tty?
+	camle	1, 2
+reap1:	 move	1, 2			; If know both, get the minumum
+	jrst	reap3
+reap2:	jumpn	2, reap1		; If know about tty however, use it
+	jumpge	t, .+2			; Nothing known about either ...
+	 skipa	1, rdettm		; If detached, use detached time
+	 move	1, rdeftm		; Else use regular default
+reap3:	camg	q, 1			; Get here with time we decided on in 1
+	 jrst	noreap			; Not inactive long enough
+	jumpl	t, rkill		; If detached, flush right now
+	aosn	q, rwarnc(j)		; Else get count of times we warned
+	 jrst	rwarn			; Not warned before, do so now
+	caml	q, nreaps		; Time to flush him all together?
+	 jrst	rkill			; Yeah, do it
+reapnx:	aobjn	j, reap0		; Try next job
+	ret				; All done
+noreap:	setom	rwarnc(j)		; Reset warn count
+	jrst	reapnx			; And do next job
+
+; Come here to warn a user that we're going to flush him
+rwarn:	call	rchkrt			; Check runtime changes
+	hrroi	2, [asciz /Warning/]
+	call	rusrlg			; Log data for user
+	movei	1, .ttdes(t)		; Get device designator for tty
+	rfcoc
+	push	p, 2
+	push	p, 3
+	tdz	2, [3b15+3b21+3b27]
+	tdo	2, [2b15+2b21+2b27]	; Make bell, cr and lf work
+	sfcoc
+	 ercal	[movei	1, .ttdes(t)
+		 ret]
+	sobe				; Dont get hung up too much
+	 jrst	rwarn2
+	setom	typing			; Doing TTY output
+	call	timron			; Timer on for this
+	hrroi	2, rkilms		; The message
+	setz	3,
+rwsout:	sout				; rwsout whould point to the sout
+rwarn2:	pop	p, 3
+	pop	p, 2
+	sfcoc
+	 erjmp	.+1
+	setzm	typing			; No longer triping
+	call	timrof			; Turn off timer
+	jrst	reapnx
+
+; Come here to flush a user that has been idle too long
+rkill:	call	rchkrt			; Check runtime changes
+	hrroi	2, [asciz /Flushing/]
+	call	rusrlg			; Log the event
+	movei	1, (j)			; The job number
+	lgout
+	 error	(REAPER failed to LGOUT job)
+	jrst	noreap			; Reset vars for grins
+
+rchkrt:	move	1, jobrt0		; Last minute check, see if runtime
+	hrli	1, (j)			; Is the same as when we started here
+	getab
+	 seto	1,
+	camn	1, jobort(j)		; Runtime shouldnt have changed in
+	 came	1, jobrt(j)		; A long time
+	 jrst	[adjsp	p, -1		; Flush old return address
+		 jrst	noreap]		; And dont kill the guy
+	ret				; Still the same, ok
+
+; Come here to perhaps log an event in the reaper log
+rlogit:	skipg	1, rlogjf		; Have a reaper log?
+	 ret				; Nope, forget it
+	setz	3,
+	push	p, 2
+	seto	2,
+	odtim
+	pop	p, 2
+	sout
+rlogi2:	rfptr				; Update the byte count
+	 tdza	3, 3
+	 move	3, 2
+	seto	2,
+	hrli	1, .fbsiz
+	chfdb
+	ret
+
+rusrlg:	skipg	1, rlogjf		; Have a log file?
+	 ret				; No
+	setz	3,
+	push	p, 2
+	seto	2,
+	odtim
+	movei	2, " "
+	bout
+	pop	p, 2
+	sout
+	hrroi	2, [asciz / Job /]
+	sout
+	movei	2, (j)			; Job number
+	movei	3, =10
+	nout
+	 trn
+	hrroi	2, [asciz /, user /]
+	setz	3,
+	sout
+	move	2, jobuno(j)
+	dirst
+	 erjmp [move	1, rlogjf
+		jrst	.+1]
+	hrre	2, jobtno(j)
+	jumpl	2, [hrroi 2, [asciz /, Det
+/]
+		    sout
+		    jrst rlogi2]
+	push	p, 2			; Save it
+	hrroi	2, [asciz /, TTY/]
+	sout
+	pop	p, 2			; Get it back
+	movei	3, 10
+	nout
+	 trn
+	hrroi	2, [asciz /
+/]
+	setz	3,
+	sout
+	jrst	rlogi2
+
+lnkchk:
+tops20,<
+	setzm	ttlnk1
+	move	1, [ttlnk1,,ttlnk1+1]
+	blt	1, ttlnk1+ntts-1	; Clear temp copy area
+>
+	hllz	t, nttys		; Pointers to ttys
+lnkch1:	movei	1, (t)			; Get tty number
+tops20,<
+	call	getlnk
+>
+tenex,<
+	move	2, ttlnk1(1)
+>
+	camn	2, [-1]			; Anything there?
+	 jrst	lnkch4			; No links, ok
+	move	s, 2			; Move to a more permanent place
+	movsi	y, -4			; Number of possible links
+lnkch2:	setz	z,
+	lshc	z, 9			; Get first one
+	cain	z, 777			; Anyone there?
+	 jrst	lnkch3
+	movei	1, (z)			; Get desired object tty
+tops20,<
+	call	getlnk
+>
+tenex,<
+	move	2, ttlnk1(1)
+>
+	movei	1, (t)			; Get back current one
+	lsh	1, 9
+	iori	1, (t)
+	hrl	1, 1
+	eqvb	1, 2
+	jcry0	.+1
+	add	1, [byte (9) 1, 1, 1, 1]
+	eqv	1, 2
+	jcry0	lnkch3			; Yes, ok
+	tdne	1, [byte (9) 1, 1, 1, 1]
+	 jrst	lnkch3			; Yes, ok then
+	movei	1, 777			; First remove it from the file
+	dpb	1, lnptrs(y)		; So no one else knows about it
+	hlre	j, ttyjob(t)		; Get info on SPYee
+	jumpl	j, lnkch3
+	move	u, jobuno(j)
+	movsi	1, -nwinnr
+	came	u, winner(1)
+	 aobjn	1, .-1
+	jumpge	1, lnkch3		; Not a good guy
+	aosn	winp(1)
+	 call	lnkmsg			; Send the message
+lnkch3:	aobjn	y, lnkch2		; For all possible this tty
+lnkch4:	aobjn	t, lnkch1		; For all ttys
+	move	1, [ttlnk1,,ttlink]	; Now install the updated version
+	blt	1, ttlink+ntts-1
+	ret
+
+tops20,<
+getlnk:	skipe	2, ttlnk1(1)		; Already have data?
+	 ret				; Yes, return it
+	movei	2, ttlnk1(1)		; Where it will go
+	skipg	1, ttactl(1)		; See if any dynamic data for this one
+	 jrst	[setob	1, (2)		; Nope, return -1 then
+		 ret]
+	add	1, ttlnk0		; Offset for link word entry
+	hrli	1, 1			; Just 1 word
+	peek
+	 setom	(2)			; Forget it on failure
+	move	2, (2)			; And return data
+	ret
+>
+
+lnptrs:	point	9, ttlnk1(t), 8
+	point	9, ttlnk1(t), 17
+	point	9, ttlnk1(t), 26
+	point	9, ttlnk1(t), 35
+
+lnkmsg:	hlre	j, ttyjob(z)
+	jumpl	j, cpopj		; Huh?
+	move	1, [point 7, tmpbuf]
+	movei	2, [asciz /[WOOF! WOOF! HERE BE: Job /]
+	call	movstr
+	movei	2, (j)
+	movei	3, =10
+	nout
+	 trn
+	movei	2, [asciz /, TTY/]
+	call	movstr
+	movei	2, (z)
+	movei	3, 10
+	nout
+	 trn
+	movei	2, [asciz /, /]
+	call	movstr
+	move	2, jobuno(j)
+	dirst
+	 erjmp	.+1
+	movei	2, [asciz /]
+/]
+	call	movst0
+	movei	1, .ttdes(t)
+	hrroi	2, tmpbuf
+	ttmsg
+	 trn
+	ret
+
+	subttl	Record idleness or otherwise of terminal lines
+
+usgchk:	hllz	a,nttys			; AOBJN ptr into TTYJOB
+usgch1:	skipl	ttyjob(a)
+	 aos	nuptty(a)
+	aobjn	a,usgch1
+	aos	nusgs			; Increment general count
+	ret
+
+	subttl	Host name stuff
+
+cha,<
+; The format of the compiled HOSTS2 file is:
+
+hstsid	__ 0	; wd 0	SIXBIT /HOSTS2/
+namptr	__ 10	; wd 10 Address in file of NAME table.
+sitptr	__ 11	; wd 11	Address in file of SITE table.
+netptr	__ 12	; wd 12 Address in file of NETWORK table.
+
+;NETWORK table
+; wd 0	Number of entries in table.
+; wd 1	Number of words per entry. (2)
+netnum	__ 0	; wd 0	network number
+ntlnam	__ 1	; wd 1 LH - address in file of name of network
+ntrtab	__ 1	; wd 1 RH - address in file of network's address table
+
+;ADDRESS table(s)
+; wd 0	Number of entries in table.
+; wd 1	Number of words per entry. (2)
+addadr	__ 0	; wd 0	Network address of this entry including network number
+adlsit	__ 1	; wd 1 LH - address in file of SITE table entry
+adrcdr	__ 1	; wd 1 RH - address in file of next ADDRESS entry for this site
+		;	    0 = end of list
+
+;SITE table
+; wd 0	Number of entries in table.
+; wd 1	Number of words per entry. (3)
+stlnam	__ 0	; wd 0 LH - address in file of official host name
+stradr	__ 0	; wd 0 RH - address in file of first ADDRESS table entry for
+		;	    this site.  Successive entries are threaded
+		;	    together through ADRCDR.
+stlsys	__ 1	; wd 1 LH - address in file of system name (its, tip, tenex, etc.)
+		;			may be 0 => not known.
+strmch	__ 1	; wd 1 RH - address in file of machine name (pdp10, etc.)
+		;			may be 0 => not known.
+stlflg	__ 2	; wd 2 LH - flags:
+stfsrv	__ 400000	;	4.9 1 => server site (according to nic)
+		; wd 2 RH - not used
+
+;NAMES table:
+; wd 0	Number of entries
+; wd 1	Number of words per entry. (1)
+nmlsit	__ 0	; lh	address in file of SITE table entry for this host.
+nmrnam	__ 0	; rh	address in file of host name
+
+; All names are ASCIZ strings, all letters upper case.
+; The strings are stored before, after and between the tables.
+; All strings are word-aligned, and fully zero-filled in the last word.
+
+; Network addresses are defined as follows, for purposes of this table:
+;    4.9     0
+;    4.8-4.1 network number
+;    Chaos net (number 7):
+;	3.9-2.8	0
+;	2.7-1.1 address (2.7-1.9 subnet, 1.8-1.1 host)
+;    Arpanet (number 12):	(note, old-format Arpanet addresses
+;	3.9-3.8	0	 	never appear in the host table.)
+;	3.7-2.1	IMP
+;	1.9	0
+;	1.8-1.1	Host
+;    Dialnet (number 26):
+;	3.9-3.1	0
+;	2.9-1.1	address in file of ASCIZ string of phone number
+
+nw%chs	__ 7	;Chaos net
+nw%arp	__ 12	;Arpanet
+nw%dln	__ 26	;Dialnet
+
+; Init the host table
+hstini:	movsi	a, (gj%old!gj%sht)
+tops20,<
+	hrroi	b, [asciz /SYSTEM:HOSTS2.BIN/]
+>
+tenex,<
+	hrroi	b, [asciz /<SYSTEM>HOSTS2.BIN/]
+>
+	gtjfn
+	 error	(Cant find binary host table)
+	movei	b, of%rd
+	openf
+	 error	(Cant open binary host table)
+	sizef
+	 error	(Cant get size of host table)
+	hrlz	a, a			; Start with page 0 of file
+	move	b, [.fhslf,,hstpag]
+	hrli	c, (pm%cnt!pm%rd!pm%cpy)
+	pmap
+	ret
+
+; Get a string for a host number in c, return in b, skip if any
+gfrnam:	push p,c		;save host number
+	move a,hstadr+netptr	;pointer to network table
+	dmove t,hstadr(a)
+	addi a,2
+	lsh c,-^d27		;just network number
+gfrnm1:	camn c,hstadr+netnum(a)	;found that network
+	 jrst gfrnm2
+	add a,u
+	sojg t,gfrnm1
+	pop p,(p)
+	ret			;not found
+gfrnm2:	hrrz a,hstadr+ntrtab(a)	;pointer to network's address table
+	dmove t,hstadr(a)
+	addi a,2
+	pop p,c			;get back host
+gfrnm3:	camn c,hstadr+addadr(a)
+	 jrst gfrnm4
+	add a,u
+	sojg t,gfrnm3
+	ret
+
+gfrnm4:	hlrz a,hstadr+adlsit(a)	;site entry
+	hlrz b,hstadr+stlnam(a)	;name
+	addi b,hstadr		;make absolute
+	hrli b,(<point 7,0>)	;and a byte pointer
+	aos (p)
+	ret
+>;cha
+
+	subttl	random subroutines
+
+timron:	push	p, 1
+tops20,<
+	move	1, [.fhslf,,.timel]	; Turn on a timer
+	movei	2, ^d<1*60*1000>	; One minute
+	movei	3, tmrchn
+	timer
+>
+tenex,<
+	movei	1, .fhslf
+	movsi	2, 1b<tmrchn>
+	movei	3, ^d<1*60*1000>	; One minute
+	jsys	630			; IIT
+>
+	 trn
+cpop1j:	pop	p, 1
+cpopj:	ret
+
+timrof:
+tops20,<
+	move	1, [.fhslf,,.timal]	; Delete all requests
+	timer
+>
+tenex,<
+	movei	1, .fhslf
+	movsi	2, 1b<tmrchn>
+	setz	3,			; Clear timer
+	jsys	630			; IIT
+>
+	 trn
+	ret
+
+movstr:	hrli	2, (<point 7, 0>)
+	push	p, 4			; Save work reg
+movst1:	ildb	4, 2
+	jumpe	4, movst3
+	idpb	4, 1
+	jrst	movst1
+
+; Move string and terminating null
+movst0:	hrli	2, (<point 7, 0>)
+	push	p, 4			; Save work reg
+movst2:	ildb	4, 2
+	idpb	4, 1
+	jumpn	4, movst2
+movst3:	pop	p, 4			; Restore work reg
+	ret
+
+movsix:	jumpe	3, cpopj		; Done yet?
+	setz	2,
+	lshc	2, 6			; Get next character
+	addi	2, 40			; Make ascii
+	idpb	2, 1
+	jrst	movsix
+
+	subttl	network subroutines
+
+arpa,<
+chkicp:	setzm	icplck			; Say we are going this
+chicp0:	call	chicp1			; Do the work
+	setom	icplck			; Reset lock
+	ret				; And return
+
+chicp1:	skipg	1, icpjfn		; Have a jfn?
+	 jrst	chkic3			; No, go get one
+	skipl	netrdy			; Make sure net is still up
+	 jrst	icrej2			; It isnt, go get rid of jfn
+	gdsts
+	ldb	1, [point 4, 2, 3]	; Get connection state
+	caie	1, .nslsn		; Still ok?
+	 jrst	chkic2			; No, see what's up
+	andi	3, 777
+	cain	3, 777			; Host still wild?
+	 ret				; Yes, still ok, return
+	call	icrej2			; No, go flush the jfn
+	jrst	chkicp			; And try once again (make a new one)
+chkic2:	caie	1, .nsrcr		; Got a RFC?
+	 jrst	icrej2			; No, go get rid of it
+	ldb	1, [point 6, 2, 17]	; Get byte size
+	caie	1, 40			; Is it 32?
+	 jrst	icrej2			; No, reject it then
+	movem	3, frnhst		; Save foreign host
+	movem	4, frnskt		; And socket
+	jrst	doicp			; And go accept the icp
+; ... still under arpa conditional
+
+; ... still under arpa conditional
+chkic3:	skipl	netrdy			; Is the imp even up?
+	 ret				; No, forget it
+	move	1, [point 7, netstr]
+	movei	2, [asciz /NET:/]
+	call	movstr
+	move	2, icpskt		; Socket to listen to
+	movei	3, 10
+	nout
+	 trn
+	movei	2, [asciz /#./]
+	call	movst0
+	movsi	1, (gj%sht)
+	hrroi	2, netstr
+	gtjfn
+	 ret
+	movem	1, icpjfn
+	move	2, [40b5+of%wr]
+	openf
+	 jrst	[move	1, icpjfn
+		 rljfn
+		  trn
+		 setom	icpjfn
+		 ret]
+	movsi	3, 777700+icpchn
+	movei	2, .moain
+	mtopr				; Arm ICP interrupt for this
+	ret
+; ... still under arpa conditional
+
+; ... still under arpa conditional
+doicp:	setom	netsnd
+	setom	netrcv
+	move	1, [point 7, netstr]
+	movei	2, [asciz /NET:/]
+	call	movstr
+	movei	2, 2
+	addb	2, locskt		; Increment local socket base
+	movei	3, 10
+	nout
+	 trn
+	movei	2, [asciz /#./]
+	call	movstr
+	move	2, frnhst
+	nout
+	 trn
+	movn	2, frnskt
+	subi	2, 2			; U+2 and U+3
+	nout
+	 trn
+	movsi	1, (gj%sht)
+	hrroi	2, netstr
+	gtjfn
+	 jrst	icprej
+	movem	1, netsnd
+	movsi	1, (gj%sht)
+	hrroi	2, netstr
+	gtjfn
+	 jrst	icprej
+	movem	1, netrcv
+	move	1, icpjfn
+	movei	2, .moacp
+	mtopr				; Accept the ICP
+	move	2, locskt
+	bout				; Send the local socket
+	 erjmp	icprej
+	tlo	1, (co%wcl)
+	closf
+	 trn
+	setom	icpjfn
+	move	1, netsnd
+	move	2, [10b5+6b9+of%wr]
+	openf
+	 jrst	icprej
+	move	1, netrcv
+	move	2, [10b5+5b9+of%rd]
+	openf
+	 jrst	icprej
+; ... still under arpa conditional
+
+; ... still under arpa conditional
+	movsi	1, (cr%cap)
+	cfork
+	 jrst	icprej
+	push	p, 1			; Save the fork
+	movsi	1, (gj%old!gj%sht)
+	hrroi	2, fngfil
+	gtjfn
+	 jrst	icprej
+	hrl	1, (p)
+	get
+	pop	p, 1			; Get back fork number
+	hrl	2, netrcv		; Make it's i/o from network
+	hrr	2, netsnd
+	spjfn
+	setom	netsnd
+	setom	netrcv
+	movem	2, frktab-400000(1)	; Save tty for this fork
+	movei	2, 2
+	sfrkv
+	jrst	chkicp
+; ... still under arpa conditional
+
+; ... still under arpa conditional
+icprej:	skipg	1, netrcv
+	 jrst	icrej1
+	tlo	1, (co%wcl)
+	closf
+	 trn
+	setom	netrcv
+icrej1:	skipg	1, netsnd
+	 jrst	icrej2
+	tlo	1, (co%wcl)
+	closf
+	 trn
+	setom	netsnd
+icrej2:	skipg	1, icpjfn
+	 ret
+	tlo	1, (co%wcl)
+	closf
+	 trn
+	setom	icpjfn
+	ret
+
+icpint:	aose	icplck			; Is someone in ICP routines?
+	 debrk				; Yes, let them handle it
+icpin1:	jsr	savacs
+	call	chicp0			; No, check the status of the jfn
+	jrst	intret			; And return from interrupt
+
+daeint:	aosn	icplck			; Data error, someone in icp routine?
+	 jrst	icpin1			; No, check the status
+	push	p, x
+	movei	x, icprej		; Yes, make it fail
+	movem	x, psipc1
+	jrst	eofh2
+> ;arpa
+
+ipcf,<
+	subttl	IPCF subroutines
+
+nampid:	movei	1, gtpidl		; Size of block
+	movei	2, getpid		; Addr
+	mutil				; Make a pid
+	 jrst	badpid			; No good
+	move	1, mypid		; The result
+	movem	1, (s)			; Save it
+	movem	1, intpid		; Setup for interrupt
+	movem	y, pidchn		; Setup channel we want
+	movei	1, ipintl		; Length
+	movei	2, ipcint
+	mutil				; Arm interrupt for this pid
+	 jrst	badpid
+nampd0:	movei	1, .fhslf
+	dir				; Disable interrupts for this part
+	move	1, (s)			; Get pid in question
+	movem	1, infpid		; Set for send to info
+	movsi	2, (z)			; Name we want
+	hrri	2, mymsg
+	blt	2, mymsg+idpnml-1	; Setup as our message
+	movei	1, ipinfl		; Length
+	movei	2, ipcinf		; Addr
+	msend				; Send request to <SYSTEM>INFO
+	 jrst	badpd0			; Only report this error
+okint:	movei	1, .fhslf		; Reenable interrupts
+	eir
+	ret				; Return, we will int when msg there
+badpid:	move	1, (s)
+	movem	1, kilpid
+	movei	1, ipkill
+	movei	2, ipckil
+	mutil				; Delete the bad pid
+	 trn
+	setzm	(s)			; Zero it, so we'll make a new one
+badpd0:	hrroi	1, [asciz /
+==============================
+CERBERUS: IPCF Error, ... continuing/]
+	psout
+	call	lsterr			; Give last JSYS error
+	hrroi	1, [asciz /
+==============================
+/]
+	psout
+	ret
+
+recmsg:	tlz	f, f%f1			; Only try twice (once each mode)
+	move	1, (s)			; Receive a message for this pid
+	movem	1, recpid
+	move	1, [ip%cfb!ip%cfv]	; Try page mode first
+	movem	1, ipcrec
+	move	1, [1000,,ipcfp1]
+	movem	1, recptr
+recms1:	movei	1, iprecl
+	movei	2, ipcrec
+	mrecv
+	 jrst	recmsx			; Maybe wrong mode
+	ldb	1, [point 3, ipcrec, 32]
+	cain	1, .ipccf		; From <SYSTEM>INFO?
+	 jrst	recinf			; Yes, process it
+	move	t, hismsg		; Get what he says is tty number
+	cain	s, idlpid		; Requesting TTYLOC?
+	 jrst	recms3			; No, IDLSRV
+arpa,<
+	caml	t, nvtlo		; Yes, must be an NVT then
+	 camle	t, nvthi
+> ;arpa
+	 jrst	recrej			; Else no good
+	jrst	recms4			; No, TTYLOC, ok for NVTs
+recms3:	hrrz	1, ndhl
+	caile	t, (1)			; For IDLSRV must be local terminal
+	 jrst	recrej			; No, reject it
+recms4:	movei	1, sc%whl
+	tdne	1, hiscap		; Ok if a wheel
+	 jrst	recaok
+	move	1, hispid
+	movem	1, jobpid		; Check it out otherwise
+	movei	1, ipcjbl
+	movei	2, ipcjob
+	mutil
+	 setzm	pidjob
+	movei	1, .ttdes(t)		; Get poop on that job
+	hrroi	2, 3
+	movei	3, .jijno		; Job number
+	getji
+	 seto	3,
+	came	3, pidjob		; Matches?
+	 jrst	recrej			; No, reject it then
+recaok:	aos	(p)			; Skip return for ok
+	hlrz	2, z			; Ok message
+respnd:	move	1, [point 7, mymsg]	; Set that as the message
+	call	movst0
+	move	1, hispid
+	movem	1, hisndp		; Setup to send back to him
+	movei	1, ipsndl
+	movei	2, ipcsnd
+	msend				; Send it off
+	 trn
+	ret
+recrej:	movei	2, (z)			; Rejection message
+	jrst	respnd
+recmsx:	tlon	f, f%f1			; Only try once
+	 caie	1, ipcf16		; Data modes mismatch?
+	 ret				; No, other error, forget it
+	movsi	1, (ip%cfb)		; Try not page mode
+	movem	1, ipcrec
+	move	1, [1000,,ipcfp19]
+	movem	1, recptr
+	jrst	recms1			; And go again
+recinf:	ldb	1, [point 6, ipcrec, 29]	; Get INFO error code
+	jumpe	1, cpopj		; No error, must be confirm of name
+	caie	1, .ipcsn		; Wants name? (ie new INFO)
+	 jrst	badpid			; No, must be lossage in the PID
+	cain	s, idlpid		; Is this IDLSRV?
+	 skipa	z, [idpdnm]		; Yes, use that name
+	 movei	z, ttpdnm		; Else TTYLOC
+	jrst	nampd0			; Go give INFO the name
+>;ipcf
+
+	subttl	random interrupt handlers
+
+eofh:	push	p, x
+	skipe	x, eofdsp		; Have an eof handler?
+	 movem	x, psipc3		; Yes, set up to return to it
+eofh2:	pop	p, x
+	debrk
+
+tmrint:	push	p, x
+	movsi	x, (1b5)
+	skipe	typing			; In the middle of typing?
+	 iorm	x, psipc3		; Yes, return to user
+	jrst	eofh2			; And go return
+
+ipcf,<
+idlint:	jsr	savacs			; Save the world
+	movei	s, idlpid		; Pointer to pid to use
+	move	z, [idlok,,idlrej]	; Messages to use
+	call	recmsg			; Get the message
+	 jrst	intret
+	soj	t,
+	imuli	t, idllen
+	addi	t, idladr
+	movsi	1, hismsg+1
+	hrri	1, (t)
+	blt	1, idllen-1(t)
+	jrst	intret
+
+arpa,<
+ttyint:	jsr	savacs			; Save the world
+	movei	s, ttypid		; Pointer to pid to use
+	move	z, [ttyok,,ttyrej]	; Messages to use
+	call	recmsg			; Get the message
+	 jrst	intret
+	movei	1, (t)
+	imuli	1, ttylen
+	hrroi	1, ttylad(1)
+	hrrz	2, ttyhst(t)		; Host number
+	cvhst
+	 nout
+	 trn
+	movei	2, [asciz /: /]
+	call	movstr
+	movei	2, hismsg+1		; What he wants it to be
+	call	movst0			; And the null too
+	jrst	intret
+
+>;arpa
+>;ipcf
+
+arpa,<
+inftrm:	jsr	savacs			; Save all ac's
+	movsi	t, -nlfks		; Number of inferiors we know about
+inftr1:	skipn	q, frktab(t)		; A fork we know?
+	 jrst	inftr3			; No, try next one
+	movei	1, 400000(t)
+	rfsts				; See what the fork is up to
+	hlrz	1, 1
+	cain	1, -1			; Is it a good handle?
+	 jrst	inftr2			; No, forget about it
+	trz	1, (rf%frz)
+	caie	1, .rfhlt
+	 cain	1, .rffpt		; Is it halted?
+	 caia				; Yes
+	 jrst	inftr3			; No, move to next one
+	movei	1, 400000(t)
+	kfork
+	 erjmp	.+1
+	movei	1, (q)			; Send connection
+	movei	2, .mosnd		; Make sure the buffer gets send out
+	mtopr
+	 erjmp	.+1
+	hrli	1, (co%wcl)
+	closf				; Then close it
+	 trn
+	hlr	1, q			; Close recv connection then
+	closf
+	 trn
+inftr2:	setzm	frktab(t)
+inftr3:	aobjn	t, inftr1
+> ;arpa
+
+intret:	movsi	16, -16(p)		; Restore acs
+	blt	16, 16
+	adjsp	p, -17
+	debrk
+
+	subttl	error handlers
+
+lsterr:	hrroi	1, [asciz /
+last JSYS error: /]
+	psout
+	movei	1, .priou		; Give last jsys error
+	hrloi	2, .fhslf
+	setz	3,
+	erstr
+	 caia
+	 trn
+	hrroi	2, [asciz /
+/]
+	sout
+	seto	2,
+	odtim				; Tell them when it was too
+	ret
+
+pdlint:	skipa	x, [uerr [asciz /PDL overflow/]]
+illint:	 move	x, [uerr [asciz /Illegal instruction/]]
+	movem	x, 40			; Setup fake UUO call
+	move	x, psipc1		; Fake caller address
+	movem	x, .uuoh		; And fall thru to UUO handler
+
+uuoh:	movei	1, .priou
+	dobe				; Wait for action to stop
+	hrroi	1, [asciz /
+==============================
+CERBERUS: /]
+	psout
+	hrro	1, 40
+	psout				; Give the message
+	hrroi	1, [asciz /
+called from /]
+	psout
+	movei	1, .priou
+	hrrz	2, .uuoh		; Where it came from
+	movei	3, 10
+	nout
+	 trn
+	call	lsterr
+	hrroi	1, [asciz /
+==============================
+/]
+	psout
+
+badnap:	skipe	dbugsw			; Debugging?
+	 haltf				; Yes, give him a chance then
+	move	p, [iowd npdl, pdl]	; Reset stack
+	time				; See how long since last time
+	exch	1, errtim
+	jumpe	1, @errdsp		; First error ever?
+	sub	1, errtim		; Get difference
+	movm	1, 1
+	cail	1, ^d<60*1000>		; Any within last minute?
+	 jrst	@errdsp			; No, return to program
+diedie:	hrroi	1, [asciz /
+==============================
+CERBERUS: TOO MANY ERRORS, RELOADING IN 10 MINS
+==============================
+/]
+	psout
+	movei	1, ^d<10*60*1000>	; As promised
+	disms
+	movsi	1, (gj%old!gj%sht)
+	hrroi	2, [asciz /SYS:CERBERUS.EXE/]
+	gtjfn
+	 haltf
+	hrli	1, .fhslf
+	move	2, [dieblt,,3]
+	blt	2, 7
+	jrst	3			; Smash
+
+dieblt:	get				; 3
+	reset				; 4
+	movei	1, .fhslf		; 5
+	gevec				; 6
+	jrst	(2)			; 7
+
+tops20,<
+movstl:	extend	t, [ movslj		; Copy the string
+		     0 ]
+	 error	(String move failed)
+	ret
+>
+
+tenex,<
+	subttl	Tenex support rotines
+
+; Simulate extend t,[movslj  0]
+movstl:	push	p, a
+movsl1:	sojl	t, cpop1j
+	sojl	w, movsle
+	ildb	a, u
+	idpb	a, x
+	jrst	movsl1
+
+movsle:	error	(String move failed)
+
+; TOPS-20 PMAP emulation.  Does the repeat count business
+.pmap:	dmovem	1, tmpacs+1		;save ac's
+	dmovem	3, tmpacs+3
+	movei	4, 1			;assume 1 page
+	tlne	3, (pm%cnt)		;count provided?
+	 hrrz	4, 3			;yes, use it
+.pmap0:	$pmap				;map the first page
+	came	1, [-1]			;special ac 1?
+	 addi	1, 1			;no, bump it
+	addi	2, 1			;and the dest
+	sojg	4, .pmap0		;do them all
+	dmove	1, tmpacs+1		;recover acs
+	dmove	3, tmpacs+3
+	ret
+
+>;tenex
+
+; Local modes:
+; Mode: FAIL
+; Comment column:40
+; Comment begin:; 
+; End:
+	end	go

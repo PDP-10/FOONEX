@@ -1,0 +1,1445 @@
+;<MFEXEC>XSTG.MAC;20238  7-Mar-81 13:15:58, Edit by MMCM
+;<MFEXEC>XSTG.MAC;20237    16-AUG-79 14:52:16    EDIT BY RLWSSD
+; PUT BACK IIT IN IAC SWITCH 'CAUSE WE FIGURED IT OUT.
+;<MFEXEC>XSTG.MAC;20236     3-AUG-79 15:41:50    EDIT BY RLWSSD
+; TOOK OUT IIT (IN IAC SWITCH) UNTIL WE FIGURE OUT WHAT IIT IS HERE.
+;<MFEXEC>XSTG.MAC;20235     2-AUG-79 11:30:20    EDIT BY RLWSSD
+;<MFEXEC>XSTG.MAC;20234    19-JUL-79 23:58:59    EDIT BY WEISSMAN
+;<MFEXEC>XSTG.MAC;20233    19-JUL-79 23:04:47    EDIT BY WEISSMAN
+; UPDATE OF JSYS TRAPPING STORAGE FOR PSI SIMULATION/TRAPPING ROUTINES
+;<MFEXEC>XSTG.MAC;20232    18-JUL-79 14:50:18    EDIT BY WEISSMAN
+;<MFEXEC>XSTG.MAC;20231    17-JUL-79 19:30:21    EDIT BY WEISSMAN
+;<MFEXEC>XSTG.MAC;20230    16-JUL-79 23:38:36    EDIT BY WEISSMAN
+;<MFEXEC>XSTG.MAC;20229    16-JUL-79 23:18:23    EDIT BY WEISSMAN
+;<MFEXEC>XSTG.MAC;20228    13-JUL-79 10:36:08    EDIT BY WEISSMAN
+;<MFEXEC>XSTG.MAC;20227    12-JUL-79 19:11:26    EDIT BY WEISSMAN
+;<MFEXEC>XSTG.MAC;20226    12-JUL-79 18:41:45    EDIT BY WEISSMAN
+;<MFEXEC>XSTG.MAC;20225    12-JUL-79 18:38:47    EDIT BY WEISSMAN
+;<MFEXEC>XSTG.MAC;20224    12-JUL-79 18:15:16    EDIT BY WEISSMAN
+; ADDED PRINTING-IN PROGRESS FLAG "PRINPR"
+;<MFEXEC>XSTG.MAC;20223     3-JUL-79 14:45:00    EDIT BY WEISSMAN
+;<MFEXEC>XSTG.MAC;20222    28-JUN-79 16:18:24    EDIT BY WEISSMAN
+;<MFEXEC>XSTG.MAC;20221    28-JUN-79 15:08:41    EDIT BY WEISSMAN
+; ADDED SPELLING CORRECTOR: FEATUR %CORECT
+; ADDED JFRKAC BLOCK FOR TRAPPED FORK'S ACS; FEATUR %BAKTRP
+;[I4B-TENEX]<MFEXEC>XSTG.MAC;20207, 12-JUN-79 10:05:30, EDIT BY WEISSMAN
+;<MFEXEC>XSTG.MAC;20205    11-JUN-79 16:04:34    EDIT BY WEISSMAN
+;<MFEXEC>XSTG.MAC;20203    11-JUN-79 13:52:45    EDIT BY WEISSMAN
+; Changes for I4-TENEX operation (via IAC/NOIAC switch).
+;<MFEXEC>XSTG.MAC;20202  31-OCT-78 14:50:18  EDIT BY B-SMITH
+;Repaired site mask bits correctly (?)
+;<MFEXEC>XSTG.MAC;20200  26-SEP-78 16:41:15  EDIT BY B-SMITH
+;Changed COND macro to FEATUR macro, and added feature parameters
+;Minor cleanup
+;Changes site conditional coding
+;<MFEXEC>XSTG.MAC;20102   4-JAN-78 08:53:44  EDIT BY B-SMITH
+;<MFEXEC>XSTG.MAC;20101  22-DEC-77 16:03:43  EDIT BY B-SMITH
+;2.01 UPDATE
+;<MFEXEC>XSTG.MAC;150   2-NOV-76 18:19:49  EDIT BY B-SMITH
+;document update
+;<MFEXEC>XSTG.MAC;150  12-OCT-76 13:23:02  EDIT BY B-SMITH
+;2.00
+;COMBINATION OF XDEF AND XPRIV
+
+COMMENT	` Introduction
+.TITLE MFEXEC -- A Multiple Fork Executive System for TENEX          
+.NUMBER 0
+
+		MFEXEC
+
+!10
+#1
+		Multiple Fork Executive System
+		for
+		TENEX
+
+!5
+		Barden E. Smith
+		Robert J. Armantrout *
+		Dale S. Russell
+
+!5
+		USC Information Sciences Institute
+			4676 Admiralty Way
+		 Marina del Rey, California 90291
+!3
+
+		January 4, 1978
+!15
+ * Robert J. Armantrout is with the University of Utah Computer Science
+Department, Salt Lake City, Utah 84112
+`
+COMMENT	`
+::Introduction
+I.  Introduction
+	MFEXEC is a modified executive system for TENEX that provides
+a facility to make further use of the TENEX fork structure.
+In the TENEX EXEC there exists no way in which to take advantage
+of multiple parallel forks, each of which would contain a
+virtual machine.
+MFEXEC solved this difficulty by allowing the user to save a
+process in a fork that was then made semi-permanent.
+A process saved this way is said to be kept.
+This allows the user to SUSPEND a process and then CONTINUE
+it after another process had been completed.
+In addition it provides a mechanism to allow a background process
+to run in parallel with the foreground process.  That is, a
+program may be specified to run while control of the job remains
+at the executive level.
+	MFEXEC was created out of the need for an executive
+that promotes efficient program development; therefore, some
+commands have been specificly designed towards this type of
+environment.  Although some commands have been changed a user
+who does not choose to execute the fork control commands
+will find MFEXEC practically identical to the current
+TENEX EXEC.
+	The number of forks that can be created is limited both by
+MFEXEC parameters and the TENEX operating system parameters.
+However, these are currently set to be the same.  The number of
+handles and therefore the number of immediate inferiors one
+can create is set at 15 (400000 to 400017).  The total number of forks
+is a job is limited to 24.
+	Because any timesharing system is a community of users,
+each one of the member must be considerate of the others' rights.
+Most TENEX systems only allow an average of three to four forks
+per job.  It is each users responsibility to avoid using system resources
+unnecessarily (e.g. keeping an inactive fork for long periods of time).
+	MFEXEC has some EXEC commands modified to be able to
+reference multiple forks, e.g. START, CONTINUE, and REENTER;
+a second argument has been added to specify the fork.
+If no fork is specified, then the fork is defaulted to the
+"current fork".  The "current fork" is also the one that is
+referenced by RUNSTAT, MEMSTAT, SAVE, DDT, and others (no additional
+arguments have been added).  RESET has also been changed to
+have a second argument -- thereby allowing the release of a
+particular fork.  To RESET a fork (or a set of forks) is to remove all
+information about a virtual computer (and its inferior fork structure).
+RESET<cr> does not, however,
+default to the "current fork"; instead it resets all forks that are
+not kept.  After the RESET the "current fork" will not be
+associated with any fork (even though there may still be kept forks).
+To create more than one fork it is necessary to tell MFEXEC that it
+should not reset the fork you want to retain.
+This is done with the KEEP command.  A fork that has not been
+kept will be reset by the RESET command or any command
+that would run a program (except an ephemeron), e.g.
+GET, RUN, EDIT, F40, MACRO, etc.
+	The EDIT command can now use several editors: POET, SOS, TECO,
+XED and others.  The editor is specified with an argument following
+the filename; if the editor is not specified then it defaults to the
+last editor used with the command or to TECO if it is
+the first time the command is executed.
+	The FORKSTAT command is a modified version of the
+TENEX Exec's FORKSTAT.  FORKSTAT types the name, the number,
+the designations (e.g. Kept or Current), and the
+status (as in RUNSTAT) of the fork.
+A second argument has been added to specify a particular fork
+and acquire handles into that structure.  If no argument is
+specified then it defaults
+to MFEXEC; handles are not assigned.
+`
+COMMENT ` Handling of Multiple Forks
+:: Handling of Multiple Forks
+
+II. Handling of Multiple Forks
+	Giving a user the ability to create many forks with which
+he can load with a variety of programs does complicate the
+management of these virtual computers.  The original EXEC allows
+a user to switch forks by using the FORK command and specifying
+the fork by number.  MFEXEC, in addition to allowing
+references to a fork by number, also allows references by name.
+	To help facilitate the user to effectively utilize a
+number of forks, MFEXEC attempts to assign a fork the name of
+the program that is loaded into that fork (with a GET).
+A fork may be assigned a name arbitrarily by the user with the
+KEEP command.  This is useful when the same editor is loaded into
+two or more forks, each with a different file read in.
+	Each fork must have a unique name; an attempt to KEEP a fork
+with a name that is already assigned to a different fork will fail
+with the message:  Name already in use.
+`
+COMMENT	| Fork control commands
+III.	Fork control
+!3
+1.	FORK
+
+To specify which fork is current.
+
+   @FORK forknumber%
+
+   or
+
+   @FORK forkname%
+
+>#1
+Make the specified fork be the current fork until either another FORK
+command or a RESET occurs.
+>
+
+
+Errors:	No such fork
+	Fork number must be between 1 and 17
+!4
+2.	KEEP
+
+To make a fork permanent
+
+   @KEEP (fork as) forkname%
+
+   or
+
+   @KEEP (fork as) %
+
+>#1
+Make the current fork permanent and give it the name specified.
+If no name is specified the fork is named after the program name
+residing in the fork.  If that name is already in use, no name
+is assigned and the fork number is reported.
+Examples:
+>
+
+   @KEEP (fork as) MACRO%
+   @KEEP%
+    Kept as MACRO
+   @KEEP%
+    Kept as Fork 4
+
+
+Errors:	No current fork
+	Requires immediate inferior
+	Can't keep debugger
+	Name too long
+	Name already in use
+.PAGE
+3.	RESET
+
+To reset fork(s):
+
+   @RESET%
+
+   or
+
+   @RESET forkname%
+
+   or
+
+   @RESET forknumber%
+
+   or
+
+   @RESET *%
+
+Form 1:  Reset all unkept forks
+Form 2:  Reset the fork specified by name
+Form 3:  Reset the fork specified by number
+Form 4:  Reset all forks
+
+>#1
+Execution of the RESET command in forms 2, 3 or 4 will reset the
+specified fork(s) independent of its kept status.
+>
+!4
+4.	FORKSTAT
+
+To determine the state of the forks inferior to this fork (MFEXEC).
+
+   @FORKSTAT%
+
+   or
+
+   @FORKSTAT fork%
+
+>#1
+This is an expanded version of the the TENEX EXEC's FORKSTAT.
+If a fork is specified, then just the structure of that fork
+is typed and handles are assigned to those forks.  If no fork is
+specified then it defaults to
+all forks below MFEXEC; handles are not assigned.
+>
+
+
+Errors:	No structure
+.PAGE
+5.	BACKGROUND
+
+>#1
+To designate a fork as background and optionally start, reenter, or continue
+it and to optionally specify new primary input and output files.
+>
+
+   @BACKGROUND (fork) forkname (infile) oldfilespec (outfile) filespec
+    (and) START/REENTER/CONTINUE/-%
+
+>#1
+The default fork is the "current fork"; the default input and output
+files are the current ones (i.e. no change) and the default for the last
+argument is nothing (does not effect the forks status).
+>
+
+Errors:	No such fork
+	All file errors
+!4
+6.	FOREGROUND
+
+To make a background fork a normal (foreground) fork.
+
+   @FOREGROUND (fork) forkname%
+
+>#1
+This command makes a background fork a foreground fork and redirects
+the primary I/O to the same as MFEXEC.
+>
+
+Errors:	Fork not background
+	No such fork
+!4
+7.	SUSPEND
+
+To suspend a running fork.
+
+   @SUSPEND (fork) forkname%
+
+>#1
+This command simply freezes the fork specified.
+>
+!4
+8.	SPLICE
+
+To splice a fork structure below a specific fork.
+
+   @SPLICE (fork) forkname (below fork) forkname%
+
+>#1
+This command allows a user to manipulate his fork structure. There
+are very few checks and splicing forks arbitrarily may lead to unexpected
+results.
+>
+
+Errors:	Can't SPLICE debugger
+!4
+9.	START, CONTINUE and REENTER
+
+To START, CONTINUE or REENTER a fork:
+
+   @CONTINUE%
+
+   or
+
+   @CONTINUE forkname%
+
+   or
+
+   @CONTINUE 4%
+
+Form 1: Default to the current fork (or the last run fork)
+Form 2: Operate on the fork specified by name
+Form 3: Operate on the fork specified by number
+
+A fork may become current in several ways:
+!1
+>#1
+.LEFT MARGIN 8
+.INDENT -3
+1) When a fork is created for a program to run in it becomes
+     the current fork.
+.INDENT -3
+2) The FORK command changes the current fork.
+.INDENT -3
+3) If no current fork exists, then running a fork makes that fork
+    the current fork.
+.LEFT MARGIN 0
+!2
+The format of the START and REENTER commands is identical to that of
+the CONTINUE command.  See the TENEX EXEC manual for the original
+descriptions of the functions of these commands.
+>
+|
+COMMENT	| Modified commands
+
+IV.	Modified commands
+
+
+1.	ATTACH
+
+>#1
+See EXEC documentation for this command.  In addition recognition
+may be invoked on the user's name and if already logged in, the name
+will default to the logged in directory.
+>
+!4
+2.	BYE
+
+To break links:
+
+   @BYE (links) %
+
+>#1
+Any links will be broken upon confirmation of this command.  Synonym
+for BREAK.
+>
+!4
+3.	CHANGE
+
+To change the account of a logged in job:
+
+   @CHANGE ACCOUNT (# to) account number%
+
+   or
+
+   @CHANGE ACCOUNT (to) account name%
+
+>#1
+This command allows the user to switch computer use charges
+from  one  account to another during the course of a working
+session.  The format depends on whether the user can use
+account names or is limited to numbers.
+!2
+To change the password associated with a directory:
+
+>
+   @CHANGE PASSWORD (of directory) directory name
+    (old password) password (new password) new password
+    (new password) new password%
+
+>#1
+This command allows the user to change the password of any directory
+he knows the password to, to a password of his choice.
+The requirement of typing the new password twice assures the user
+that he typed what he thought he typed.
+The password change is effective immediately.
+>
+!4
+.PAGE
+4.	CONNECT
+
+To change the user's primary disk directory.
+
+   @CONNECT (TO DIRECTORY) directory name%
+
+>#1
+See EXEC documentation of this command.  Additionally the directory
+defaults to the login directory if no directory is specified.
+>
+!4
+5.	DSKSTAT
+
+To learn status of system/user disk use:
+
+   @DSKSTAT%
+
+>#1
+This command reports the disk space used in the connected directory.
+The disk space used is always printed and if some files are deleted
+the amount of deleted and undeleted disk used is printed.  If the
+directory is over allocation the allocation is printed.  The system
+totals printed by the DISCUSE command are printed if
+the system free space totals are low.
+>
+!4
+6.	EDIT
+
+To create a fork with an editor loaded with the file specified.
+
+   @EDIT filename%%
+
+   or
+
+   @EDIT filename editor%
+
+>#1
+This command will create a fork and start up the editor so that it will read
+the specified file for editing.  At present the editors available
+are POET, SOS, TECO and XED.  Others may be added in the future.
+If an editor is not specified then the editor defaults to the last
+editor specified or to TECO if the command has not been
+executed before.
+>
+!4
+.PAGE
+7.	ERUN
+
+To run a program ephemerally:
+
+   @ERUN program name%
+
+>#1
+Ephemerally run a subsystem or other save file.  It does not reset
+the existing fork structure.
+>
+|
+
+; PDP-10 MULTI FORK EXECUTIVE SYMBOL DEFINITIONS
+
+;GENERATES NO CODE, BUT DEFINES SYMBOLS AND MACROS AND OP CODES
+; AND PRIVATE STORAGE LOCATIONS
+
+
+;IT SHOULD BE LOADED FIRST. IT IS ABSOLUTE TO INSURE PROPER DEFINITIONS
+;OF PAGE BUFFERS FOR WINDOW PAGES ON INFERIOR FORK.
+
+	UNIVERSAL XSTG
+
+	SALL
+
+LOC 0
+
+;***** SITE DEPENDENT STUFF ********
+
+
+DEFINE SITES ($SITE$)<
+DEFINE OK (TEXT)<
+	TEXT>
+DEFINE NOOK (TEXT)<>
+SITCNT==0
+IRP $SITE$,<
+   IFNDEF %'$SITE$'.,<%'$SITE$'.==0>
+   IFN %'$SITE$'.,<
+	IF1 <PRINTX $SITE$ Version being assembled>
+	SYN OK,$SITE$
+	SYN NOOK,NO'$SITE$
+	SITCNT==SITCNT+1
+   >
+   IFE %'$SITE$'.,<
+	SYN NOOK,$SITE$
+	SYN OK,NO'$SITE$
+	PURGE %'$SITE$'.,%'$SITE$'.
+   >
+>
+IFE SITCNT,<IF1 <PRINTX No special site code assembled>>
+PURGE OK,OK,NOOK,NOOK,SITCNT,SITCNT
+>
+
+SITES <ISI,SRI,ECL,BBN,IAC,SCRC>
+PURGE SITES,SITES
+
+;SITMSK==BITS FOR FEATURES THAT NEED TO BE INCLUDED FOR THIS
+; VERSION. CONDITION CODE N CORESPONDS TO BIT N-1; CONDITION
+; CODE -N THE OPPOSITE OF CODE N.
+
+;CONDITION CODES:
+%IIT==1			;IIT EXISTS
+%DAEMON==2		;INCLUDE DAEMON
+%SCHED==3		;INCLUDE SCHED STUFF (JSYS 606)
+%FREEZ==4		;Include FREEZE; uses SFRZC (JSYS 602)
+%ALERT==5		;ALERT / WAKEUP option
+%BAKTRP==6		; TRAP TTY I/O FOR BACKGROUND FORKS WITH NO
+			; PRIMARY I/O FILES SPECIFIED
+%CORECT==7		; ALLOW SPELLING CORRECTION FEATURE
+;	OTHERS YET TO BE DEFINED...
+
+   ISI < IFNDEF SITMSK,<SITMSK==640000B17>>
+   SRI < IFNDEF SITMSK,<SITMSK==714000B17>>
+   ECL < IFNDEF SITMSK,<SITMSK==600000B17>>
+   BBN < IFNDEF SITMSK,<SITMSK==200000B17>>
+   IAC < IFNDEF SITMSK,<SITMSK==614000B17>>
+  SCRC < IFNDEF SITMSK,<SITMSK==614000B17>>
+IFNDEF SITMSK,<SITMSK==0> ;No special features assumed
+
+DEFINE FEATUR (CODE,TEXT)<
+   IFL <<CODE>>,<.BIT==<-<CODE>>-1
+   IFE <1B<.BIT>&SITMSK>,<TEXT>>
+   IFG <CODE>,<.BIT==<CODE>-1
+   IFN <1B<.BIT>&SITMSK>,<TEXT>>
+>
+
+;LIST/TYPE DEFAULT SIZES -
+
+	LPTWID==^D132		;DEFAULT WIDTH
+   IAC	< LPTWID==^D80		; NARROW IAC PRINTER>
+	LPTLEN==^D60		;DEFAULT LENGTH
+
+; SAVE FILE STRING MACRO
+
+IFNDEF TEST,<TEST==0>
+
+IFE TEST,<
+DEFINE MFSAVS <ASCIZ "<MFEXEC>MFEXEC.SAV">
+DEFINE MFSYMS <ASCIZ "<MFEXEC>MFEXEC.SYMBOLS">
+>
+IFN TEST,<
+DEFINE MFSAVS <ASCIZ "<TEST>MFEXEC.SAV">
+DEFINE MFSYMS <ASCIZ "<TEST>MFEXEC.SYMBOLS">
+>
+
+;**** THINGS THAT AFFECT THE LANGUAGE EFFECTED BY THIS CODE *****
+
+
+
+CTRLC==3	;SUPER-PANIC PSI CHARACTER
+		;AND "TERMINAL CODE" FOR SAME
+CTCODE==^D20	;"TERMINAL CODE" FOR CHARACTER ASSIGNED TO PSI THAT
+		;PRINTS RUNTIME (^T)
+HUCODE==^D30	;"TERMINAL CODE" FOR DATAPHONE CARRIER OFF (HANGUP)
+BELL==7         ;CHARACTER TO RING WHEN ILLEGAL ^A OR ^W INPUT,
+                ;OR WHEN RECOGNITION AMBIGUITY REQUIRES MORE INPUT
+CTRLE==5	;CHARACTER THAT PREFIXES PRIVILEGED COMMANDS
+CTRLZ==32	;EOF CHARACTER FOR "COPY" COMMAND WHEN TTY IS SOURCE
+CONTCH==177	;STORED INTERNALLY FOR CONTINUATION CHARACTER (&).
+		;ONE BYTE, TRANSLATED BACK TO EOL-SPACE-& ON OUTPUT
+		;FOR ^R, ^A. THIS CHAR MUST NEVER TURN UP OTHERWISE;
+		;IS 177 THE BEST VALUE?
+
+;ALSO MANY CHARACTERS ARE GIVEN SPECIAL FUNCTIONS BY THEIR ENTRIES
+;  IN THE CHARACTER TABLE (CHRTBL).
+
+;AUTOMATIC LOGOUT PARAMETERS:
+;AUTOLOGOUT OCCURS IN TOP-LEVEL MFEXEC WHEN JOB IS NOT LOGGED IN AND:
+;	1) MFEXEC RETURNS TO COMMAND INPUT AND AT LEAST AUTOL1 SECONDS
+;	   HAVE ELAPSED SINCE MFEXEC WAS STARTED, OR
+;	2) AUTOL2 SECONDS HAVE ELAPSED SINCE STARTUP AND THERE HAS
+;	   BEEN NO TELETYPE ACTIVITY FOR AUTOL3 SECONDS.
+
+AUTOL1==^D600
+AUTOL2==^D120
+AUTOL3==^D60
+
+   SRI<
+AUTOL1==^D3600
+AUTOL2==^D180
+AUTOL3==^D180
+>
+
+IAC <
+AUTOL1==^D1200
+AUTOL2==^D180
+AUTOL3==^D180
+>
+
+;CONTROL T PARAMETERS
+CTTIM0==^D60	;MAX. ^T INTERVAL THAT CAUSES FULL TYPEOUT
+CTTIM1==^D0	;MIN. INTERVAL BETWEEN TYPEOUTS
+
+   SRI<
+CTTIM0==^D10
+CTTIM1==^D5
+>
+IAC <
+CTTIM0==^D20
+CTTIM1==5
+>
+
+;CHKDAL PRINTOUT CONTROL PARAMETERS
+	DSKLL==^D5000	;LOWER LIMIT FOR DSKSTAT RESOURCES TYPEOUT
+	DSKSPC==^D0	;USER ALLOWED 0% OF SYSTEM FREE OVER ALLOCATION
+	DSKUP==^D0	;USER ALLOWED 0% OVER ALLOCATION
+
+   ISI <DSKLL==^D2000	;LOWER LIMIT FOR DSKSTAT RESOURCES TYPEOUT
+	DSKSPC==^D10	;USER ALLOWED 10% OF SYSTEM FREE OVER ALLOCATION
+	DSKUP==^D20	;USER ALLOWED 20% OVER ALLOCATION
+>
+IAC <	DSKLL==377777	; A BIG NUMBER >
+
+;****************** SYSTEM DEPENDENT THINGS ********************
+
+
+;Fork handles
+
+OPDEF ZZ [0B8]		;KLUGE TO OVERCOME DEFINITION OF Z AS AN AC
+.FHSLF==400000		;Self
+.FHSUP==< ZZ -1 >	;Superior
+.FHTOP==< ZZ -2 >	;Top fork (in job)
+.FHSAI==< ZZ -3 >	;Self and all inferiors
+.FHINF==< ZZ -4 >	;All inferiors
+.FHJOB==< ZZ -5 >	;All forks in job
+.FHGTP==< ZZ -6 >	;Top fork (in group)
+.FH==400000		;Fork handle bit
+
+
+; FILE DESCRIPTOR BLOCK IN FILE DIRECTORY
+	PHASE 1		;Header not referenced symbolically
+FDBCTL:!BLOCK 1		;Control bits in LH
+ FDBTMP==1B0		 ;Temporary file
+ FDBPRM==1B1		 ;Permanent file
+ FDBNEX==1B2		 ;File doesn't exist
+ FDBDEL==1B3		 ;File deleted
+ FDBNXF==1B4		 ;1st write not complete
+ FDBUND==1B9		 ;Perpetual file
+SCRC <
+ FDBKEP==1B16		 ;Auto keep file
+>;SCRC
+ FDBEPH==1B17		 ;Ephemeral file
+FDBEXT:!BLOCK 1		;Loc ext blk ,, Nxt ext blk
+FDBADR:!BLOCK 1		;File index address
+FDBPRT:!BLOCK 1		;Protection word
+FDBCRE:!BLOCK 1		;Creation date & time of version 1
+FDBUSE:!BLOCK 1		;Last writer ,, Last reader
+FDBVER:!BLOCK 1		;Version # ,, Nxt version blk
+FDBACT:!BLOCK 1		;Account info
+FDBBYV:!BLOCK 1		;# version to retain, Byte size ,, Page count
+FDBSIZ:!BLOCK 1		;Byte count
+FDBCRV:!BLOCK 1		;Creation date & time
+FDBWRT:!BLOCK 1		;Last write date & time
+FDBREF:!BLOCK 1		;Last read date & time
+FDBCNT:!BLOCK 1		;# writes ,, # reads
+FDBBCK:!BLOCK 5		;Backup words
+ FDBARC==B1		 ;Archive request
+ FDBNAR==B2		 ;Don't (ever) archive
+ FDBADL==B5		 ;Don't delete after archiving
+ FDBAAR==B6		 ;File already archived
+FDBUSW:!BLOCK 1		;User settable word
+FDBLEN:!BLOCK 0
+	DEPHASE
+
+;Misc. system definitions
+
+NFKS==20		;RANGE OF FORK HANDLES
+NFKJ=^D24		;SYSTEM MAXIMUM NO. FORKS PER JOB
+SYMLTH==4		;SYMBOL TABLE BUFFER LENGTH (19 CHRS)
+NOIAC < MAXJFN==155		;FOR FILSTAT, RLJFNS, ETC. >
+IAC < MAXJFN==153 >
+
+.JBSYM=116
+.JBUSY=117
+.JBSA=120
+.JBREN=124
+.JBOPC=130
+
+
+;WHERE DDT (UDDT.SAV) RESIDES
+DDTORG==770000
+DDTSYM==DDTORG+1	;LOCATION IN DDT THAT POINTS TO LOC WHERE
+			;SYMBOL TABLE POINTER IS STORED ($I-1)
+
+
+;ASCII CHARACTERS - IF ANY ARE CHANGED, MUST ALSO CHANGE "CHRTBL"!
+TAB==11			;TAB (^I ON MODEL 33 TTY)
+LF==12			;LINE FEED
+FORMF==14		;FORM FEED
+CR==15			;CARRIAGE RETURN
+ALTM==33        	;ALT MODE, ESC, ETC KEY
+EOL==37         	;CHARACTER FOR END OF LINE (CR-LF)
+SPACE==40		;SPACE
+
+;*********** DEFINITIONS THAT ARE INTERNAL TO MFEXEC ***********
+
+
+
+;MNEMONIC AC'S
+CBT=7                   ;DESCRIPTIVE BITS FROM "CHRTBL" FOR LAST CHARACTER
+CHR=10                  ;INPUT CHARACTER
+TRM=11                  ;LAST INPUT FIELD TERMINATOR
+KWV=12                  ;VALUE WORD RETURNED BY LAST KEYWORD TABLE LOOKUP
+KWV1=13                 ;KWV SAVED AFTER FIRST KEYWORD IN COMMAND
+BFP=14                  ;COMMAND BUFFER POINTER
+.BFP=15                 ;DITTO SAVED AT BEGINNING OF LAST FIELD
+CNT=16                  ;NUMBER OF CHARACTERS IN FIELD (REQUIRED BY
+			;EDITING STUFF)
+
+;DEFINITIONS NEEDED TO APPEND ITEMS TO A LIST AND THEN EXTRACT
+;THEM ALL FOR ASSEMBLY IN A SINGLE PLACE
+
+DEFINE APPEND (DEF,ITEM)<
+DEFINE DEF (XX,MORE) <XX DEF,<ITEM,MORE>>
+>
+
+DEFINE EXPAND (DEF,OP)<
+DEFINE OPMAC (A,ITEM) <IRP ITEM <IFNB <ITEM>,<OP>>>
+	DEF(OPMAC)
+	PURGE OPMAC
+>
+
+;UUO'S USED IN MFEXEC. MOST HAVE CALLING MACROS.
+;NOTE: UUO DISPATCH TABLE AND DISPATCHER ARE AT BEGINNING OF XMAIN.MAC.
+;      UUO ROUTINES ARE IN XSUBRS.MAC.
+
+DEFINE UUO (OP,DISP)<
+	UUON==UUON+1
+	OPDEF OP [<UUON>B8]
+   IFB <DISP>,<UUOS(APPEND,%'OP##)>
+   IFNB <DISP>,<UUOS(APPEND,DISP##)>
+>
+
+APPEND(UUOS)	;INIT DISPATCH LIST
+UUON==0		;INIT UUO NUMBERS
+
+        UUO(UERR,%ERR)		;ERROR MESSAGE
+        UUO(UTYPE,%TYPE)	;TYPE MESSAGE
+	UUO(KEYWD,%KEYW)	;KEYWORD INPUT AND LOOKUP
+        UUO(UNOI,%NOI)		;NOISE WORD INPUT/OUTPUT
+	UUO(U$TYPE,%$TYPE)	;TYPE AND STORE MESSAGE
+	UUO(ALLOW)		;CHECK LAST CHARACTER'S DESCRIPTIVE BITS
+	UUO(UALTYP,%ALTYP)	;TYPE AND STORE MESSAGE IF
+				; AC "TRM" CONTAINS ALT MODE
+	UUO(U$ERR,%$ERR)	;ERROR MESSAGE WITHOUT CR FIRST
+	UUO(UETYPE,%ETYPE)	;TYPE MESSAGE AND INTERPRET % CODES
+	UUO(GTB)		;CONVENIENT INTERFACE TO THE GETAB JSYS
+	UUO(PRINT)		;PRINT ASCII CHARACTER FROM EFF ADDR
+	UUO(UTRAP,%TRAP)	;ERROR PSI MESSAGE
+	UUO(U.$ERR,%.$ERR)	;ERROR THAT DOESN'T CLEAR BUFFERS (^X)
+	UUO(UINHEL,%INHEL)	;INPUT A FIELD AND GIVE HELP ON "?"
+	UUO(SUBCOM,%SBCOM)	;INPUT AND DISPATCH ON SUBCOMMANDS
+
+;MACROS TO CALL UUO'S AND SUBROUTINES
+
+DEFINE ERROR (TEXT)<
+	UERR [ASCIZ ~TEXT~]>
+
+DEFINE $ERROR (TEXT)<
+	U$ERR [ASCIZ ~TEXT~]>
+
+DEFINE .$ERROR (TEXT)<
+	U.$ERR [ASCIZ ~TEXT~]>
+
+DEFINE TYPE (TEXT)<
+	UTYPE [ASCIZ ~TEXT~]>
+
+DEFINE $TYPE (TEXT)<
+	U$TYPE [ASCIZ ~TEXT~]>
+
+DEFINE ETYPE (TEXT)<
+	UETYPE [ASCIZ ~TEXT~]>
+
+DEFINE NOISE (TEXT)<
+	UNOI [ASCIZ ~TEXT~]>
+
+DEFINE CONFIRM <
+	CALL CONF>
+
+DEFINE ALTYPE (TEXT)<
+	UALTYP [ASCIZ ~TEXT~]>
+
+DEFINE TRAP (TEXT)<
+	UTRAP [ASCIZ ~TEXT~]>
+
+DEFINE INHELP (TEXT)<
+	UINHEL [ASCIZ ~TEXT~]>
+
+
+;THE FOLLOWING SIMULATE UNIMPLEMENTED JSYS'S
+
+;HYPOTHETICAL FUTURE JSYS TO STOP NON-INTERACTIVE JOB
+
+DEFINE BTCHER <>
+
+
+;DEFER INTERRUPTS
+
+DEFINE NOINT <
+	AOS NOINTF>
+
+
+;NORMAL INTERRUPTS
+
+DEFINE OKINT <
+	SOSG NOINTF
+	CALL NOINTR>
+
+;COMMAND TABLE MACROS
+
+;AN ENTRY
+;ALSO USED FOR DEFAULT INFORMATION AFTER "KEYWD" MACRO
+DEFINE T (TEXT,PBITS,DBITS,ADDR)<
+   IFB <ADDR>,<..A=.'TEXT>
+   IFNB <ADDR>,<..A=ADDR>
+   IFB <PBITS>,<
+	[DBITS+0,,..A],,[ASCIZ ~TEXT~]
+>
+   IFNB <PBITS>,<
+	[DBITS+1,,..A
+	PBITS+0],,[ASCIZ ~TEXT~]
+>>
+
+;HANDIER MACRO FOR USE WHERE "EOLOK" BIT IS TO BE SET
+DEFINE TE (TEXT,PBITS,DBITS,ADDR)<
+T <TEXT>,PBITS,EOLOK+DBITS,<ADDR>
+>
+
+;A "FAKE" ENTRY TO FORCE AN AMBIGUITY
+DEFINE X (TEXT)<
+T <TEXT'!>,,NOLOG+EOLOK+INVIS,CERR
+>
+
+;BEGIN TABLE.
+;FIRST WORD MUST BE NUMBER OF ENTRIES
+DEFINE TABLE <
+	Z		;;FILLED IN BY NEXT TEND
+..T==.			;;USED BY NEXT TEND
+>
+
+;END TABLE
+DEFINE TEND <
+..U==.
+RELOC ..T-1
+	..U-..T	       ;;FILL IN FIRST WORD OF TABLE
+RELOC ..U
+>
+
+;BITS BITS BITS
+
+
+;CHARACTER DESCRIPTION BITS.
+;USED IN ENTRIES IN CHARACTER TABLE (CHRTBL) AND THUS THEY APPEAR
+; IN AC "CBT" AND IN CALLS TO "ALLOW" UUO.
+
+			  ;BIT SET FOR ---
+ALPHAN==1               ;ALHPANUMERIC CHARACTERS AND "-"
+OCTDIG==2               ;OCTAL DIGITS 0 THRU 7
+PUNBIT==4               ;PUNCTUATION = MOST OTHER PRINTING CHARACTERS
+TEOL==10                ;EOL AND SEMICOLON
+TSPC==20                ;SPACE AND TAB
+TALT==40                ;ALT MODE
+TCOM==100               ;COMMA
+TLPR==200               ;LEFT PAREN
+TRPR==400               ;RIGHT PAREN
+TCOL==1000              ;COLON (FOR DEVICE NAMES)
+TLAN==2000              ;LEFT ANGLE BRACKET
+TRAN==4000              ;RIGHT ANGLE BRACKET
+HERCHR==10000           ;LEGAL HERALD CHARACTER
+FRZC==20000             ;Recommended freeze character
+TLF==40000              ;LINE-FEED NOT PRECEEDED BY A CR
+
+;BITS...
+
+;STATUS BITS (0-17) FOR FORKS IN FKFLG
+
+FK%KPT==400000          ;FORK HAS BEEN SAVED
+FK%STD==200000          ;FORK STARTED AT LEAST ONCE
+FK%DDM==100000          ;DDT IS MERGED
+FK%IDD==40000           ;IDDT FORK
+FK%BDD==20000           ;BDDT FORK
+FK%PRO==10000           ;FORK IS PROPRIETARY SUBSYS
+			; DISABLES /, \, GOTO, SAVE, ETC.
+FK%BLK==4000            ;TABLE FKBLK ENTRY IS VALID
+FK%NAM==2000            ;TABLE FKNAM ENTRY IS VALID
+FK%ACT==1000            ;FORK IS ACTIVE (RUNNING OR BACKGROUND RUNNING)
+FK%EPH==400             ;FORK IS EPHEMERON -- KILL ON TERMINATION
+FK%BAK==200             ;FORK IS BACKGROUND (DON'T WAIT ON IT)
+FEATUR %BAKTRP,<
+FK%TRP==100		; FORK (OR INFERIOR) IS JSYS-TRAPPED
+>
+
+;BITS...
+
+;BITS IN LEFT HALF OF VALUE WORD IN KEYWORD TABLES
+
+;BITS DEFINED HERE ARE RETURNED IN LEFT HALF OF AC "KWV" BY THE LOOKUP
+; UUO, "KEYWD".
+;SOME OF THESE BITS ARE INTERPRETED BY %KEYW ITSELF, AND SOME ARE
+; USED BY ITS CALLERS, AS FOLLOWS.
+
+;THIS FIRST GROUP IS TESTED IN %KEYW, THE SERVICE ROUTINE FOR "KEYWD".
+;BIT --                 ;MEANING IF BIT ON --
+;BITS  15-16 ARE AVAILABLE
+SECOK==10		;COMMAND OK IN SECURE MODE
+COMOK==20               ;COMMA IS OK AS TERMINATOR FOR THIS WORD
+EOLOK==40               ;CARRIAGE RETURN OR SEMICOLON OK AS TERM
+			; ALSO, "EOLOK" IS IMPLIED BY "ONEWD"
+LPROK==100              ;LEFT PAREN OK TO TERMINATE THIS WORD
+			; (USED WHERE A NOISE WORD CAN FOLLOW)
+NSPALT==200             ;DON'T TYPE SPACE AFTER A WORD AFTER ALT MODE
+LANOK==400              ;LEFT ANGLE BRACKET ACCEPTABLE AFTER THIS WORD
+INVIS==1000             ;DO NOT LIST THIS ENTRY'S KEYWORD WHEN "?" IS TYPED
+
+;THE REST OF THE BITS ARE NOT TESTED BY %KEYW.
+;THIS NEXT GROUP ARE USED IN THE MAIN COMMAND TABLES, AND ARE
+; MOVED TO AC "KWV1" AFTER FIRST KEYWORD IS INPUT, AND
+; STAY IN KWV1 THROUGHOUT COMMAND DECODING.
+;SEVERAL ALSO USED IN SUBCOMMAND TABLES
+;SUBROUTINE "CONF" LOOKS AT SEVERAL OF THESE.
+CONFRC==2000	;CONFIRMATION IS FORCED FOR THIS COMMAND
+NOCONF==4000	;THIS COMMAND REQUIRES NO CONFIRMATION
+CONMAN==10000	;CONFIRMATION IS MANDATORY FOR THIS COMMAND
+ALTCON==20000	;ALT MODE MAY BE USED TO CONFIRM THIS COMMAND
+		;(EOL ECHOED)
+NOLOG==40000	;THIS COMMAND LEGAL EVEN IF NOT LOGGED IN
+PROGX==100000	;RUN A PROGRAM WHICH WILL APPEAR AS AN
+		;  EXTENTION TO THE EXEC.  THIS BIT IS NEVER ON IN
+		; COMMAND TABLE ENTRIES.  IT IS TURNED ON BY THE EXEC
+		; WHEN IT DECIDES THAT A FILE NAME SHOULD LOOK LIKE
+		; AN MFEXEC COMMAND.
+		;ALSO B5 USED IN "CREATE" SUBCOMMAND TABLE
+EASUB==200000	;THIS COMMAND EXAMINES, ALTERS, OR EXECUTES SUBSIDIARY
+		; FORK, AND IS THUS ILLEGAL IF A PROPRIETARY
+		; PROGRAM IS IN THAT FORK.
+ONEWD==400000	;ONE WORD COMMAND: CONFIRM BEFORE DISPATCH,
+		; "EOLOK" BIT IMPLIED
+
+;PRIVILEGE BITS IN COMMAND TABLES
+;IN WORD AFTER VALUE (IF B17 ON IN VALUE)
+
+ENAREQ==1B17	;COMMAND REQUIRES PROCESS TO BE ENABLED IN SOME MANNER
+ENAPOS==7B2+777777	;THE FIRST 3 PROGRAM SETTABLE PRIVILEGES & ALL USER
+
+;PROGRAM SETTABLE PRIVILEGES (B0-16):
+; OF THESE BITS 9 THROUGH 16 ARE CLEARED AT THE TOP OF THE COMMAND LOOP
+FH%ALL==1B15	;ALL FORKS OK (*)
+FH%MF==1B16	;FORK HANDLE 0 OR MFEXEC STRING OK
+
+;USER PRIVILEGES (B18-35 <MONITOR ASSIGNED>)
+WHEEL==1B18	;WHEEL SPECIAL CAPABILITY
+OPER==1B19	;OPERATOR SPECIAL CAPABILITY
+CONFI==1B20	;CONFIDENTIAL INFORMATION ACCESS SPECIAL CAPABILITY
+MAINT==1B21	;MAINTENENCE SPECIAL CAPABILITY
+NETWIZ==1B22	;NETWIZARD SPECIAL CAPABILITY
+ABSSKT==1B23	;ABSOLUTE SOCKET SPECIAL CAPABILITY
+
+;BITS...
+
+;THE FOLLOWING ARE SOME OF THE OTHER BITS USED IN VARIOUS OTHER TABLES.
+;DO NOT REDEFINE THESE BITS OR THOSE IN GROUP INTERPRETED BY
+; "%KEYW" IN SUCH A WAY AS TO PRODUCE A CONFLICT!
+;B5 ALSO USED IN "CREATE" SUBCOMMAND TABLE (5/14/70).
+
+;FLAG BITS IN AC Z LEFT HALF
+;THESE FLAGS ARE CLEARED BEFORE EACH COMMAND IS DECODED
+
+PUNCF==1        ;PUNCTUATION OTHER THAN FILE NAME FIELD TERMINATORS
+		; OK IN INPUT FIELDS.
+		; TESTED IN "CSTR" SUBROUTINE.
+STCF==2         ;STORE CHARACTERS WHICH ARE OUTPUT WITH SUBR "CCHRO"
+		; (AND HENCE MACRO "TYPE") INTO CBUF (POINTER "CBP").
+		; USED WHILE REST OF WORD IS BEING TYPED AFTER ALT MODE.
+CTRLVF==4	;THIS CHARACTER WAS PRECEDED BY ^V
+		; SET IN "CCHRI", TESTED IN "CSTR"
+BAKFF==10	;BACK UP A FIELD (UN-INPUT FIELD): CAUSES CSTR SUBR AND
+		; KEYWD UUO TO RE-USE THE PREVIOUS INPUT FIELD.
+DASHF==20	;"-" A TERMINATOR NOT "ALPHANUMERIC" CHARACTER
+NECHOF==40	;ECHOING OFF (PASSWORD INPUT). TESTED IN %NOI.
+RUNF==100	;PROG RUNNING (OR AT LEAST ITS TTY MODES IN EFFECT)
+		;ALSO TELLS ^C TO FREEZE THE WORLD (5/20/70).
+CTLCF1==200	;SET BY ^C TO SAY CLEAR BUFFER ON ANOTHER ^C
+CTLCF2==400	;SET BY 2ND ^C TO SAY CLEAR BUFFER AFTER DEBREAK
+LOGOFF==1000	;SET DURING LOGOUT MESSAGE AND LOGGING OUT PROCESS.
+		;TELLS ERRORS AND ^C TO SAY "NOT LOGGED OUT".
+DTACHF==2000	;INDICATES "DETACH" COMMAND.
+		;DISTINGUISHES IT FROM "REDIRECT" AND OTHER COMMANDS
+		;DURING EXECUTION.
+NEOLF==4000	;TELLS CSTR AND OTHER ROUTINES NOT TO ECHO INPUT EOL'S.
+		;USED WHEN A FILE NAME IS BEING PRE-READ.
+EOLNEF==10000	;SAYS AN EOL HAS BEEN INPUT BUT NOT ECHOED.
+GROUPF==20000	;ON IF INFG ETC INPUT A GROUP OF INPUT FILE NAMES
+		;(A NAME WITH AN *, OR MORE THAN ONE NAME)
+F3==40000	;FLAG AVAILABLE FOR USE IN COMMANDS,
+		;NOT CLOBBERED BY UUO'S OR SUBROUTINES.
+F2==100000	;ANOTHER FLAG AVAILABLE FOR USE IN COMMANDS
+F1==200000	;FLAG AVAILABLE FOR LOCAL USE IN SUBRS AND UUO'S
+
+
+;FLAG BITS IN AC Z RIGHT HALF ARE ALSO AVAILABLE TO COMMAND ROUTINES.
+
+;GENERAL PURPOSE BIT SYMBOLS
+;USED, FOR INSTANCE, IN JSYS CALLING SEQUENCES
+B0==400000
+B1==200000
+B2==100000
+B3==40000
+B4==20000
+B5==10000
+B6==4000
+B7==2000
+B8==1000
+B9==400
+B10==200
+B11==100
+B12==40
+B13==20
+B14==10
+B15==4
+B16==2
+B17==1
+
+
+
+;LOCATIONS OF SOME PAGE BUFFERS
+
+LFREP==655000		;LAST PAGE IN FREE SPACE
+
+;PAGE-MAPPING BUFFERS ARE JUST BELOW THE CODE.
+; (UNMAP RELEASES PAGES FROM <BPBUF>/1000 TO <EPBUF>/1000)
+
+PAGEN=656000            ;WINDOW INTO INFERIOR FORKS
+BPBUF==657000           ;FIRST OF PAGE BUFFERS
+NSBUF=657000            ;WINDOW INTO NETWORK STATISTICS FILE
+BUF1=660000             ;"COPY" COMMAND SOURCE PAGE
+;ALSO BUF1 AND FOLLOWING PAGES ARE USED BY "DIRECTORY"
+BUF2=661000             ;"COPY" COMMAND DESTINATION PAGE
+EPBUF==677000           ;LAST PAGE OF BUFFERS
+FEATUR %BAKTRP,<
+GTJBUF==677000		; PAGE FOR MAPPING INFERIOR'S GTJFN BLOCK
+>
+BCODE==:700000	;WHERE TO LOAD CODE
+
+;************* TENEX SYSTEM STANDARD DEFINITIONS *************
+
+;AC'S
+Z=0
+A=1
+B=2
+C=3
+D=4
+E=5
+F=6
+G==7
+AA==10
+BB==11
+CC==12
+DD==13
+EE==14
+FF==15
+GG==16
+P=17    ;PUSHDOWN POINTER
+
+OPDEF CALL [PUSHJ P,]
+OPDEF RET [POPJ P,]
+OPDEF ERCAL [JUMP P,]
+OPDEF ERJMP [JUMP 16,]
+OPDEF XJMP [JUMPA 16,]
+
+
+
+; PDP-10 MULTIPLE FORK EXECUTIVE PRIVATE STORAGE AREA
+
+LOC 140
+
+;STORAGE FOR EXEC COMMAND INTERPRETER
+
+CJINIT:	BLOCK 1		;NON-ZERO WHILE SETTING UP A CREATED JOB
+CJFLGS:	BLOCK 1		;FLAGS PASSED FROM CRJOB
+CJFKSA:	BLOCK 1		;FORK,,ENTRY FOR CREATED INFERIOR
+
+CSZ1==.    		;CSZ1 TO CSZ2 IS ZEROED EVERY COMMAND
+
+.P:	BLOCK 1		;P SAVED AT BEGINNING OF SUBCOMMAND,
+			; FOR %ERR TO RESTORE
+
+.JBUFP:	BLOCK 1		;JBUFP SAVED AT BEGINNING OF SUBCOMMAND
+JBUFP:	BLOCK 1		;PUSHDOWN-TYPE POINTER INTO...
+JBUFL==77		;JFN BUFFER LENGTH: ONE MORE THAN # JFNS IN A CMD.
+JBUF:	BLOCK JBUFL 	;BUFFER (STACK) FOR JFN'S. JFN'S OF ALL FILES
+			; MENTIONED IN A COMMAND MUST BE HERE SO ERROR
+			; ROUTINES CAN CLOSE AND RELEASE THEM.
+CJFN1==JBUF		;JFN OF FIRST ARGUMENT
+CJFN2==JBUF+1		;JFN OF 2ND ARGUMENT
+INIFH1:	BLOCK 1		;JBUFP VALUE FOR FIRST JFN IN INPUT FILE GROUP
+INIFH2:	BLOCK 1		;SAME FOR LAST FILE.  SAME AS INIFH1 UNLESS
+			; SEVERAL NAMES (SEPERATED BY COMMAS) WERE GIVEN.
+
+NOINTF:	BLOCK 1		;NO INTERRUPT FLAG (0 - OK, POS - DEFER)
+NOINTM:	BLOCK 1		;NOINT MASK, BITS OF DEFERRED CHANNELS
+			;THESE WILL BE IIC'D ON OKINT
+
+EOFDSP:	BLOCK 1		;SPECIAL DISPATCH ADDRESS FOR EOF PSI,
+			; EG DURING "COPY"
+
+ERRMF:	BLOCK 1		;NON-ZERO WHILE PROCESSING ERROR
+			;CURTAILS PROCESSING OF NESTED ERRORS TO AVOID
+			;INFINITE LOOPS IN ERROR CODE.
+
+FKSTCF:	BLOCK 1		;FK STR VALID FLAG, -1 MEANS OK USE IT
+
+NOCKPV:	BLOCK 1		;FLAG TO MAKE PRVCK ALWAYS SAY GOOD
+
+
+CSZ2==.-1               ;END OF AREA ZEROED EVERY COMMAND
+
+CINITF:	BLOCK 1		;NON-ZERO AFTER STARTUP INITIALIZATION
+
+DTSF:	BLOCK 1		;NON-0 IF SYSTEM DATE & TIME HAVE BEEN SET
+
+NOSRI <
+BSFLG:	BLOCK 1>	;Flag to indicate backspace can be used (char del)
+
+PRVENF:	BLOCK 1		;NON-0 IF PRIVILEGED COMMANDS "ENABLE"D
+PSPRIV:	BLOCK 1		;PROGRAM SETTABLE SPECIAL CAPABALITIES
+SECURE:	BLOCK 1		;FLAG FOR SECURE ENVIRONMENT
+
+CUSRNO:	BLOCK 1		;USER NUMBER IF LOGGED IN, 0 IF NOT
+
+HERALD:	BLOCK 1		;VARIABLE HERALD CHARACTERS (ENA,,DISA)
+
+CIFORK:	BLOCK 1		;CURRENT FORK NUMBER (OR -1 FOR NO FORK)
+FORK:	BLOCK 1		;FORK HANDLE FOR SUBROUTINES AND COMMANDS
+LFORK:	BLOCK 1		;FORK HANDLE OF RUNNING FORK, OR LAST RUN FORK
+
+FKFLG:	BLOCK NFKS	;FLAGS,,DOT INX BY FORK NUMBER
+
+FKNMT:	BLOCK 1		;LENGTH OF USEFUL TABLE
+	BLOCK NFKS	;IN KEYWD FORMAT
+
+FKNAM:	BLOCK SYMLTH*NFKS ;STRING FOR FORKS (INX FKN*SYMLTH)
+
+FKBLK:
+FK.SNM:	BLOCK 1		;PROGRAM NAME (SIXBIT)
+FK.MOD:	BLOCK 1		;MODE WORD
+FK.STP:	BLOCK 3		;TAB WORDS (3)
+FK.COC:	BLOCK 2		;CCOC WORDS (2)
+FK.JTI:	BLOCK 1		;JOB TIW
+ SFKBLK=.-FKBLK		;SIZE OF FKBLK (EACH FORK)
+BLOCK SFKBLK*<NFKS-1>	;REMAINDER FOR OTHER FORKS
+ IFKBLK=.-FKBLK		;OFSET INTO THE FOLLOWING
+BLOCK SFKBLK		;INITIAL FORK BLOCK
+
+ SFREBT==<^D512+^D35>/^D36 ;FULL FORK OF FREE PAGES
+FREBT:	BLOCK SFREBT	;FREE PAGE BIT TABLE
+FRESPC:	BLOCK 1		;FREE SPACE: TOTAL,, LOC 1ST BLOCK
+FSLTB:	BLOCK 1		;TEMP FREE LIST POINTER  LEN,,FIRST LOC
+FSLTX:	BLOCK 1		;TEMP FREE INDEX  LEN,,CUR INDEX
+			;LIST ASSIGNED END-BEGINNING
+
+   SQ==20
+Q:	BLOCK SQ	;COMMAND LOOP QUEUE
+QIN:	BLOCK 1
+QOUT:	BLOCK 1
+
+NPAGE:	BLOCK 1		;-1 OR XWD FORK HANDLE, ADDR FOR PAGE MAPPED AT "PAGEN"
+
+	;AUTOLOGOUT CRAP
+ALOFH:	BLOCK 1		;AUTOLOGOUT FORK
+STRTIM:	BLOCK 1		;DATE AND TIME EXEC WAS STARTED, IN "TIME" FORMAT
+TTYACF:	BLOCK 1		;TTY ACTIVITY FLAG: AOS'D FOR EACH CHARACTER IN OR OUT
+TTYCNT:	BLOCK 1		;SAVED TTYACF FROM AUTOLOGOUT INTERRUPT
+
+	;SUPERIOR'S SUBSYSTEM NAME RESTORED BY QUIT
+SUPSUB:	BLOCK 1
+
+
+	;FOR CONTROL T ROUTINE
+CTLIM0:	BLOCK 1		;DELTA1 (15 SEC) PLUS TIME OF 1ST ^T
+CTLIM1:	BLOCK 1		;DELTA2 (1 MIN) PLUS TIME OF LAST VERBOSE ^T TYPEOUT
+
+PRIMRY:	BLOCK 1		;SAVED PRIMARY JFNS AT ENTRY
+CIJFN:	BLOCK 1		;COMMAND (PRIMARY) INPUT JFN
+COJFN:	BLOCK 1		;PRIMARY OUTPUT JFN
+
+;PRIMARY INPUT AND OUTPUT JFN'S SAVED AT ^C OUT OF REDIRECTED I/O OPERATION
+; AND INPUT AND OUTPUT REDIRECTION FLAGS
+;EACH CAN INDEPENDENTLY HAVE THE VALUES
+;       0   NORMAL   (JFN HAS NO SIGNIFICANCE)
+;	-1  INPUT OR OUTPUT IS NOW REDIRECTED
+;       1   ^C'D (OR ERRORED) OUT OF REDIRECTION,
+;		JFN OF LAST USED REDIRECT FILE IN CRJFNI/O
+
+CRJFNI:	BLOCK 1		;Redirected input JFN
+CRJFNO:	BLOCK 1		;Redirected output JFN
+CREDIF:	BLOCK 1		;Input redirection flag
+CREDOF:	BLOCK 1		;Output redirection flag
+
+CERET:  BLOCK 1         ;WHERE TO GO AFTER ERROR MESSAGE. NORMALLY "RERET"
+			; WHICH GOES BACK TO CMDIN, BUT IS CHANGED DURING
+			; SUB-COMMAND INPUT AS FOR "DIRECTORY"
+
+CSTRR:  BLOCK 1         ;USED BY "CSTR" TO SAVE RETURN FOR "MORE"
+
+FRSTFR: BLOCK 1         ;RETURN FROM "FRSTF" SUBR IN XSUBRS.MAC, SAVED
+			; FOR USE BY "NEXTF", ALSO IN XSUBRS.MAC
+
+%EDAYT: BLOCK 1         ;DATE & TIME SAVED FROM %D TO %E (ETYPE UUO)
+
+CSBUFP: BLOCK 1         ;POINTER INTO CSBUF (SEE SAME)
+
+ERCOD:  BLOCK 1         ;ERROR CODE FROM JSYS ERROR RETURN
+
+ERPC:   BLOCK 1         ;PC FOR FAKE INSTRUCTION TRAP FOR SIMULATED JSYS'S
+
+DOLGTM:	BLOCK 1		;LAST LOGIN TIME STORED TO REQUEST SYSTEM MESSAGES
+DOLGBT:	BLOCK 1		;BITS RETURNED FROM LOGIN
+
+LOGINI:	BLOCK 1		;SET TO NON ZERO TO REQUEST LOGIN.CMD TO BE DONE.
+FILINI:	BLOCK 1		;SET TO NON ZERO AFTER COMAND.CMD PROCESSSING STARTED.
+
+FEATUR %ALERT,<
+ALRTIM: BLOCK 1>        ;ZERO OR NEXT ALERT TIME; "GTAD" FORMAT
+
+ITIMER:	BLOCK 1		;APPROXIMATE TIME OF NEXT IIT INTERRUPT
+MSGLST: BLOCK 1         ;WRITE DATE OF LAST MESSAGE
+MSGTIM: BLOCK 1         ;TIME OF NEXT CHECK IF MAIL WATCH ON
+			;-1 IF MAIL WATCH OFF
+PRNTIM: BLOCK 1         ;0 IF PRINTER WATCH ON, -1 IF PRINTER WATCH OFF
+IAC <
+PRINPR:	BLOCK 1		; -1 IF PRINTING IN PROGRESS
+MWUSER:	BLOCK 1		; USER NUMBER FOR MAIL WATCH
+
+; FOLLOWING 4 WORDS FROM LOWERCASE ROUTINE IN LOWER.MAC
+LOWFLG:	BLOCK 1
+SCANPT:	BLOCK 1
+BEGWRD:	BLOCK 1
+CASE:	BLOCK 0
+>
+IAC <
+PRINPR:	BLOCK 1		; -1 IF PRINTING IN PROGRESS
+MWUSER:	BLOCK 1		; USER NUMBER FOR MAIL WATCH
+
+; FOLLOWING 4 WORDS FROM LOWERCASE ROUTINE IN LOWER.MAC
+LOWFLG:	BLOCK 1
+SCANPT:	BLOCK 1
+BEGWRD:	BLOCK 1
+CASE:	BLOCK 0
+>
+SCRC <
+PRINPR:	BLOCK 1		; -1 IF PRINTING IN PROGRESS
+MWUSER:	BLOCK 1		; USER NUMBER FOR MAIL WATCH
+
+; FOLLOWING 4 WORDS FROM LOWERCASE ROUTINE IN LOWER.MAC
+LOWFLG:	BLOCK 1
+SCANPT:	BLOCK 1
+BEGWRD:	BLOCK 1
+CASE:	BLOCK 0
+>
+
+;STORAGE FOR IIT DOWNTIME CHECK
+OLDDTM:	BLOCK 1
+OLDUTM:	BLOCK 1
+OLDWHY:	BLOCK 1
+
+FEATUR %BAKTRP,<
+; STORAGE FOR A TRAPPED FORK'S ACS
+JFRKAC:	BLOCK 20
+FKTRAP:	BLOCK NFKS	; STORAGE FOR TRAPPED FORK HANDLES
+FKTIW:	BLOCK NFKS	; STORAGE FOR TRAPPED FORKS' TERM. INT. WORDS
+FKDIM:	BLOCK NFKS	; STORAGE FOR DEFERRED INTERRUPT MASKS
+FKCHAN:	BLOCK NFKS	; STORAGE FOR CHANNEL MASKS FOR PSI
+			; SIMULATION ROUTINES (IN XSUBRS)
+FKCHN2:	BLOCK NFKS	; STORAGE FOR "SUPPOSED TO BE ON" CHANS
+JTDATA:	BLOCK 1		; FOR RTFRK WORD
+JGTJST:	BLOCK 10	; FOR A FILENAME FROM A TRAPPED GTJFN
+>
+FEATUR %CORECT,<
+; FLAG WORD FOR SPELLING CORRECTION: -1: CORRECT, 0: NO CORRECT
+DOCORR:	BLOCK 1
+CORCMD:	BLOCK 10	; SPACE FOR FIXED-UP COMMAND NAME
+; FOLLOWING STUFF MOVED HERE FROM SPLCOR
+TBL:	BLOCK 1
+RES:	BLOCK 1
+SCORE:	BLOCK 1
+SLNGTH:	BLOCK 1
+N:	BLOCK 1
+NTRANS:	BLOCK 1
+DOUBLD:	BLOCK 1
+TS1:	BLOCK 1
+TS2:	BLOCK 1
+TN1:	BLOCK 1
+TN2:	BLOCK 1
+CS1:	BLOCK 1
+CS2:	BLOCK 1
+CN1:	BLOCK 1
+CN2:	BLOCK 1
+OLDT:	BLOCK 1
+CNEXT:	BLOCK 1
+SAVDCI:	BLOCK 1
+REGS:	BLOCK 17
+SAVD17:	BLOCK 1
+TCHARS:	BLOCK 60
+CCHARS:	BLOCK 60
+>
+
+;STORAGE USED FOR HALT
+DOWNTM:	BLOCK 1
+UPTIME:	BLOCK 1
+WHYHLT:	BLOCK 1
+
+;STORAGE USED BY TTYNUM FOR "LINK" AND "ADVISE"
+FRAME:	BLOCK 1		;P SAVED DURING TTYNUM
+
+
+;STORAGE USED BY SUBSYS LOOKUP
+IUSRNM:	BLOCK ^D10
+
+;STORAGE USED BY SEARCH PATH FEATURE
+
+NDEFDR==21		;SIZE OF SEARCH PATH BLOCK I.E. NUMBER OF DIRECTORIES
+CDEFDR:	BLOCK NDEFDR
+
+;STORAGE USED BY "EDIT"
+EDFILL==17		;FILE NAME.EXT SAVED BY EDIT COMMAND
+			;(FIRST WORD IS POINTERS)
+EDFILE:	BLOCK EDFILL	;HOLDS NAME OF FILE BEING EDITTED
+EDITOR:	BLOCK 1		;HOLDS EDITOR NUMBER
+
+FEATUR %DAEMON,<
+DAENXT:	BLOCK 1		;NEXT TIME TO RUN DAEMON
+DAEINC:	BLOCK 1		;TIME INCREMENT FOR RUNNING DAEMON
+DAENAM:	BLOCK 10	;FILENAME STORAGE FOR DAEMON
+>
+
+;STORAGE LOCATIONS USED BY "DIRECTORY" AND OTHER COMMANDS FOR
+; INFORMATION ABOUT ARGUMENTS
+DEVICE:	BLOCK 1		;DEVICE IDENTIFIER
+DIRNO:	BLOCK 1		;DIRECTORY NUMBER
+OLDDIR:	BLOCK 1		;PREVIOUS DIRECTORY NUMBER
+OUTDSG:	BLOCK 1		;DESIGNATOR OF FILE TO PRINT ON
+INDSG:	BLOCK 1		;SOURCE JFN (TYPE, LIST)
+DSKTTC:	BLOCK 1		;Count of disk JFNs displayed
+DSKGCT:	BLOCK 1		;Total file count of all disk JFNs displayed
+DSKGSP:	BLOCK 1		;Total space count of all disk JFNs displayed
+DSKCT:	BLOCK 1		;File count for present disk JFN
+DSKSP:	BLOCK 1		;Space count for present disk JFN
+DTATTC:	BLOCK 1		;Count of DECtape JFNs displayed
+DTAGCT:	BLOCK 1		;Total file count of all DECtape JFNs displayed
+DTAGSP:	BLOCK 1		;Total space count of all DECtape JFNs displayed
+DTACT:	BLOCK 1		;File count for present DECtape JFN
+DTASP:	BLOCK 1		;Space count for present DECtape JFN
+
+;EXECUTION TIME STORAGE FOR "DIRECTORY" AND OTHER COMMANDS
+LPNAME:	BLOCK 1		;0 OR STRING POINTER TO LAST PRINTED NAME
+LPEXT:	BLOCK 1		;0 OR STRING POINTER TO LAST PRINTED EXTENSION
+LPFDB:	BLOCK 1		;0 OR LOCATION OF FDB FOR WHICH PRINTING
+			; IS INCOMPLETE
+LFPOS:	BLOCK 1		;LINE POSITION, AS - # COLS USED OVER MINIMUM
+
+;STORAGE FOR "LIST" AND "TYPE" COMMANDS
+GHEAD:	BLOCK 1		;0 OR BYTE POINTER TO SUBCOMMAND-GIVEN HEADING
+HEAD:	BLOCK 1		;0 OR PTR TO HEAD BEING USED FOR THIS FILE,
+			; INCL "PAGE"
+HEDLNO:	BLOCK 1		;# LINES IN HEADING, INCL EOLS BEFORE AND AFTER
+SPCG:	BLOCK 1		;0 FOR SINGLE SPACING, 1 FOR DOUBLE, ETC
+WIDTH:	BLOCK 1		;PAGE WIDTH IN COLUMNS
+LENGTH:	BLOCK 1		;PAGE LENGTH IN LINES
+			; = LAST LINE AT WHICH TO BREAK PAGE IF NO ^L
+L35:	BLOCK 1		;FIRST LINE AT WHICH TO BREAK PAGE IN ABSENCE OF ^L
+L50:	BLOCK 1		;PREFERRED LINE AT WHICH TO BREAK PAGE
+PAGENO:	BLOCK 1		;PAGE NUMBER, INCREMENTED AT ^L
+PAGEN1:	BLOCK 1		;SUBPAGE NUMBER, INCREMENTED WHEN OVERLONG PAGE
+			; IS SPLIT
+BESPTR: BLOCK 1         ;POINTER TO BEST PLACE IN OUTBUF TO BREAK PAGE
+BESCOR:	BLOCK 1		;"SCORE" ASSOCIATED WITH BESPTR
+BESLNO:	BLOCK 1		;LINE # AT BESPTR
+PPRINT:	BLOCK 1		;POINTER TO BLOCK OF WORDS SPECIFYING PAGES TO LIST,
+			; EACH WORD BEING XWD MIN,MAX, 0 TERMINATING BLOCK.
+SPCBTS: BLOCK 1         ;BITS FOR SPACING CONTROL CHARS IN VERBATIM MODE
+
+
+;PSEUDO-INTERRUPT PC STORAGE WORDS
+LEV1PC:	BLOCK 1
+LEV2PC:	BLOCK 1
+LEV3PC:	BLOCK 1
+
+;BUFFERS
+
+SGTBLN==^D40		;SIZE OF THE $SYSGT HASH TABLE(S)
+SGTNAM:	BLOCK SGTBLN	;HOLDS SIXBIT NAME (ARGUMENT TO SYSGT)
+SGTAC1:	BLOCK SGTBLN	;HOLDS AC1 RETURNED BY SYSGT
+SGTAC2:	BLOCK SGTBLN	;HOLDS AC2 RETURNED BY SYSGT
+
+FKSTC:	BLOCK 3*NFKJ	;BUFFER FOR FORK STRUCTURE (GRFKS)
+
+PDL==400        	;PUSHDOWN SIZE
+PD:     BLOCK PDL       ;PUSHDOWN
+			;WHILE A PUSHDOWN OVERFLOW ERROR MESSAGE IS BEING
+			; TYPED PD OVERFLOWS INTO CBUF, WHICH IS OK.
+
+CBUFL==^D50     ;COMMAND BUFFER LENGTH. DETERMINES LENGTH OF COMMAND.
+CBUF:   BLOCK CBUFL     ;BUFFER FOR ENTIRE COMMAND TEXT,
+	                ; INCLUDING STUFF ECHOED BY ALT MODE.
+CBUFE:	BLOCK 1		;END OF CBUF
+
+CWBUF:  BLOCK SYMLTH	;BUFFER IN WHICH TO SET UP WORD JUST SO
+			; FOR "FSYM" TABLE SEARCH.
+
+CJFNBK:	BLOCK 11	;ARGUMENT BLOCK FOR "GTJFN" JSYS
+			; ALWAYS ALL 0 EXCEPT WORDS 0, 1, 3, 4, 5.
+
+CSBUFL==^D40		;STRING BUFFER MINIMUM SIZE
+			;BIG ENOUGH FOR USR NAME, PASSWD, ACCT #, PLUS
+CSBUF:	BLOCK CSBUFL	;BUFFER IN WHICH TO SET UP AND SAVE STRINGS
+			; USED AS JSYS ARGUMENTS (BUFFF SUBR),
+LOC <<.+40>!777>-37     ;USE REST OF PAGE EXCEPT FOR PATCH AREA
+CSBUFE:			;END OF CSBUF. EVEN IF STRINGS OVERFLOW BEYOND
+			;THIS POINT IT USUALLY WON'T DO ANY HARM.
+
+PPATS: PPAT: BLOCK 40   ;PRIVATE PATCH AREA
+
+CSZ4==.-1               ;END OF AREA TO ZERO AT STARTUP (BEGINS AT CSZ1)
+MFFREE=.                ;START OF FREE SPACE AREA
+
+	END
+

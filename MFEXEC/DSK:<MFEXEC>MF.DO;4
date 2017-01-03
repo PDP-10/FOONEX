@@ -1,0 +1,5 @@
+MACRO
+MF.ASM@
+LINK10
+@MF.LNK
+DEL *.TMP;*

@@ -1,0 +1,430 @@
+
+LGINX1	600010	LOGIN: Illeg account
+LGINX2	600011	LOGIN: Can't Log in under that directory number
+LGINX3	600012	LOGIN: NO ROOM in System
+LGINX4	600013	LOGIN: Password incorrect
+LGINX5	600014	LOGIN: Already Logged in
+
+CRJBX1	600020	CRJOB: Illegal parameter or option bits
+CRJBX2	600021	CRJOB: Illeg inst while starting new job
+CRJBX3	600022	CRJOB: Illeg account
+CRJBX4	600023	CRJOB: Terminal illegal or not assigned to you
+CRJBX5	600024	CRJOB: Illeg directory
+CRJBX6	600025	CRJOB: NO ROOM in system for new job
+CRJBX7	600026	CRJOB: Password incorrect
+
+LOUTX1	600035	Illegal attempt to LGOUT job
+LOUTX2	600036	LGOUT: No such job
+
+CACTX1	600045	CACCT: Illegal account
+CACTX2	600046	CACCT: Not logged in
+
+EFCTX1	600050	EFACT: LOG Spec Cap not enabled
+EFCTX2	600051	EFACT: Entry longer than 64 words
+EFCTX3	600052	EFACT: Accounting system failure, contact Operator
+
+GJFX1	600055	GTJFN: Desired "JFN" illeg
+GJFX2	600056	GTJFN: Desired JFN not available
+GJFX3	600057	GTJFN: No JFN's available
+GJFX4	600060	GTJFN: Illeg char
+GJFX5	600061	GTJFN: More than 39 chars in a field
+GJFX6	600062	GTJFN: Two device fields or device not first
+GJFX7	600063	GTJFN: Two directory fields or directory after name
+GJFX8	600064	GTJFN: No "<" before ">"
+GJFX9	600065	GTJFN: More than 1 name field
+GJFX10	600066	GTJFN: Non-numeric version
+GJFX11	600067	GTJFN: Two version fields
+GJFX12	600070	GTJFN: Two accounts
+GJFX13	600071	GTJFN: Two protections
+GJFX14	600072	GTJFN: Bad protection
+GJFX15	600073	GTJFN: Illeg confirmation char
+GJFX16	600074	GTJFN: No such device
+GJFX17	600075	GTJFN: No such directory
+GJFX18	600076	GTJFN: No such file name
+GJFX19	600077	GTJFN: No such extension
+GJFX20	600100	GTJFN: No such version
+GJFX21	600101	GTJFN: No such file (it disappeared)
+GJFX22	600102	GTJFN: JSB full
+GJFX23	600103	GTJFN: Directory full
+GJFX24	600104	GTJFN: Old file required
+GJFX25	600105	GTJFN: Name given for non-directory device
+GJFX26	600106	GTJFN: Extension for non-directory device
+GJFX27	600107	GTJFN: New file required
+GJFX28	600110	GTJFN: Device not mounted
+GJFX29	600111	GTJFN: Device not available
+GJFX30	600112	GTJFN: Numeric account required
+GJFX31	600113	GTJFN: Illeg "*"
+GJFX32	600114	GTJFN: Empty directory and "*" given for name
+GJFX33	600115	GTJFN: Null name not allowed
+GJFX34	600116	GTJFN: ? was typed
+GJFX35	600117	GTJFN: Access to directory not allowed
+
+OPNX1	600120	OPENF or RNAMF: File open
+OPNX2	600121	OPENF: File doesn't exist
+OPNX3	600122	OPENF: Read access not allowed
+OPNX4	600123	OPENF: Write access not allowed
+OPNX5	600124	OPENF: Execute access not allowed
+OPNX6	600125	OPENF: Append access not allowed
+OPNX7	600126	OPENF: Device assigned to another job
+OPNX8	600127	OPENF: Device not mounted
+OPNX9	600130	OPENF: File busy
+OPNX10	600131	OPENF: NO ROOM
+OPNX11	600132	OPENF: WHEEL or OPER spec cap needed to not change dates
+OPNX12	600133	OPENF: List access not allowed
+OPNX13	600134	OPENF: Illeg access
+OPNX14	600135	OPENF: Illeg mode
+OPNX15	600136	OPENF: Non read/write access not allowed
+OPNX16	600137	OPENF: File has bad index block
+OPNX17	600140	OPENF: No room for long file page table table
+OPNX18	600141	OPENF: No room to initialize index block
+OPNX19	600142	OPENF: IMP is not up
+OPNX20	600143	OPENF: Host is not up
+OPNX21	600144	OPENF: Connection refused
+OPNX22	600145	OPENF: Connection byte size mismatch
+OPNX23	600146	OPENF: Directory access does not permit opening files
+
+DESX1	600150	Illeg TENEX source/destination designator
+DESX2	600151	That terminal not available
+DESX3	600152	Unassigned JFN
+DESX4	600153	Illeg use of terminal designator or string pointer
+DESX5	600154	File not open
+DESX6	600155	File must be a TTY
+DESX7	600156	JFN must not refer to output asterisks
+DESX8	600157	File must be on a disk
+
+CLSX1	600160	CLOSF: File not open
+CLSX2	600161	CLOSF: File not closable by this fork
+
+RJFNX1	600165	RLJFN: File is open
+RJFNX2	600166	RLJFN: JFN being used to accumulate file name
+RJFNX3	600167	RLJFN: JFN not accessible to this fork
+
+DELFX1	600170	DELF: You don't have delete access to file
+
+SFPTX1	600175	SFPTR: File not open
+SFPTX2	600176	SFPTR: Illeg to set this file's pointer
+SFPTX3	600177	SFPTR: Illeg pointer (eg less than -1)
+
+CNDIX1	600200	CNDIR (used for password check only): Incorrect password
+CNDIX2	600201	CNDIR: Incorrect password
+CNDIX3	600202	CNDIR: Invalid directory #
+CNDIX4	600203	CNDIR: Can't check password when logged in
+CNDIX5	600204	CNDIR: Not logged in
+CNDIX6	600205	CNDIR: Proxy connect not permitted except by top fork of group
+
+SFBSX1	600210	SFBSZ: Can't change byte size for this opening of file
+SFBSX2	600211	OPENF or SFBSZ: Illeg byte size
+
+IOX1	600215	Reading from a file not open for reading
+IOX2	600216	Writing on a file not open for writing
+IOX3	600217	RIN or ROUT: Can't change pointer for this opening of file
+IOX4	600220	Reading beyond end of file
+IOX5	600221	Data error
+IOX6	600222	Attempt to write beyond absolute maximum end of a file
+
+PMAPX1	600240	PMAP: Illeg access request
+PMAPX2	600241	PMAP: Illeg case
+
+SPACX1	600245	SPACS: Illeg access request
+
+FRKHX1	600250	Illeg fork handle
+FRKHX2	600251	Attempt to manipulate a superior fork
+FRKHX3	600252	Illeg attempt to manipulate multiple forks
+FRKHX4	600253	Fork running
+FRKHX5	600254	HFORK: Fork(s) already halted
+FRKHX6	600255	CFORK: Fork handles used up
+FRKHX7	600256	LGOUT: Not permitted except by fork in top fork group of a job
+
+SPLFX1	600260	SPLFK: Attempt to manipulate superior fork
+SPLFX2	600261	SPLFK: Attempt to splice with a non-inferior fork
+SPLFX3	600262	SPLFK: Attempt to splice forks into a loop
+SPLFX4	600263	SPLFK: Object forks have different JSYS trap monitors
+
+GTABX1	600267	GETAB: Illeg table index
+GTABX2	600270	GETAB: Illeg table #
+GTABX3	600271	GETAB: Capability not enabled
+
+RUNTX1	600273	RUNTM: Fork handle -3 or -4 given
+
+STADX1	600275	STAD: Date & time already set and not WHEEL or OPER
+STADX2	600276	STAD: Ridiculous date or time
+
+ASNDX1	600300	ASND: Unassignable device
+ASNDX2	600301	ASND: Illeg to assign this device
+ASNDX3	600302	ASND or CSYNO: No such device
+
+CSYNX1	600312	CSYNO: Synonym already in use
+
+ATACX1	600320	ATACH: Illeg job #
+ATACX2	600321	ATACH: Job already attached
+ATACX3	600322	ATACH: Directory # does not match
+ATACX4	600323	ATACH: Password Incorrect
+ATACX5	600324	ATACH: No controlling terminal
+
+DCHRX1	600330	DVCHR: Illeg device designator
+
+STDVX1	600332	STDEV: No such device
+
+DEVX1	600335	Illeg device designator
+DEVX2	600336	Device assigned to another job
+DEVX3	600337	Device not mounted
+
+MNTX1	600345	MOUNT: Bad directory
+MNTX2	600346	MOUNT: Attempt to mount device unsuccessful
+MNTX3	600347	MOUNT: Unmountable device
+
+TERMX1	600350	ATI or DTI: That code not usable for PSI's
+
+TLNKX1	600351	TLINK: Must do object to remote before remote to object link
+
+ATIX1	600352	ATI: Illeg channel #
+ATIX2	600353	ATI: Spec cap required to assign ^C
+
+DTIX1	600355	DTI: That code wasn't assigned to you
+
+TLNKX2	600356	TLINK: Link refused
+TLNKX3	600357	TLINK: All links in use
+
+TTYX1	600360	STI: Not a terminal or no such terminal
+
+CFRKX2	600362	CFORK: Can't start fork with no pages
+CFRKX3	600363	CFORK: NO ROOM in System
+
+KFRKX1	600365	KFORK: Can't kill top level fork
+KFRKX2	600366	KFORK: Can't kill self
+
+RFRKX1	600367	RFORK: Attempt to resume non-frozen fork(s)
+
+GFRKX1	600371	GFRKS: Illeg fork handle in 2
+
+GETX1	600373	GET: Bad save file format
+GETX2	600374	GET: System's Special Pages Table full
+
+TFRKX1	600375	TFORK: Unknown function bits
+TFRKX2	600376	TFORK: Unassigned fork handle or not immediate inferior
+
+SFRVX1	600377	SFRKV: Illeg entry vector relative position
+
+GETX3	600400	GET: File not properly opened
+
+OPRFX1	600401	OPRFN: Unknown function
+OPRFX2	600402	OPRFN: Bad argument
+
+NOUTX1	600407	NOUT: Radix out of range 2 to 36
+NOUTX2	600410	NOUT: Column overflow
+
+IFIXX1	600414	NIN: Radix out of range 2 to 36
+IFIXX2	600415	NIN: First character not a digit
+IFIXX3	600416	NIN: Overflow
+
+ADVX1	600420	ADVIZ: Advice not accepted
+ADVX2	600421	ADVIZ: This error code is not currently used
+ADVX3	600422	ADVIZ: Attempt to simultaneously advise and accept advice
+ADVX4	600423	ADVIZ: ADVIZ already in progress
+
+GFDBX1	600424	GTFDB: Illeg displacement
+GFDBX2	600425	GTFDB: Illeg number of words
+GFDBX3	600426	GTFDB: You don't have list access to file
+
+CFDBX1	600430	CHFDB: Illeg displacement
+CFDBX2	600431	CHFDB: Illeg to change those bits
+CFDBX3	600432	CHFDB: You don't have spec cap or file access to change those bits
+CFDBX4	600433	CHFDB: Illeg value for those bits
+
+DUMPX1	600440	DUMPI/O: Command list error
+DUMPX2	600441	DUMPI/O: JFN wasn't opened in mode 17
+DUMPX3	600442	DUMPI/O: Address too big or crosses end of memory
+DUMPX4	600443	DUMPI/O: Memory access error
+
+RNAMX1	600450	RNAMF: Files not on same device
+RNAMX2	600451	RNAMF: Destination file disappeared
+RNAMX3	600452	RNAMF: Access to destination not allowed
+RNAMX4	600453	RNAMF: NO ROOM
+
+BKJFX1	600454	Can't BKJFN that device twice
+
+TIMEX1	600460	Time greater than 24 hours
+
+ZONEX1	600461	Time zone out of range -12 to 12
+
+ODTNX1	600462	ODTIM can't print time zones except USA and Greenwich
+
+DILFX1	600464	Illeg date format
+
+TILFX1	600465	Illeg time format
+
+DATEX1	600466	Year out of range 1858 to 2576
+DATEX2	600467	Month greater than 11
+DATEX3	600470	Day of month too large
+DATEX4	600471	Day of week greater than 6
+DATEX5	600472	Date out of legal range
+DATEX6	600473	System date and time not set
+
+SMONX1	600515	SMON: LOG spec cap not enabled
+
+CPRTX1	600520	CPRTF: You don't have access to file to change protection
+
+SACTX1	600530	SACTF: File not on multiple-directory device
+SACTX2	600531	SACTF: JSB full
+SACTX3	600532	SACTF: Directory requires numeric account
+SACTX4	600533	SACTF: You don't have access to file to change account
+SACTX5	600534	SACTF: Illegal account
+
+GACTX1	600540	GACTF: File not on multiple-directory device
+GACTX2	600541	GACTF: File doesn't exist
+
+FFUFX1	600544	FFUFP: File not open
+FFUFX2	600545	FFUFP: File not on multiple-directory device
+FFUFX3	600546	FFUFP: No used page found
+
+DSMX1	600555	DSMNT: Can't dismount -- file(s) open
+
+RDDIX1	600560	RDDIR: Failure
+
+SIRX1	600570	SIR: Table address less than 20
+
+SSAVX1	600600	SSAVE: File not on disk
+SSAVX2	600601	SSAVE: Page count greater than 1000
+
+SEVEX1	600610	SEVEC: Entry vector longer than 777
+
+WHELX1	600614	WHEEL or OPER spec cap not enabled
+
+CAPX1	600615	WHEEL, OPER or MAINT spec cap required
+
+PEEKX1	600616	PEEK: Block crosses page boundary
+PEEKX2	600617	PEEK: Read access not allowed
+
+CRDIX1	600620	CRDIR: WHEEL or OPER spec cap not enabled
+CRDIX2	600621	CRDIR: Wrong directory # for name
+CRDIX3	600622	CRDIR: JSB full
+CRDIX4	600623	CRDIR: Sub-index full
+CRDIX5	600624	CRDIR: Null name illeg
+CRDIX6	600625	CRDIR: Can't change # of old directory
+CRDIX7	600626	CRDIR: Can't kill directory with busy files
+
+GTDIX1	600640	GTDIR: WHEEL or OPER spec cap not enabled
+GTDIX2	600641	GTDIR: No such directory #
+
+FLINX1	600650	FLIN: First char not blank or numeric
+FLINX2	600651	FLIN: Number too small
+FLINX3	600652	FLIN: Number too large
+FLINX4	600653	FLIN: Bad format
+
+FLOTX1	600660	FLOUT: Field overflow before or after point
+FLOTX2	600661	FLOUT: Exponent field overflow
+FLOTX3	600662	FLOUT: Illeg format spec
+
+FDFRX1	600700	FDFRE: Not a multiple directory device
+FDFRX2	600701	FDFRE: No such directory #
+
+ATPX1	600710	ATPTY: Bad rec'v JFN
+ATPX2	600711	ATPTY: Rec'v JFN not read
+ATPX3	600712	ATPTY: Rec'v JFN not open
+ATPX4	600713	ATPTY: Rec'v JFN not net
+ATPX5	600714	ATPTY: Rec'v JFN not unused
+ATPX6	600715	ATPTY: Rec'v connection refused
+ATPX7	600716	ATPTY: Send JFN Bad
+ATPX8	600717	ATPTY: Send JFN not write
+ATPX9	600720	ATPTY: Send JFN not open
+ATPX10	600721	ATPTY: Send JFN not net
+ATPX11	600722	ATPTY: Send JFN not unused
+ATPX12	600723	ATPTY: Send connection refused
+ATPX13	600724	ATPTY: No NVTs
+
+CVSKX1	600730	CVSKT: Bad JFN
+CVSKX2	600731	CVSKT: Local socket illeg in this context
+
+DPX1	600734	DISPLAY JSYS: Unassigned display process
+DPX2	600735	DISPLAY JSYS: Illeg display process number
+
+STRDX1	600740	STRDP (STSDP): Illeg map word
+STRDX2	600741	STRDP (STSDP): Too many pages locked
+STRDX3	600742	STRDP (STSDP): Non-readable-writable-executable page
+
+STTX1	600744	STTYP: Illeg terminal type number
+
+RNAMX5	600750	RNAMF: Destination busy
+RNAMX6	600751	RNAMF: Destination has bad page table
+RNAMX7	600752	RNAMF: Source disappeared
+RNAMX8	600753	RNAMF: Access to source not allowed
+RNAMX9	600754	RNAMF: Source is empty
+
+RNMX10	600755	RNAMF: Source busy
+RNMX11	600756	RNAMF: Source has bad page table
+RNMX12	600757	RNAMF: Rename to self
+
+GJFX36	600760	GTJFN: Directory has bad format -- notify operator
+
+NTWZX1	600761	NETWIZ spec cap required
+
+SQX1	600762	Special IMP Q number out of range
+SQX2	600763	Special IMP Q not assigned to this job
+
+ASNSX1	600764	ASNSQ: All special queues in use
+ASNSX2	600765	ASNSQ: Link(s) assigned to another special queue
+
+SNDIX1	600766	SNDIM: Bad message size
+SNDIX2	600767	SNDIM: No buffers available
+
+ILINS1	600770	Illeg instruction executed
+ILINS2	600771	Unassigned JSYS executed
+ILINS3	600772	10/50 UUO executed and compatability package not found
+
+SNDIX3	601000	SNDIM: NCP links, 0 - 72, not permitted
+SNDIX4	601001	SNDIM: Header value not permitted on this queue
+SNDIX5	601002	SNDIM: IMP down
+
+SCTX1	601004	SCTTY: Undefined function bits
+SCTX2	601005	SCTTY: TTY already in use as controlling TTY
+SCTX3	601006	SCTTY: Attempt to set job controlling TTY as fork controlling TTY
+
+CAPX2	601010	CTY spec cap required
+
+GJFX37	601014	GTJFN: Illeg version number
+GJFX38	601015	GTJFN: Illeg account
+
+PIEX1	601020	CGRP (GPSGN): Not a pie slice scheduler system
+
+VACX1	601025	VACCT (GDACC): No such user
+VACX2	601026	VACCT: Invalid name/account pair
+
+GBERR1	601027	VACCT: User name/account not in account matrix
+
+GDACX1	601030	GDACC: User name not in accounting matrix
+GDACX2	601031	GDACC: No default account for user
+
+CGRPX1	601035	CGRP: No such group name
+
+ACCTX1	601040	No user/account data file
+
+ATGPX1	601045	ATGRP: Invalid account or no group for this acount
+
+GCTJX1	601050	GACTJ (GPSGN): Invalid job #
+GCTJX2	601051	GACTJ (GPSGN): Job doesn't exist
+
+GNJFX2	601054	GNJFN: No such version
+
+GFACX1	601060	No such directory (AC1 or AC3)
+GFACX2	601061	Illegal protection word
+
+TFRKX3	601064	TFORK: Fork not frozen
+
+TYMXX1	601200	Aux circuit building mechanism busy
+TYMXX2	601201	Aux circuit building mechanism timed out
+TYMXX3	601202	No free lines available
+TYMXX4	601203	Line  myteriously zapped prematurely
+TYMXX5	601204	Supervisor reports error
+TYMXX6	601205	Illegal receive bits request
+TYMXX7	601206	Illegal TYMOP function code
+TYMXX8	601207	Illegal TYMNET TTY
+TYMXX9	601210	Job does not own TTY
+TYMX10	601211	Insufficient capabilities
+TYMX11	601212	Illegal job number
+TYMX12	601213	Illegal SYSNDX
+TYMX13	601214	SYSNDX slot already occupied
+TYMX14	601215	SYSNDX slot not currently occupied
+TYMX15	601216	Illegal aux TTY or in bad state
+TYMX16	601217	Aux TTY not queued by job
+TYMX17	601220	No jobs queued
+TYMX18	601221	Bad aux circuit function specified
