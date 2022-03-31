@@ -1,0 +1,4157 @@
+;<FOONEX>TYMSRV.MAC;123    18-Jun-80 12:41:09    EDIT BY LYNCH
+;<FOONEX>TYMSRV.MAC;122    18-Jun-80 09:19:53    EDIT BY LYNCH
+;DSK:<134-TENEX>TYMSRV.MAC;120  6-May-80 20:31:24, Edit by FRENCH
+;FIX BUG IN TYMRST (DON'T PASS LINE # AOBJN PTR TO PSI ROUTINES)
+;TURN OFF CARRIER OFF BIT IN TTFLGS BEFORE ISSUEING INTERRUPT
+;DSK:<134-TENEX>TYMSRV.MAC;119 25-Apr-80 14:09:20, Edit by FRENCH
+;DON'T CLEAR SYSNDX TABLE ON BASE RESYNC
+;ONLY DO IT ONCE IN TYMINI
+;<134-TENEX>TYMSRV.MAC;118     4-Apr-80 16:57:15    EDIT BY PETERS
+; Make TYMDOB simply return without yellow ball negotiation
+;DSK:<134-TENEX>TYMSRV.MAC;117  4-Apr-80 15:13:15, Edit by FRENCH
+;TYMENT TYPE A GETS NVT NOW FOR SLOW AND FAST SPEEDS
+;DSK:<134-TENEX>TYMSRV.MAC;116  2-Apr-80 11:21:47, Edit by FRENCH
+;CLEAR TTLPOS FOR LINE RIGHT AFTER SETYP SO GET PAGING RIGHT
+;DSK:<134-TENEX>TYMSRV.MAC;115 25-Mar-80 11:28:48, Edit by FRENCH
+;FIX BUG IN AUXBLD.  RESTORE USER PTR TO LOGIN STRING FOR CPYFU1
+;DSK:<134-TENEX>TYMSRV.MAC;114 18-Mar-80 14:21:26, Edit by PETERS
+; Fix CAPMSK reference to be EXTERNAL
+;<FRENCH>TYMSRV.MAC;1    17-Mar-80 21:20:06    EDIT BY FRENCH
+;TTY TYPE 16 IS VT100, FIX TYMNET PARAMETERS FOR IT
+;DSK:<134-TENEX>TYMSRV.MAC;112 17-Mar-80 12:58:19, Edit by FRENCH
+;DO FANCY INPUT TTY BUFFER SPLICE WHEN NECESSARY FOR IBP ADJUSTING
+;FIX UP ILLEGAL EXTERNAL ARITHMETIC FOR TTY PARAMETERS
+;DSK:<134-TENEX>TYMSRV.MAC;111 29-Feb-80 14:03:17, Edit by FRENCH
+;MAKE PTT 5 BIT BYTES TO ALLOW FOR NEW TERMINAL PARAMETERS
+;DSK:<134-TENEX>TYMSRV.MAC;110 27-Feb-80 14:43:56, Edit by FRENCH
+;ADDED MORE UPTODATE TERMINAL PARAMETER CODE DEFINTIONS
+;DSK:<134-TENEX>TYMSRV.MAC;109 22-Feb-80 15:05:55, Edit by FRENCH
+;MAKE TYMNET THINK OF DUMMY TTY TYPES AS NVTS
+;DSK:<134-TENEX>TYMSRV.MAC;108 22-Feb-80 14:56:17, Edit by FRENCH
+;REWORK TERMINAL TYPE TABLES FOR AGREEMENT WITH EXEC AND TTYSRV
+;PUT IBPNBF IN TTYSRV AND MAKE EXTERNAL HERE
+;DSK:<134-TENEX>TYMSRV.MAC;105 21-Feb-80 20:05:22, Edit by FRENCH
+;JOB 0 UNDOES POSSIBLE INPUT BUFFER DIDDLING WHEN FREEING LINE
+;DSK:<134-TENEX>TYMSRV.MAC;104 21-Feb-80 19:41:28, Edit by FRENCH
+;WHEN TYMNET TTY TYPE IS 0 (DESTINATION END OF AUX CIRCUIT)
+;ENABLE IBP AND DIDDLE INPUT BUFFER PARAMETERS FOR LINE IN TYMCTL
+;DSK:<134-TENEX>TYMSRV.MAC;103 21-Feb-80 19:26:35, Edit by FRENCH
+;REWORKED IBP STUFF.  AUX CIRCUITS ALWAYS GET BUILT WITH IPBOF ENABLED
+;WITH SPECIAL INPUT BUFFER PARAMETERS.  SETLNS DIDDLES BUFFER
+;PARAMETERS ALSO.
+;DSK:<134-TENEX>TYMSRV.MAC;102 19-Feb-80 16:50:58, Edit by FRENCH
+;ADDED PRIVELEDGE CHECK FOR AUX BUILDING AT AUXBLD
+;DSK:<134-TENEX>TYMSRV.MAC;101 14-Feb-80 13:59:46, Edit by FRENCH
+;CONDITIONAL IBPOFF OFF F3FLG
+;DSK:<134-TENEX>TYMSRV.MAC;100 11-Feb-80 12:54:53, Edit by FRENCH
+;FIX GETLNS TO GET LINE # CORRECTLY
+;DSK:<134-TENEX>TYMSRV.MAC;99 29-Jan-80 12:31:03, Edit by FRENCH
+;ADDED IFN KL FOR NO CACHEING OF TYMBPG
+;<134-TENEX>TYMSRV.MAC;98    27-Jan-80 18:52:22    EDIT BY PETERS
+; Fix IFDEF/IFNDEF F3AFLG to IFE/IFN F3FLG
+;DSK:<134-TENEX>TYMSRV.MAC;97 24-Jan-80 17:26:11, Edit by FRENCH
+;ADDED JUNK IMULI'S IN FNSYNC FOR MICROCODE LOSAGE DELAY REQUIRED FOR F3A
+;DSK:<134-TENEX>TYMSRV.MAC;95 23-Jan-80 23:03:44, Edit by FRENCH
+;MORE BUG FIXES AS RESULT OF LATE NIGHT DEBUGGING
+;<134-TENEX>TYMSRV.MAC;88    20-Jan-80 23:41:35    EDIT BY FRENCH
+;FIX MORE QUEUEING BUGS
+;DSK:<134-TENEX>TYMSRV.MAC;83 20-Jan-80 17:49:37, Edit by FRENCH
+;VARIOUS BUG FIXES FIRST FIRST PASS AT AUX CIRCUIT QUEUE DEBUGGING
+;DSK:<134-TENEX>TYMSRV.MAC;81 15-Jan-80 16:39:13, Edit by FRENCH
+;DSK:<134-TENEX>TYMSRV.MAC;79 14-Jan-80 19:45:02, Edit by FRENCH
+;ADDED TYMRLA ROUTINE, CALL TTRLAB IN JOB 0 CLEANUP OF LINES
+;<134-TENEX>TYMSRV.MAC;78    21-Dec-79 23:48:58    EDIT BY LOWE
+;CHANGED F3FLG USAGE FROM IFE/IFN TO IFDEF/IFNDEF AS USED BY JCP
+;<DSK:<134-TENEX>TYMSRV.MAC;75> 20-Dec-79 12:24:26, Edit by FRENCH
+;ADDED RETY WIN MESSAGE IF FNSYNC RETRY SUCCEEDS
+;<DSK:<134-TENEX>TYMSRV.MAC;74> 19-Dec-79 12:05:28, Edit by FRENCH
+;SEND RESET IF ALARM GOES OFF, ALARM PERIOD UP TO 1 MINUTE
+;<DSK:<134-TENEX>TYMSRV.MAC;73> 18-Dec-79 20:26:03, Edit by FRENCH
+;CONTINUED HACKING OF JOB 0 TYMNET NODE RESETING LOGIC
+;<134-TENEX>TYMSRV.MAC;70    18-Dec-79 18:14:21    EDIT BY FRENCH
+;FIX TYMCHK FOR BAD MOVEM 1,TYMRST (SHOULD BE TYMSTS)
+;CHANGED IBPOFF FROM 40 TO 200
+;FIX FENCEPOST PROBLEM FOR TERMINAL TYPES IN TYMX0.
+;MAKE TYMRST JOB 0 FUNCTION SO FOONLY NODE RESYNC CAN TAKE LONG TIME
+;WITHOUT HANGING MACHINE.
+;TERMINATE AUX CIRCUIT STRINGS WITH ";" INSTEAD OF ANOTHER SUPER AUX REQ.
+;RESET COMMUNICATIONS HEADER BEFORE DOING INTERAFCE RESET
+;RESET YHCRSH VIA TEMPLATE TOO IN TYMRST
+;ADDED CODE FOR FOO - NODE INTERFACE VIA F3FLG DEFINED IN PARAMS
+;<134-TENEX>TYMSRV.MAC;48    15-Dec-79 17:04:53    EDIT BY FRENCH
+;REWORK TYMCTL H2H DETECTION NOT TO EAT NON H2H CHARS IN ANY WAY
+;FIX CROCK AT TYMX9 IF LINE NO LONGER CONNECTED, ADDED TYMBYE FOR THAT
+;<134-TENEX>TYMSRV.MAC;47    14-Dec-79 19:51:45    EDIT BY FRENCH
+;ADDED NTHOST OUTPUT TO BASE IN TYMRST CODE
+;<134-TENEX>TYMSRV.MAC;46    14-Dec-79 13:38:28    EDIT BY PETERS
+; Changed TYMBUF to TYMBAS in two places to make it possible
+; To assemble for a standard (non-SUMEX) Tymbase
+;<134-TENEX>TYMSRV.MAC;30    12-Dec-79 21:00:08    EDIT BY FRENCH
+;MERGED AUXQUE STUFF.  NO TURNING BACK NOW
+;<134-TENEX>TYMSRV.MAC;22     9-Dec-79 20:13:23    EDIT BY FRENCH
+;ADDED TYMROK ROUTINE TO BE CALLED FROM RELD TO PREVENT USERS
+;FROM STEPPING ON AUX CIRCUITS WITHOUT USING AUXRLS TYMOP FUNCTION.
+;<134-TENEX>TYMSRV.MAC;21     9-Dec-79 19:11:21    EDIT BY FRENCH
+;ADDED CONAH1 AND CONAH2 AUX CIRCUIT STATES FOR FLOW CTL IN HANGUP CODE
+;<134-TENEX>TYMSRV.MAC;19     9-Dec-79 16:38:46    EDIT BY FRENCH
+;ADDED AUXRLS FUNCTION CODE AND ROUTINE TO .TYMOP
+;<134-TENEX>TYMSRV.MAC;17     7-Dec-79 15:02:38    EDIT BY FRENCH
+;REWORKED PSI STUFF FOR AUX CIRCUITS AND NORMAL LINES
+;AUXCIRCUITS ALWAYS GET POKED ON TERM CODE 32
+;NORMAL LINES ON 30
+;<PEFMON>TYMSRV.MAC;3     6-Dec-79 15:52:00    EDIT BY FRENCH
+;CALL TTPS2T IN TTYSRV INSTEAD OF TTPSI2 AT TYMPS2
+;<PEFMON>TYMSRV.MAC;2     5-Dec-79 20:44:35    EDIT BY FRENCH
+;ADDED TYMLFP ROUTINE CALLED FROM TTYSRV TO CHECK TO SEE IF TYMNET
+;LINES SHOULD GET LINEFEED PADDING BY TENEX.
+;FIXED TERMINAL TYPE HANDLING, GET NVT TYPE FOR AUX CIRCUITS .
+;ADDED CLEARING OF AUXINF AT SUPBAD.
+;<PEFMON>TYMSRV.MAC;4    28-Nov-79 19:30:03    EDIT BY FRENCH
+;ADDED UNSTYP ROUTINE FOR UNIMPLMENETED CODE IGNORING.
+;CHANGED PSI TERMINAL CODE FROM 30 TO 32 AT TYMDET. (NEW TENEX
+;USES 30 AND 31)
+;<134-TENEX>TYMSRV.MAC;13     3-Oct-79 18:43:06    EDIT BY PETERS
+;installed input backpressure crock at setlns
+;<134-TENEX>TYMSRV.MAC;12    17-Jul-79 22:02:53    EDIT BY PETERS
+;<134-TENEX>TYMSRV.MAC;11     9-Apr-79 18:15:52    EDIT BY PETERS
+;<134-TENEX>TYMSRV.MAC;10    10-Sep-78 16:08:36    EDIT BY PETERS
+;<134-TENEX>TYMSRV.MAC;9    29-Aug-78 16:09:20    EDIT BY PETERS
+;<134-TENEX>TYMSRV.MAC;8    27-Aug-78 19:40:04    EDIT BY PETERS
+;<134-TENEX>TYMSRV.MAC;7    16-Aug-78 20:31:19    EDIT BY PETERS
+;<134-TENEX>TYMSRV.MAC;6    13-Aug-78 14:36:30    EDIT BY PETERS
+;<134-TENEX>TYMSRV.MAC;5    15-Jul-78 18:40:33    EDIT BY PETERS
+;<134-TENEX>TYMSRV.MAC;4    10-Jul-78 13:14:52    EDIT BY PETERS
+;<134-TENEX>TYMSRV.MAC;3     8-Jul-78 17:14:18    EDIT BY PETERS
+;<134-TENEX>TYMSRV.MAC;2     1-Jun-78 15:10:03    EDIT BY PETERS
+;<MON>TYMSRV.MAC;3    22-MAR-77 15:15:18    EDIT BY SWEER
+; SAVE LINE AROUND TTCHI CALL IN LOGGER
+;<SCHULZ>TYMSRV.MAC;2    24-NOV-76 11:04:23    EDIT BY SWEER
+; FIXED TYSAVP HANDLING AND IMPROVED TTY CHECK IN .TYMOP
+;<MON>TYMSRV.MAC;25    12-APR-76 16:30:36    EDIT BY SWEER
+; ADDED HEATHMAN FIXES TO IGNORE DATA/TIME MSG ON STARTUP
+; AND BETTER HANDLING OF INPUT BACK PRESSURE
+	SUBTTL DATA DEFINITIONS, STORAGE, POINTERS, ETC
+;
+;	TYMBASE interface handler
+;	Michael Heathman  8/74, 7/75
+;	SUMEX-AIM
+;	Stanford University Medical Center
+;	Stanford, Ca. 94305
+;
+
+	search prolog
+	title TYMSRV
+
+;
+;	EXTERNALS, INTERNALS
+;
+	EXTERNAL CHKTIM			;LINK TO JOBZRO
+	EXTERNAL JB0FLG,BUGNTE,SETJFK ;link to SWPMON
+	EXTERNAL DISE,PSILOB,PSIR4,STIME,ETIME,JOBDIR ;link to SCHED
+	EXTERNAL CHKDEV,CHKTTC,DEVUNT,DEVCHR,NDEV ;LINK TO JSYS
+	EXTERNAL MSTKOV		;link TO PISRV
+	EXTERNAL LSTERR		;link to FILE
+	EXTERNAL CPYFU1		;link to FUTILI
+	EXTERNAL TYMXX2,TYMXX3,TYMXX5,DEVX2
+	external bhc,bits,bughlt,BUGCHK,capenb,chktty,edisms
+	external entflg,fkint,insked,itrap1,jobpt,logdes
+	external mentr,mretn,mretne,normtf,r,skmrtn
+	external tadsec,tci,tci0,tcibf,tcobq,todclk
+	external ttchi,ttdobe,ttdpsi,ttect,tteout,ttflgs
+	external ttfork,ttfrec,ttict,ttiin,TTIOUT
+	external ttimax,ttmod1,ttnin,ttnou,ttoct,ttoin
+	external ttomax,ttoout,ttpsi,ttpsi2,ttrec4,ttrlob,TTRLAB
+	external ttrne,ttylmd,ttype,typcrt,unlckf,wrpmsk
+	external ttflgs,xttflg,tymchx,MINUS1
+	EXTERNAL TTPS2T,NYCHBF,NINBUF,IBPNBF,TTGTBF,TTLPOS
+
+	INTERNAL TYMNFK		;link to SCHED
+	INTERNAL TYMX0,TYMJB0	;link to SWPMON
+	INTERNAL TYHNGU		;link to JSYS
+	INTERNAL TYMCHK		;link to SCHED
+	INTERNAL YHCRSH,TYMCLK	;link to PISRV
+	INTERNAL .TYMBW,.TYMBR,.TYMLI,.TYMOP ;link to PROLOG
+	internal greent,tymeco,tymtci,tymini,tymdob
+	internal tymchi,tymcib,rcvcmp,tymtyp,tymcob,TYMLFP
+	internal nthost,tymptr
+	INTERNAL TYMROK		;LINK TO DEVJS (.RELD)
+	INTERNAL TYMQUE		;LINK TO JOBINI
+	INTERNAL LGOAUX,TYMRLA	;LINK TO LOG2JS
+
+
+;
+;	DEFINITIONS
+;
+IRNGS==200		;input ring size
+ORNGS==400		;output ring size
+YKEY==633751506262	;base key
+NTYMOT==NTYMTT		;number of lines to check for output at one
+			;pass through TYMOUT
+NXFRMX==177		;maximum # of chars to send for one line
+IFG NXFRMX-177,<PRINTX NXFRMX must be less than 200>
+STATSW==1		;assemble TYMSRV statisics keeping code
+
+NAUXLN==1		;number of parallel aux circuit initiations possible
+NAXTRY==2		;number of aux cir bldging retrys on super error
+AUXID==1		;present aux cir id for all aux cir building
+			;will change when TYMSHARE implements parallel
+			;aux circuit building
+BUFSIZ==13		;size of buffer in which to store TYMNET connect
+			;name (buffer is stack)
+
+;SEE TTYSRV FOR DEF OF IBPNBF (# INPUT BUFFERS FOR AUX CIRCUITS)
+
+IBPOFF==200		;INPUT BACK PRESSURE TURN ON POINT, OR MAX
+			;PROBABLE # OF CHARS IN IRING AT ANY ONE TIME.
+
+; VARIOUS CLOCK PERIODS
+
+IFE F3FLG,<KEYPRD==^D100		;key check interval
+	    OVRPRD==^D8*^D1000		;interface overdue period>
+IFN F3FLG,<KEYPRD==^D10*^D1000		;KEY CHECK INTERVAL FOR FOONLEY
+	    OVRPRD==^D20*^D1000		;interface overdue period>
+
+IFN F3FLG,<SNCPRD==^D20*^D1000		;TIMEOUT FOR NODE RESYNC
+	    J0RPRD==^D30*^D1000		;HOW LONG TO WAIT BEFORE NEXT
+					;RETRY TO RESYNC NODE>
+
+IKEYCT==OVRPRD/KEYPRD	;RESET VALUE FOR KEYCT
+
+YELPRD==^D60*^D1000	;yellow ball overdue time limit
+RSTPRD==^D5*^D1000	;crash reset "silence" period
+YALRMP==^D60*^D1000	;TYMBASE disabled check period
+AUXPRD==2*^D60*^D1000	;aux circuit overdue period
+AUXTIM==3*^D60*^D1000	;HOW LONG AUX CIRCUIT CAN BE QUEUED FOR
+AUXTMC==^D5*^D1000	;HOW OFTEN JOB 0 RUNS AUXCKT
+
+IFN F3FLG,<NZEROS==300		;WRT THIS MANY 0 TO RESYNC NODE>
+
+
+;	REGISTERS
+
+A==1
+B==2
+C==3
+D==4
+LINE==2			;line number index
+JFN==11
+IPTR==11		;input iring pointer
+OPTR==12		;output oring pointer
+
+IFN F3FLG,<
+
+;SPECIAL OPCODES FOR FOONLY-NODE INTERFACE
+
+OPDEF FN.RST [744000,,0]	;RESET FOO-NODE INTERFACE
+OPDEF FN.WRT [745000,,0]	;WRITE TO FOO-NODE INTERFACE
+OPDEF FN.RED [746000,,0]	;READ FROM FOO-NODE INTERFACE
+
+> ;END IFN F3FLG
+
+; AUX CIRCUIT ID BUILDING STATES
+
+AUXFRE==0		;available for building
+AUXUSE==1		;claimed for use
+AUXREQ==2		;first supervisor request sent
+AUXSGR==3		;supervisor acknowledge
+AUXSGN==4		;signon string sent
+AUXLGR==5		;auxlog received
+AUXBLT==6		;aux circuit built
+AUXRTY==7		;supervisor error received, retry
+AUXPS2==10		;first flush state on PSI interrupt
+AUXPS3==11		;second flush state on PSI interrupt
+AUXPS4==12		;third flush state on PSI interrupt
+
+; LINE CONNECTION STATES
+
+CONFRE==0			;line disconnected from TYMNET
+CONLG1==<CONNF>B47+1		;line connected, init not started
+CONLG2==<CONNF>B47+2		;line connected, init routine reading
+CONLG3==<CONNF>B47+3		;line connected, init routine in operation
+CONCTL==<CONNF+INITF>B47 	;line connected to TENEX as controlling tty
+CONHG1==<CONNF+INITF>B47+4 	;post-init hang up waiting for empty buffers
+CONHG2==<CONNF+INITF>B47+5 	;post-init hang up waiting for yellow ball
+CONHG3==<CONNF>B47+4		;pre-init hang up waiting for empty buffers
+CONHG4==<CONNF>B47+5		;pre-init hang up waiting for yellow ball
+CONDC1==3			;disconnected while init, wait till init thru
+CONDC2==2			;zapped while reading init stuff
+CONDC3==<INITF>B47+1		;type disconnect message
+
+CONAL1==<CONNF+AUXF>B47+1 	;aux circuit connected, waiting for super ok
+CONAL2==<CONNF+AUXF>B47+2 	;aux circuit connected, not yet inited
+CONAL3==<CONNF+AUXF>B47+3 	;aux circuit connected, init in operation
+CONAUX==<CONNF+AUXF+INITF>B47	;line connected to TENEX as aux circuit
+CONAH1==<CONNF+AUXF+INITF>B47+4 ;POST INIT HANGUP WAITING FOR EMPTY BUFFS
+CONAH2==<CONNF+AUXF+INITF>B47+5 ;POST INIT HANGUP WAITING FOR YELLOW BALL
+CONAD1==<AUXF>B47+2		;aux circuit zapped while waiting for super ok
+CONAD2==<AUXF>B47+3		;aux cir zapped while initing
+CONAD3==<AUXF+INITF>B47+1 	;deassign aux circuit and type disc message
+
+COMMENT $ 
+
+KNOWN BUGS AND DESIRED CHANGES:
+
+	1) When entering any of the PS2,3,4 states, the supervisor response
+	   timer gets reset, allowing the supervisor to remain silent and
+	   leave the auxbld process locked in the corresponding PSI flush
+	   state. The fix is to transfer the supervisor time out routines
+	   from the WTLST routine to the SCHED level routines, and on time
+	   out, return AUXSTS to the FRE state.  If the AUXBLD process
+	   gets hung up this way, just zap AUXSTS to FRE (SETZM AUXINF(n)).
+
+	2) There needs to be a translation table between TYMNET supervisor
+	   error codes and TENEX error codes of the 600nnn variety, with
+	   a TENEX error code for "unrecognzed SUPERVISOR error".  The 
+	   supervisor errors are:
+
+		1 - Illegal signon string format
+		2 - Unrecognized signon string
+		3 - Bad Master User Directory (MUD); supervisor blew its mind
+		4 - System unavailable
+
+	3) Some timer studies I did do, show that the code is not as
+	   efficient as I would like.  I would suggest putting switches
+	   in the YLTCHK and TYMOUT sections of the code which are turned
+	   on whenever a yellow ball is sent or whenever any output is
+	   placed in the output buffers (or the HG1 or HG3 states are
+	   entered) respectively.  The YLTCHK and TYMOUT routines
+	   should only execute when these switches are on, and turn them
+	   off when they are through.  This would eliminate multiple
+	   line scans.
+
+
+		Michael Heathman 8/75
+
+   This is a state map of the connect/disconnect sequence.  The state
+variable is a combination of CONSTS and the left half of TTFORK, represented
+here as the last three capital letters of the CONXXX states defined above
+and the numeric vaule of (lh) TTFORK (where "n" is the job number).
+Events are lower case letters along the transition path nearest the 
+originating state.  Actions (where they can be squeezed in) are in 
+parenthesis.
+								  
+  ----------------------FRE,-1---------------------		 -^c
+  !		     aux   ^  log		  !      	 ----
+  !			   !			  v   -^c	 ^  v zap
+  !			   !			LG1,-1---  ---->CTL,-1---
+  !			   !		       ^c !    	!  !     ^  !^c	!
+  !			   ! -frk	     zap  v-frk	!  ! -frk!  v	!
+  !			   !<---FRE,-2<---------LG1,-2--!  !	CTL,-2	!
+  !			   !   frk!   -----       !frk	!  ! frk/  !zap	!
+  v  zap		   v  det v  /read!  zap  v	!  !   v   v	!
+AL1,n--------------------->!<---FRE,n<----------LG1,n 	!  !   !   !<----
+  ! sup ok		   !   /  ^		  !read	!  !   !   !
+  v  zap	     msg   !  /	  !msg	     zap  v	------ !   !
+AL2,n---------->AD1,n----->! !	DC2,n<----------LG2,n 	   ! ! !   !
+  ! msg			   ! !			  ! msg	   ! ! !   !
+  v  zap		   ! !		     zap  v	   ! ! !   !
+AL3,n---------->AD2,n	   ! !	DC1,n<----------LG3,n  det ! ! !   !
+  !init	      init!	   ! !	  !init	      init!   -----! ! !   !
+  v  zap	  v  job 0 ! !	  v	     zap  v  /       ! !   !
+AUX,n---------->AD3,n----->! --<DC3,n<----------CTL,n<-------!--   !
+  ! hang		   !  job 0	     hang !    ------!------
+  v			   !			  v   /	     !
+  -------------------------!------------------->HG1,-1       -->HG3,-1
+			   !		    zap/  !empty    zap/   !empty
+			   !job 0    /---------	  v	     /	   v
+			   !<---DC3,-1<---------HG2,-1	     !	HG4,-1
+			   !	    	    zap or yellow    v	   !yellow
+			   !<---------------------------------------  or
+								     zap
+
+EVENT			   from	STATE	     to	STATE	ACTION
+
+log   log code received,	FRE,-1		LG1,-1
+      TENEX line found
+
+aux   auxilliary circuit built,	FRE,-1		AL1,n	assign line
+      TENEX line found
+
+^c    ^C accepted, fork		LG1,-1		LG1,-2
+      requested
+
+				CTL,-1		CTL,-2
+
+-^c   ^C rejected		LG1,-1		HG3,-1	
+
+				CTL,-1		CTL,-1
+
+frk   fork started		LG1,-2		LG1,n
+
+				FRE,-2		FRE,n
+
+				CTL,,-2		CTL,n
+
+-frk  fork rejected		LG1,-2		HG3,-1
+
+				FRE,-2		FRE,-1
+
+				CTL,-2		CTL,-1
+
+read  TYMNET connect string	LG1,n		LG2,n
+      reading commenced
+
+				FRE,n		FRE,n	skip initialization
+
+msg   connect message started	LG2,n		LG3,n
+
+				DC2,n		FRE,n	skip initialization
+
+				AL2,n		AL3,n	
+
+				AD1,n		FRE,-1	deassign line
+
+init  initialization complete	LG3,n		CTL,n	
+
+				DC1,n		DC3,n	detach interrupt
+
+				AL3,n		AUX,n	
+
+				AD2,n		AD3,n	detach interrupt
+
+hang  program requested 	CTL,n		HG1,-1
+      hang up
+
+				AUX,n		HG1,-1
+
+empty output buffer empty	HG1,-1		HG2,-1	send yellow ball
+
+				HG3,-1		HG4,-1	send yellow ball
+
+yellow yellow ball returned	HG2,-1		DC3,-1	send zapper
+
+				HG4,-1		FRE,-1
+
+job 0 job 0 disconnect msg	DC3,-1		FRE,-1
+
+				DC3,n		FRE,n
+
+				AD3,n		FRE,-1	deassign line
+
+zap   received zapper		LG1,-2		FRE,-2
+
+				LG1,n		FRE,n
+
+				LG2,n		DC2,n
+
+				LG3,n		DC1,n	
+
+				CTL,n		DC3,n	detach interrupt
+
+				HG1,-1		DC3,-1
+
+				HG2,-1		DC3,-1
+
+				HG3,-1		FRE,-1
+
+				HG4,-1		FRE,-1
+
+				CTL,-1		HG1,-1
+
+				CTL,-2		HG1,-1
+
+				AL1,n		FRE,-1	deassign line
+
+				AL2,n		AD1,n
+
+				AL3,n		AD2,n
+
+				AUX,n		AD3,n	detach interrupt
+
+   Auxilliary circuit building state map.  Again, states correspond to
+last three capital letters of AUXBLD symbols defined above, events are
+in lower case.
+
+
+   ---------------------------->FRE<------------------------------
+   !				 !				 !
+   !				 !				 !
+   !				 v				 !
+   !				USE				 !
+   !				 !    new			 !
+   !				 !   --------------------------->!
+   ! sup		     psi v  / err			 !
+   !<---PS2<--------------------REQ-----------			 !
+   !	 ! ack		     ack !  \ time   !			 !
+   !	 !			 !   --------!------------------>!
+   !	 !		   psi   v	     !			 !
+   !	 !<---------------------SGR          !			 !
+   !	 !		    prog !    new    !			 !
+   !	 !			 !   --------!------------------>!
+   ! sup v		     psi v  / err    v		   prog  !
+   !<---PS3<--------------------SGN-------------------->RTY----->!
+   !	 ! log		     log !  \ time   ^			 !
+   !	 !			 !   --------!------------------>!
+   !	 !			 !    new    !			 !
+   !	 !			 !   --------!------------------>!
+   ! sup v		     psi v  / err    !			 !
+   !<---PS4<--------------------LGR-----------			 !
+     or ack   		     ack !  \ time			 !
+				 !   --------------------------->!
+				 v
+				BLT
+
+
+EVENT			   from	STATE	     to	STATE	ACTION
+
+prog  program action		FRE		USE	lock AUXBLD process
+
+				USE		REQ	send super request
+				
+				SGR		SGN	send sign on string
+
+				RTY		REQ	retry, send super
+							request
+
+ack   supervisor acknowldege	REQ		SGR
+
+				PS2		PS3	send super request
+							w/o signon string
+							to force termination
+							error	
+
+				PS4		FRE	
+
+log   aux cir login		SGN		LOG	
+
+				PS3		PS4	zap line
+
+err   supervisor error		REQ		RTY	retry
+							
+				SGN		RTY	retry
+
+				LGR		RTY	retry
+
+new   new supervisor takeover	REQ		FRE	restart
+							
+				SGN		FRE	restart
+
+				LGR		FRE	restart
+
+time  supervisor time out	REQ		FRE	abort
+
+				SGN		FRE	abort	
+
+				LGR		FRE	abort
+
+sup   is err, new, or time
+
+psi   PSI interrupt rcvd	REQ		PS2	restart 
+
+				SGR		PS3	restart 
+	
+				SGN		PS3	restart 
+							
+				LGR		PS4	zap line, restart
+ACTIONS
+
+retry	release process, increment retry counter, lock and start process
+
+restart	release process, reset retry counter, lock and start process
+
+abort	release process, return error to user
+$ ;end COMMENT
+
+;
+;	VARIABLES
+;
+LS(DYMLNS,NTYMTT)	;individual line TYMNET status
+TYMLNS=:DYMLNS-TYMTTL	;offset for tymlines only
+LS(DLTCHK,NTYMTT)	;over due yellow ball clock
+YLTCHK=:DLTCHK-TYMTTL
+LS(DYNODS,NTYMTT)	;TYMNET connection source info (tty type, node, port)
+TYNODS=:DYNODS-TYMTTL
+LS(TYMTEN,NTYMTT)	;TYMNET to TENEX line number conversion, indexed
+			;by TYMNET port number, RH gives TENEX line number
+TENTYM=:TYMTEN-TYMTTL	;TENEX to TYMNET line number conversion, indexed
+			;by TENEX line number, LH gives TYMNET port number
+			;-1 in both cases means disconnected
+LS(DYMCMM,NTYMTT)	;mask of control messages to deferredly interrupt
+TYMCMM=:DYMCMM-TYMTTL
+LS(DYMCMR,NTYMTT)	;last received deferred control message
+TYMCMR=:DYMCMR-TYMTTL
+LS(DYMCMI,NTYMTT)	;XWD system fork number of fork to receive deferred
+TYMCMI=:DYMCMI-TYMTTL	;control message interrupt,,PSI channel for int.
+
+LS(DUXINF,NAUXLN)	;auxilliary circuit building information
+AUXINF=:DUXINF-AUXID
+LS(DUXCLK,NAUXLN)	;aux circuit clock
+AUXCLK=:DUXCLK-AUXID
+LS(TYMSVC,1)		;supervisor version number
+
+LS(KEYTIM)		;keyword check clock
+LS(KEYCT)		;key clobber count, and interface status flag
+LS(LTYMOT)		;last line checked for output in TYMOUT
+LS(TYMCSH)		;TYMBASE crash reason, YBCRSH saved on RESET
+LS(TYSAVP)		;intrpt side pc on oring full
+LS(TYSAV1,4)		;  "     "   ac's    "    "
+LS(TYMSTS)		;JOB 0 tymnet interface status notification word
+LS(YALRMC)		;Apparently disabled TYMBASE alarm clock
+LS(TYMCS2)		;clock level routine reg 2 save word
+LS(TYMENT)		;answer/shut switch .LE. 0 =) shut
+			;		    .EQ. 0 =) according to ENTFLG
+			;		    .GE. 0 =) answering
+LS(IBPFLG)		;IBP OFF MESSAGE FROM SHCED SIDE FOUND FULL ORING
+LS(TYM1ST)		;NON-ZERO IF INITED INTERFACE AT LEAST ONCE
+
+IFN F3FLG,<LS(J0RTIM)	;HOLDS WHEN TO RETRY NODE RESET>
+
+;	TYMSRV statistics variables, switch controlled
+
+IFN STATSW,<
+LS(YSTLYL)		;lost yellow balls
+LS(YSTBZP)		;buffer zaps
+LS(YSTRST)		;resets
+LS(YSTIMS)		;input message packets
+LS(YSTOMS)		;output message packets
+LS(YSTOFL)		;oring fulls
+LS(YSTBPO)		;back pressure ons
+LS(YSTBCR)		;base crash messages
+	>
+
+
+
+;STORAGE FOR AUXQUE STUFF
+
+QMAGCN==-3		;AUXQUE MAGIC NUMBER USED FOR ASSIGNING TO QUE
+
+LS(AUXCTM)		;HOLDS NEXT TIME FOR JOB 0 TO AUXCKT
+
+LS(DUXCTL,NTYMTT)	;HOLDS H2H FUNCTION AND DATA FOR NEW LINE
+AUXCTL=:DUXCTL-TYMTTL	;-1 IF FREE (GETS USED FOR AUX CIRCS ONLY)
+
+LS(DUXDJQ,NTYMTT)	;EDBITS,UDBITS,,DJOB
+AUXDJQ=:DUXDJQ-TYMTTL	;-1 IF FREE (GETS USED FOR AUX CIRCS ONLY)
+
+LS(DUXSJQ,NTYMTT)	;ESBITS,USBITS,,SJOB
+AUXSJQ=:DUXSJQ-TYMTTL	;-1 IF FREE (GETS USED FOR AUX CIRCS ONLY)
+
+LS(DUXTMQ,NTYMTT)	;AUXQUE ALARM CLOCK
+AUXTMQ=:DUXTMQ-TYMTTL	;-1 IF FREE (GETS USED FOR AUX CIRCS ONLY)
+
+NSYSND==15		;# SLOTS IN SYSNDX
+
+LS(DYSNDX,NSYSND)	;SYSNDX TABLE (CONTAINS DJOBS OF SYSTEM PROCESSES)
+SYSNDX=:DYSNDX-1	;0TH NOT USEABLE SO CAN SPECIFY AS NEGATIVE INDEX
+
+
+
+;	POINTERS
+
+;	TYMLNS(LINE) fields
+CONSTS:	POINT 6,TYMLNS(2),5	;connect state
+;	TYNODS(1) fields (assumes TYMNET tty designator in 1)
+NODTYP:	POINT 8,TYNODS-400000(1),16	;terminal type
+NOD1:	POINT 6,TYNODS-400000(1),29	;first half of origin node number
+NOD2:	POINT 6,TYNODS-400000(1),35	;second half
+NODLIN:	POINT 7,TYNODS-400000(1),23	;port number at origin node
+;	AUXINF(LINE) fields
+AUXSTS:	POINT 9,AUXINF(2),35	;state/status
+AUXSVC:	POINT 9,AUXINF(2),26	;supervisor version
+AUXLIN:	POINT 9,AUXINF(2),17	;job/line number
+AUXSVR:	POINT 9,AUXINF(2),8	;supervisor response
+;	TYMCMR(LINE) fields
+CMCOD:	POINT 8,TYMCMR(2),7	;deferred control message node
+CMSBT:	POINT 8,TYMCMR(2),15	;deferred control message subtype
+CMDAT:	POINT 8,TYMCMR(2),23	;deferred control message data
+
+;	getab entries for tymnet host number table
+
+nthost:	thostn			;tymnet local host number
+tymptr:	xwd -ntymtt,tymttl	;just like arpanet lhostn table
+
+;	end of tymnet host number getab entries
+
+;
+;	FLAGS
+;
+;	TYMLNS(LINE) flags (LH)
+CONMSK==770000		;disconnect mask test
+CONNF=400000		;active circuit on line
+AUXF=200000		;this line is an AUX CIR origination
+INITF=100000		;line initialized, connection complete
+OBPF=004000		;OUTPUT back pressure on
+IBPF=002000		;INPUT BACK PRESSURE ON
+IBPOF=001000		;ENABLE INPUT BACK PRESSURE
+CDMPF=000400		;dump incoming chars (Clear input buff)
+GREENF=000200		;GREEN BALL RECEIVED
+UECOF==000001		;user echo mode flag - USER SETTABLE
+;	TYMLNS(LINE) flags (RH)
+TABF=1B29		;TYMSAT to echo tab
+ECHOF=1B30		;echo on sent to TYMSAT
+HDPXF=1B31		;TYMSAT in half duplex mode
+DEFF=3B33		;TYMSAT deferred echo mode
+;	TYMSTS flags (LH)
+CRASHF=400000		;received crash message from TYMBASE
+DIEDF=200000		;TYMBASE has died
+RESETF=100000		;interface has been reset
+UPF=040000		;TYMBASE just came up
+ANSF=020000		;TENEX answering
+ALARMF=010000		;TYMBASE apparently disabled
+JB0RST==004000		;REQUEST JOB 0 TO CALL TYMRST
+RTYWIN==002000		;RESYNC RETRY MADE IT
+;	TYMINF flags
+AUXPND==400		;supervisor response and/or aux log pending flag
+
+; MACROS
+
+DEFINE	ERR(ERRORN,EXTRA)<
+JRST [	EXTRA
+	IFDIF <ERRORN>,<>,<MOVEI A,ERRORN>
+	JRST ERRD]>
+
+
+	SUBTTL TYMNET terminal type translation
+;
+;	TENEX to TYMNET
+;
+	RESCD
+
+;TYMTCS sub type numbers in order as below
+
+PTT:	BYTE (5)TMCPA,TMCPB,TMCPC,TMCELF,TMCECR,TMCCRD,TMCPAR
+
+PTTPA:	POINT 8,TYMTTP(A),7	;parameter A padding
+PTTPB:	POINT 8,TYMTTP(A),15	;parameter B padding
+PTTPC:	POINT 8,TYMTTP(A),23	;parameter C padding
+PTTPL:	POINT 1,TYMTTP(A),24	;echo LF with CR
+PTTPR:	POINT 1,TYMTTP(A),25	;echo CR with LF
+PTTPD:	POINT 1,TYMTTP(A),26	;CR delay
+PTTPP:	POINT 1,TYMTTP(A),27	;parity
+
+	RADIX 10	;**********
+
+;THIS TABLE MUST AGREE WITH TTYSRV AND THE EXEC'S TRANSLATION OF
+;USER STRINGS TO TERMINAL TYPE #
+;INDEXED BY TERMINAL TYPE #
+
+TYMTTP:	BYTE(8) 64,0,2 (1)0,1,1,0	;(0) mod tty33
+	BYTE(8) 64,0,2 (1)0,1,1,0	;(1) mod tty35
+	BYTE(8) 64,0,2 (1)0,1,1,0	;(2) mod tty37
+	BYTE(8) 16,3,7 (1)0,1,1,0	;(3) TI, EX
+	BYTE(8) 0,0,0  (1)0,0,0,0	;(4) UNUSED
+	BYTE(8) 0,0,0  (1)0,0,0,0	;(5) UNUSED
+	BYTE(8) 0,0,0  (1)0,0,0,0	;(6) UNUSED
+	BYTE(8) 0,0,0  (1)0,0,0,0	;(7) NVT
+	BYTE(8) 4,5,26 (1)0,1,1,1	;(10) LA30,TERMINAET
+	BYTE(8) 16,5,5 (1)0,1,1,0	;(11) TI733
+	BYTE(8) 0,0,0  (1)0,1,0,0	;(12) SCOPE
+	BYTE(8) 0,0,0  (1)0,1,0,0	;(13) LINEPROCESSOR
+	BYTE(8) 0,0,0  (1)0,1,0,0	;(14) DATAMEDIA
+	BYTE(8) 16,0,4 (1)0,1,1,0	;(15) DCT500
+	BYTE(8) 0,0,0 (1)0,1,0,0	;(16) VT100
+	BYTE(8) 4,0,4  (1)0,1,1,0	;(17) UNIVAC
+	BYTE(8) 0,0,0  (1)0,1,0,0	;(20) TYM444
+	BYTE(8) 0,0,0  (1)0,1,0,0	;(21) TYM420
+	BYTE(8) 0,0,0  (1)0,1,0,0	;(22) ADM42
+	BYTE(8) 0,0,0  (1)0,1,0,0	;(23) IBM3101
+	BYTE(8) 0,0,0  (1)0,1,0,0	;(24) TYM430
+
+REPEAT 50-<.-TYMTTP>,<
+	BYTE(8) 0,0,0  (1)0,0,0,0	;(25:47) DUMMIES LIKE NVTS
+>
+
+	RADIX 8		;*****
+
+;
+;	TYMNET to TENEX
+;
+
+DYTYPU:	3			;DEFAULT TENEX TERMINAL TYPE FOR UNKOWNS
+
+DYTYP:	7			;GET NVT FOR AUX CIRCUITS
+	7			;(1-A) CRT
+        15			;(2-C) DTC500
+	3			;(3-E) EXECUPORT
+        16			;(4-G) PARITY TERMINET360
+	2			;(5-B) TTY37
+        17			;(6-F) UNIVAC
+	2			;(7-J) PARITY TTY37
+	3			;(8-N) SPLIT SPEED EXECUPORT
+        3			;(9-CR) 2741 FAKE IT SINCE USER CAN'T
+				;SET TO TYPE 2741
+	0			;(10-D)	TTY33
+	11			;(11-I)	TI733
+	7			;(12-A) 1200 BAUD CRT
+MXYTYP=.-DYTYP-1		;MAX TYPE WE KNOW ABOUT
+
+
+	SUBTTL HOST/BASE INTERFACE DATA STRUCTURE
+;
+;	ring buffer definitions
+;
+
+	RESCD
+TMPLT:	PHASE TYMBAS
+
+YLOCK:	YKEY		;key
+	0		;not used
+	0		;base dump loc * 16 - not used
+
+YIRNG:	IRING_4		;input ring loc * 16
+YISIZ:	IRNGS_4		;input ring size * 16
+YIHP:	0		;host set input pointer
+YIBP:	0		;base set input pointer
+
+YORNG:	ORING_4		;output ring loc *16
+YOSIZ:	ORNGS_4		;output ring size * 16
+YOHP:	0		;host set output pointer
+YOBP:	0		;base set output pointer
+
+YBCRSH:	0		;base set crash indicator + reason
+YHCRSH:	0		;host set crash reason
+
+IRING=TYMBUF+TYMBSZ-<IRNGS+ORNGS>
+	IFL IRING-., <PRINTX TYMNET RING BUFFERS TOO LARGE>
+ORING=IRING+IRNGS
+	DEPHASE
+
+;
+;	pointer definitions
+;
+	RESCD
+
+PITYPE:	POINT 8,IRING(IPTR),7	;input type field
+PIPORT:	POINT 8,IRING(IPTR),15	;input port field
+PISUBT:	POINT 8,IRING(IPTR),23	;input subtype field
+PIDATA:	POINT 8,IRING(IPTR),31	;input data field
+
+POTYPE: POINT 8,ORING(OPTR),7	;output type field
+POPORT:	POINT 8,ORING(OPTR),15	;output port field
+POSUBT:	POINT 8,ORING(OPTR),23	;output subtype field
+PODATA:	POINT 8,ORING(OPTR),31	;output data field
+
+	SUBTTL HOST TO BASE INTERFACE MESSAGE DEFINITIONS
+
+; ARGUMENTS: NAME, LABEL, TYPE, (USER/WHEEL RECEIVE/SEND STATUS)
+
+	DEFINE MESAGE (NAM,LABEL,TP,RU,SU,RW,SW)
+<
+	DEFINE TYM'NAM
+<
+	MOVEI C,TYP'NAM
+	CALL OTYPE'TP
+>
+TYP'NAM:! JRST LABEL 
+RUSR==RUSR!<RU>B<TYP'NAM>
+SUSR==SUSR!<SU>B<TYP'NAM>
+RWHL==RWHL!<RW>B<TYP'NAM>
+SWHL==SWHL!<SW>B<TYP'NAM>
+>
+RUSR==0
+SUSR==0
+RWHL==0
+SWHL==0
+	RESCD	    
+TYPFCN:	PHASE 0
+	JRST INVTYP			;0 illegal type
+	MESAGE (ANS,IGNORE,A,0,0,0,0)	;1 system is answering
+	MESAGE (SHT,IGNORE,A,0,0,0,1)	;2 system is up but shut
+	MESAGE (CRS,CRSH,A,0,0,0,1)	;3 sender is crashed
+	MESAGE (DIE,IGNORE,A,0,0,0,1)	;4 recipient should crash
+	MESAGE (NSP,NEWSUP,A,0,0,0,0)	;5 base taken over by new supervisor
+;********* TYMIN assumes all type A messages are less than 6 **********
+	MESAGE (LOG,LOGGER,B,0,0,0,0)	;6 login, next 4 data chrs are 
+				;the info about terminal type, and port 
+				;or origin, then name, etc.
+	MESAGE (AUX,AUXLOG,B,0,0,0,0)	;7 supervisor response to
+				;establishing auxillary circuit
+	MESAGE (NOP,BPON,B,0,0,0,0)	;10 backpreasure on
+	MESAGE (OUP,BPOFF,B,0,0,0,0)	;11 back pressure off
+	MESAGE (GOB,GOBBLE,B,1,1,1,1)	;12 character gobbler
+	MESAGE (ZAP,ZAPPER,B,0,0,0,0)	;13 circuit zapper
+	MESAGE (EDC,EDEC,B,1,1,1,1)	;14 enter defered echo mode
+	MESAGE (LDC,LDEC,B,1,1,1,1)	;15 leave deferred echo mode
+	MESAGE (GRN,GREEN,B,1,1,1,1)	;16 green ball
+	MESAGE (RED,RED,B,1,1,1,1)	;17 red ball
+	MESAGE (YEL,YELLOW,B,1,1,1,1)	;20 yellow ball
+	MESAGE (ORG,YELLOW,B,1,1,1,1)	;21 orange ball
+	MESAGE (HNG,IGNORE,B,1,0,1,0)	;22 hang character - not used
+	MESAGE (ETM,IGNORE,B,1,1,1,1)	;23 enter 2741 transparent mode
+	MESAGE (LTM,IGNORE,B,1,1,1,1)	;24 leave 2741 transparent mode
+	MESAGE (LOS,BLACK,C,1,1,1,1)	;25 lost ball, data has been lost from
+				;buffers. the data filed may tell how
+				;many were lost
+	MESAGE (SUP,IGNORE,C,1,0,1,0)	;26 supervisor request (aux circuits)
+	MESAGE (SUR,SUPRSP,C,0,0,1,0)	;27 supervisor response (aux circuits)
+	MESAGE (AXC,IGNORE,C,0,0,0,1)	;30 supervisor string character
+;******************************************************************
+;  !!NOT TO BE ISSUED ON INTERRUPT SIDE
+	MESAGE (TSP,IGNOR2,F,0,0,0,0)	;31 test pattern probe
+	MESAGE (TSR,IGNOR2,F,0,0,0,0)	;32 test pattern response
+	MESAGE (SAD,IGNOR2,F,0,0,0,0)	;33 host sad
+;******************************************************************
+	MESAGE (ECN,IGNORE,B,1,1,1,1)	;34 echo on
+	MESAGE (ECF,IGNORE,B,1,1,1,1)	;35 echo off
+	MESAGE (TCS,IGNORE,D,1,1,1,1)	;36 term characteristics, first data
+				;byte indicates which characteristics
+				;second data byte indicates 
+				;value to set to
+	MESAGE (TCP,IGNORE,C,1,1,1,1)	;37 term characteristcs probe, data byte
+				;indicates which terminal characteristic
+				;were requested
+	MESAGE (TCR,IGNORE,D,1,1,1,1)	;40 term characteristcs response, data
+				;is just like tcs, comes in response
+				;to a probe; also is reflected by remote
+				;when terminal characteristics are sent
+	MESAGE (HSI,BAD,C,0,0,0,0)	;41 host up and answereing with # of
+				;ports in port byte, and host # in data
+				;byte
+MAXTYP=.
+	DEPHASE
+;
+;	Terminal characteristic subtypes
+;
+TMCECO==0			;echo
+TMCCIE==1			;echo tab (^I)
+TMCELF==2			;echo lf as lf cr delay
+TMCECR==3			;echo cr as cr lf
+TMCCRD==4			;cr delay
+TMCIR==5			;input rate
+TMCOR==6			;output rate
+TMCPAR==7			;parity
+TMCHDX==10			;half duplex
+TMCPA==11			;paramater A
+TMCPB==12			;parameter B
+TMCPC==13			;parameter C
+TMCXEN==14			;X-ENABLE
+TMCHEC==15			;ECHO CONTROL H
+TMCREN==16			;REVERSE X-ENABLE
+TMCKAT==17			;KATAKANA
+TMCBRK==20			;TERMINAL OUTPUT ON BREAK
+
+
+; USER ALLOWABLE RECEIVE/SEND COMMUNICATIONS MESSAGE MASKS (COMPLEMENT MASKS)
+
+CMMSKS:	^-RUSR			;RECEIVE NON-WHEEL MASK
+	^-SUSR			;SEND NON-WHEEL MASK
+	^-RWHL		 	;RECEIVE WHEEL MASK
+	^-SWHL			;SEND WHEEL MASK 
+
+
+	SUBTTL INITIALIZATION AND RESET ROUTINES
+	RESCD
+
+TYMFLG:: 0			;tymnet enabled if nonzero
+
+BCRASH:	MOVE A,YBCRSH		;save reason for TYMBASE crash
+	MOVEM A,TYMCSH
+	MOVSI A,CRASHF!JB0RST		;notify job0
+	IORM A,TYMSTS
+	AOS JB0FLG
+;;;	BUG(NTE,<TYMSRV: TYMBASE DIED>)
+	RET
+
+
+tymina:	setom tymflg		;enter here to turn tymnet on when off
+TYMINI:	SETZM KEYTIM		;force REQUEST FOR TYMRST on next TYMCHK
+	SETOM KEYCT
+IFN KLFLG,<
+	MOVEI A,TYMBPG		;#1 PAGE NUMBER OF TYMNET WINDOW PAGE
+	CALL NOCASH##		;#1 MUST NOT CASH REFERENCES TO THIS PAGE!
+>
+	SETZM YBCRSH
+	SETZM YALRMC
+	MOVE 1,[DYSNDX,,DYSNDX+1]	;CLEAR SYSNDX TABLE
+	SETOM DYSNDX
+	BLT 1,DYSNDX+NSYSND-1
+	RET
+
+
+SKPRET:	AOS (P)
+	RET
+
+	SUBTTL CLOCK LEVEL KEY CHECKING ROUTINE
+;
+;	CALLED FROM PIAPR, MUST USE ONLY REG A
+;
+TYMCLK:	skipe tymflg		;skip if tymnet turned off	
+	SKIPE YBCRSH		;base crashed?
+	 JRST (2)		;yes
+
+	SKIPGE	KEYCT		;interface up?
+	 JRST (2)		;no
+
+	MOVE A,TODCLK		;time to check key?
+	CAMGE A,KEYTIM
+	 JRST (2)		;no
+
+	ADDI A,KEYPRD		;checking key, reset timer
+	MOVEM A,KEYTIM
+
+	MOVE A,[YKEY]		;test and set key
+	EXCH A,YLOCK
+
+	CAME A,[YKEY]		;was key clobbered?
+	 JRST TYMCL0		;yes, reset check counter
+
+	SKIPG A,KEYCT		;no, are we waiting for base to come up?
+	 JRST (2)		;yes, then do nothing but wait
+
+	SOJG A,TYMCL1		;no, base is active, we are checking
+				;the key, if still ok, go do things
+
+	BUG(NTE,<TYMSRV: TYMBASE OVERDUE>) ;key has been unclobbered too long
+
+	SETOM KEYCT
+	MOVE A,TODCLK
+	ADDI A,RSTPRD
+	MOVEM A,KEYTIM
+	JRST (2)
+
+TYMCL0:	MOVEI A,IKEYCT		;RESET KEYCT WITH THIS
+TYMCL1:	EXCH A,KEYCT		;reset key count
+	JUMPN A,(2)		;first time up?
+	MOVSI A,UPF		;yes
+	IORM A,TYMSTS
+	MOVSI A,ALARMF		;RESET ANY ALARM
+	ANDCAM A,TYMSTS
+	SETZM YALRMC		;AND TURN OFF TYMBASE DISABLED ALARM CLOCK
+	AOS JB0FLG		;tell job 0
+	JRST (2)
+
+	SUBTTL	SCHEDULER LEVEL DRIVER
+
+TYMCHK:	movei a,^d100		;do this ten times per second
+	movem a,tymtim##		;save for sched to decrement
+	skipn tymflg		;tymnet turned on??
+	ret			;no, do nothing
+	SKIPE YBCRSH		;base crashed?
+	 JRST BCRASH		;yes
+
+	SKIPE A,YALRMC		;TYMBASE DISABLED ALARM CLOCK ARMED?
+	 JRST  [CAML A,TODCLK	;YES, ALARM TRIPPED?
+		JRST .+1	;NO, NOT YET
+		MOVSI A,ALARMF	;YES, TELL JOB0 CHECKER
+		IORM A,TYMSTS
+		AOS JB0FLG
+		SETZM YALRMC	;AND TURN OFF ALARM
+		SKIPN KEYCT	;DID NODE NEVER ANSWER OUR RESET?
+		 JRST TYMCH1	;YES-SEND OUT ANOTHER RESET
+		JRST .+1]	;JUST FALL THRU
+
+	SKIPLE	A,KEYCT		;interface status
+	 JRST TYMC6		;up, transfer
+	 JUMPE A,TYMC8		;reset, waiting for base
+
+	MOVE B,TODCLK		;down
+	CAMGE B,KEYTIM		;should we reset
+	 JRST TYMC8		;no
+
+TYMCH1:	MOVE 1,TYMSTS
+	TLOE 1,JB0RST
+	 JRST TYMC06		;STILL SET, SEE IF SHOULD POKE JB0
+	MOVEM 1,TYMSTS		;JUST SET IT
+	AOS JB0FLG		;POKE JOB 0 TO DO IT
+	JRST TYMC5		;TERMINATE TYMCHK
+
+TYMC06:
+IFN F3FLG,<
+	SKIPE 1,J0RTIM		;ALWAYS POKE JB0 IF NOT RETRYING
+	CAMG 1,TODCLK		;TIME TO RETRY VIA JOB 0?
+	 AOS JB0FLG		;YES, POKE JOB 0
+	   >
+	JRST TYMC5		;TERMINATE TYMCHK
+
+TYMC6:	SKIPN TYSAVP		;restart blocked interface?
+	 JRST  [CALL ENTCHK	;check ans/shut status
+		 CALL TYMC3	;(oring full)
+		JRST TYMIN]
+;
+;	blocked oring on interrupt side is handled by popping to top
+;	of the stack and CALL TYMC3.  This saves PC and critical reg's
+;	and notifies TYMCHK to attempt restart next time through.
+;	CALL's to TYMC3 must be from top of stack, and only ac's 2-5
+;	are saved-IPTR and OPTR are regenerated from the
+;	respective rings.
+;
+	MOVE 5,[TYSAV1,,B]	;restore critical registers
+	BLT 5,5
+	MOVE IPTR,YIHP
+	MOVE OPTR,YOHP
+;	JRST @TYSAVP		;try doing output again
+	PUSH P,TYSAVP		;DO THIS SO WE CAN CLEAR TYSAVP
+	SETZM TYSAVP
+	RET			;RETURN TO WHERE TYSAVP POINTED
+
+TYMC3:	POP P,A			;interface blocked for oring output on
+	SUBI A,2		;intrpt side, save pc and critical ac's
+IFN STATSW,<AOS YSTOFL>		;count oring fulls
+
+TYMC4:	MOVEM A,TYSAVP		;save pc
+	MOVE A,[B,,TYSAV1]	;save ac's
+	BLT A,TYSAV1+3
+;
+;	internal confusion and errors are handled by JRST TYMC7 after
+;	an appropriate BUGCHK if there is nothing on the stack, or
+;	by SETOM KEYCT and getting to TYMC5 as soon as possible
+;
+TYMC5:	SKIPL KEYCT		;any fatal errors this time through?
+	 JRST TYMC8		;no
+
+TYMC7:	SETOM KEYCT		;come here on any interface internal
+	MOVE A,TODCLK		;confusion, silences key for 
+	ADDI A,RSTPRD		;one second, resets interface
+	MOVEM A,KEYTIM
+
+TYMC8:	RET
+
+;
+;	CHECK ANS/SHUT STATUS
+;
+ENTCHK:	MOVSI A,ANSF
+	SKIPLE TYMENT		;force up
+	 JRST ENTUP		;yes
+	SKIPE TYMENT		;force down?
+	 JRST ENTDWN		;yes
+	SKIPL ENTFLG		;is ENTFLG answering or shut?
+	 JRST ENTDWN		;shut
+
+ENTUP:	TDNE A,TYMSTS		;answering
+	 JRST SKPRET
+	TYMANS
+	 RET
+	IORM A,TYMSTS
+	JRST SKPRET
+
+ENTDWN:	TDNN A,TYMSTS		;shut
+	 JRST SKPRET
+	TYMSHT
+	 RET
+	ANDCAM A,TYMSTS
+	JRST SKPRET
+
+	SUBTTL BASE TO HOST MESSAGE DISPATCHER
+
+TYMIN:	MOVE IPTR,YIHP		;set up iring host pointer
+TYMIN0:	CAMN IPTR,YIBP		;pending input?
+	JRST IBPCHK		;no pending input
+
+	LDB C,PITYPE		;get message type
+	CAILE C,MAXTYP		;check for legal message type
+	CAILE C,200		;must be between 1 and MAXTYP inclusive
+	JUMPG C,.+2
+	 JRST	[CAIL 3,42	;BETWEEN  THESE LEGAL
+		CAILE 3,NIGNRT-1+42	;BUT UNSUPPORTED CODES?
+	 	 JRST INVTYP	;NO-BOMB
+		JRST UNSTYP]	;YES-IGNORE QUIETLY
+
+	CAIG C,5		;if type A message,
+	 jrst @typfcn(c)	;go directly to function
+	LDB LINE,PIPORT		;get port number
+	CAIN C,TYPSUR		;if supervisor response port field is id
+	 JRST TYMIN2		;number, so skip all port validity checks
+	CAIL LINE,NTYMTT
+	 JRST BADLIN
+	HRRZ LINE,TYMTEN(LINE)	;xlate TYMNET port number to TENEX line no.
+
+	CAIE C,TYPLOG		;login,
+	CAIN C,TYPAUX		;and auxlog
+	 JRST TYMIN2		;will skip connection check 
+	CAIE LINE,-1		
+	 JRST TYMIN2		;connected
+	JRST INOCON		;not
+
+TYMIN2:
+IFN STATSW,<AOS YSTIMS>
+	TRZE C,200		;type G (chars) input?
+	 JRST ITYPEG		;yes
+	JRST @TYPFCN(C)		;no, do appropriate function
+
+IGNOR2:	AOJ IPTR,
+IGNORE:	AOJ IPTR,		;advance pointer
+TYMIN1:	ANDI IPTR,IRNGS-1	;take care of wraparound
+	MOVEM IPTR,YIHP		;tell base
+	JRST TYMIN0		;try for more input
+;
+;  May need # read packets cutoff to prevent excessive time here
+;
+
+BAD:	BUG(NTE, <TYMSRV: BAD MESSAGE TYPE INPUT FROM TYMBASE>)
+	AOJA IPTR,TYMIN0
+
+INVTYP:	BUG(NTE, <TYMSRV: INVALID MESSAGE TYPE INPUT FROM TYMBASE>)
+	JRST TYMC7		;we're going to crash, so lets not do
+				;any more
+
+;IGNORE UNIMPLEMENTED CODES
+
+UNSTYP:	CAIL C,<0>+42		;WE KNOW HOW TO IGNORE BETWEEN 42 AND
+	CAILE C,<NIGNRT-1>+42	;AND THIS GUY
+	 JRST INVTYP		;BOMB
+	JRST @IGNRTB-42(C)		;IGNORE IT
+
+;TABLE OF UNIMPLEMENTED CODES, HOW TO IGNORE THEM
+
+IGNRTB:	IGNORE	;42
+	IGNOR2	;43
+	IGNOR2	;44
+	IGNORE	;45
+	IGNOR2	;46
+	IGNORE	;47
+	IGNORE	;50
+	IGNORE	;51
+	IGNORE	;52
+	IGNORE	;53
+	IGNORE	;54
+	IGNORE	;55
+	IGNORE	;56
+	IGNORE	;57
+	IGNORE	;60
+	IGNORE	;61
+	IGNORE	;62
+	IGNORE	;63
+	IGNORE	;64
+	IGNORE	;65
+	IGNORE	;66
+NIGNRT==.-IGNRTB		;# WE CAN IGNORE INDEXING
+
+BADLIN:	BUG(NTE, <TYMSRV: BAD LINE # ON TYMBASE INPUT>)
+	JRST INOCN1
+
+INOCON:	BUG(NTE, <TYMSRV: INPUT REC'D ON DISCONNECTED LINE>)
+INOCN1:	TRZE C,200		;WAS TYPE G MESSAGE?
+	 JRST ITYPG2		;GO IGONRE IT
+	CAIL C,31		;TYPE F?
+	CAILE C,33
+	AOJA IPTR,TYMIN1	;IGNORE AND GET MORE
+	AOJA IPTR,.-1		;TYPE F.
+
+
+	SUBTTL BASE TO HOST MESSAGE HANDLERS
+
+ITYPEG:	LDB 1,CONSTS		;GET CONNECTION STATUS
+	CAIE 1,CONHG3		;HANGING UP NON INITED LINE?
+	CAIN 1,CONHG4
+	 JRST ITYPG2		;YES
+	
+REPEAT 0,<
+	TLNN A,FHEDF		;flush TYMNET header?
+	 TDZA A,A		;yes
+	 SETO A,		;no
+	PUSH P,A		;save flag
+>
+	
+	PUSH P,C		;save count
+	PUSH P,PIPORT		;set up ILDB pointer
+	PUSH P,LINE		;save line number, because TTCHI may clobber
+	MOVE 13,C		;set counter
+
+ITYPG0:	ILDB A,-1(P)		;get char
+	MOVE LINE,(P)		;restore line no.
+	SETZ 6,
+REPEAT 0,<
+	SKIPN -3(P)		;flush TYMNET header?
+	 JRST  [ANDI A,177	;yes, look for <cr> or ";"
+		CAIE A,";"
+		CAIN A,15
+		CAIA
+		 JRST .+2
+		SETOM -3(P)	;yes, say were through flushing
+		MOVSI A,FHEDF
+		ANDCAM A,TYMLNS(LINE)
+		JRST .+2]
+>
+	CALL TTCHI		;stuff it into buffer
+	SOJG 13,ITYPG0		;continue if more
+
+	SUB P,BHC+2		;pop ILDB pointer
+	POP P,C			;get total count to advance pointer
+REPEAT 0,<
+	SUB P,BHC+1		;pop TYMNET header flush flag
+>
+ITYPG2:	ADDI C,2+3
+	CAIE C,37+5		;37 CHARACTER MESSAGE?
+	JRST ITYPG3		;NO, HANDLE NORMALLY
+	LSH C,-2		;YES, FINISH INPUT RING POINTER
+	ADD IPTR,C		;UPDATE
+	MOVSI C,IBPF
+	IORM C,TYMLNS(B)
+	MOVSI C,IBPOF		;HANDLING IBP ON THIS LINE?
+	TDNN C,TYMLNS(B)
+	JRST ITYPG4		;NO, IMMEDAITELY TURN OFF IBP
+	LDB C,TTIMAX		;YES, CHECK BUFFER CHAR COUNT
+	LSH C,-2		;IF LESS THAN 1/4 FULL
+	CAMGE C,TTICT(B)
+	JRST TYMIN1		;TOO FULL, DON'T TURN OFF IBP
+ITYPG4:	MOVEI C,11		;EMPTY ENOUGH, TURN OFF IBP
+	PUSHJ P,OTYPEB
+	PUSHJ P,TYMC3		;FULL ORING
+	MOVSI C,IBPF		;AND INDICATE IBP TURNED OFF
+	ANDCAM C,TYMLNS(B)
+	JRST TYMIN1
+ITYPG3:	LSH C,-2
+	ADD IPTR,C
+	
+	MOVE 3,TYMLNS(2)	;CHECK TO SEE IF WE ARE HANDLING INPUT
+	TLNN 3,IBPF		;BACK PRESSURE AND THAT THERE IS PRESENTLY
+	TLNN 3,IBPOF		;NO INPUT BACK PRESSURE ON.
+	 JRST TYMIN1		;IF THIS IS NOT SO,RETURN NOW.
+	LDB 3,TTIMAX		;GET BUFFER SIZE
+	SUBI 3,IBPOFF		;AND COMPUTE WHEN TO TURN INPUT BACK PRESSURE ON
+	CAMLE 3,TTICT(2)	;TOO MANY CHARS IN BUFFER?
+	 JRST TYMIN1		;NOT YET
+	TYMNOP			;YES, TURN ON BACK PRESSURE
+	 CALL TYMC3		;(ORING OVERFLOW)
+	MOVSI 3,IBPF		;TELL OURSELVES WE SENT INPUT BACK PRESSURE
+	IORM 3,TYMLNS(2)
+	JRST TYMIN1
+
+GOBBLE:	CALL TCIBF		;character gobbler, kill input buffer
+	AOJA IPTR,TYMIN1
+
+BPON:	MOVSI C,OBPF		;say we received back pressure
+	IORM C,TYMLNS(LINE)
+IFN STATSW,<AOS YSTBPO>		;count back pressures
+	AOJA IPTR,TYMIN1
+
+BPOFF:	MOVSI C,OBPF		;turn back pressure flag off
+	ANDCAM C,TYMLNS(LINE)
+	AOJA IPTR,TYMIN1
+
+BLACK:	
+IFN STATSW,<AOS YSTBZP>		;count buffer zaps
+	AOJA IPTR,TYMIN1	;ignore buffer zaps unless user traps them
+
+ZAPPER:	TYMZAP			;echo all received zaps
+	 CALL TYMC3
+	CALL TYDISC		;reset everything but connect state
+	LDB 3,CONSTS		;get connect state to figure new conn state
+	TRNE 3,<CONNF>B47	;if connected,
+	 CALL ZAP		;disconnect
+	AOJA IPTR,TYMIN1
+
+ZAP:	MOVE 1,BITS-40(3)	;translate state to bit mask
+	HLRZ 4,TTFORK(2)	;get other state word
+	CAIN 3,CONCTL		;attached as ctrltt?
+	 JRST CTLZAP		;fire off detach int and set disc state
+	CAIN 3,CONAUX		;attached as aux circuit?
+	 JRST AUXZAP		;FIRE OFF AUX BRK INT AND NOTIFY JOB 0
+	TLNE 1,(1B<CONHG3-32>+1B<CONHG4-32>+1B<CONLG1-32>)
+				;(1b<...> takes decimal 32 = octal 40)
+	 JRST ZAPP1		;disappear silently
+	TLNE 1,(1B<CONHG1-32>+1B<CONHG2-32>)
+	 JRST ZAPP2		;notify job 0
+	CAIN 3,CONAL1
+	 JRST  [SETOM TTFORK(2)	;reset ttfork and disappear quietly
+		hrrzs	ttype(2) ;clear ttyop flags
+		JRST ZAPP1]
+	TRZ 3,<CONNF>B47	;on all other states, set to corresponding
+	JRST ZAPP3		;disconnected state
+
+CTLZAP:	CALL TYMDET
+	MOVEI 3,CONDC3
+	JRST ZAPP3		;set state and return
+	
+AUXZAP:	CALL TYMDET
+	MOVEI 3,CONAD3
+	JRST ZAPP3
+
+ZAPLGO:	JUMPL 4,ZAPP1		;if no job, reset and disappear
+	PUSH P,2
+	HRRZ 2,JOBPT(4)		;get top fork of job
+	MOVSI 1,400000+PSILOB	;set logout interrupt on it
+	IORM 1,FKINT(2)
+	CALL PSIR4		
+	POP P,2			;and fall into reset conn status entry
+
+ZAPP1:	SKIPA 3,[CONFRE]
+ZAPP2:	MOVEI 3,CONDC3
+ZAPP3:	DPB 3,CONSTS
+	CAIE 3,CONAD3
+	CAIN 3,CONDC3
+	 AOS JB0FLG		;notify job 0
+	RET
+
+;ISSUE INTERRUPT AS APPROPRIATE FOR TYPE OF TYMNET LINE
+;A CONTROLLING TTY ALWAYS GETS TER CODE 30 (CARRIER OFF)
+;ANY OTHER LINE (AUX CIRCUIT OR NOT) WILL GET 32 (NON-CTTY CARRIER OFF)
+;ACCEPTS LINE # IN 2
+
+TYMDET:	SKIPGE 1,TTFORK(2)		;line has job?
+	 RET				;no
+	HLRZS 1				;GET JOB USING THIS TTY
+	ANDCMI 1,600000			;FLUSH EXTRANEOUS BITS
+	HLRZ 1,JOBPT(1)			;1/ JOB CTTY LINE #
+	MOVEI 3,^D30			;ASSUME CTTY INT (CARRIER OFF)
+	CAIE 2,(1)			;ARE WE GONNA INT FOR CTTY?
+	 MOVEI 3,^D32			;NO-GET NON-CTTY INT THEN
+	CALL TYMPSI			;ISSUE IT
+	RET
+
+TYDPSI:	TDZA 4,4		;say this is a deferred PSI
+TYMPSI:	SETO 4,			;say this is an immediate PSI
+	SKIPGE 1,TTFORK(LINE)	;line has job?
+	 RET			;no
+	HLRZS 1			;get job no
+	PUSH P,B		;TTPSI2 destroys B
+	SKIPGE 1,JOBPT(1)	;job detached?
+	 JRST TYMPS2		;yes, go ahead and send interrupt
+	HLRZ 2,1		;get ctrltt for that job
+	MOVE 5,BITS(3)		;get mask bit for interrupt
+	IOR 4,TTDPSI(2)		;check ac4 to see if should check TTDPSI
+	TDNE 5,TTPSI(2)		;if ctrltt has interrupt enabled
+	TDNN 5,4
+	 JRST .+2
+TYMPS2:	CALL TTPS2T		;give it to them
+	POP P,B
+	RET
+
+TYDISC:	SETZM YLTCHK(LINE)	;zappers cancel outstanding yellow balls
+	MOVEI C,1B35
+	ANDCAM C,TTFLGS(LINE)	;say "carrier off"
+	HLRZ A,TENTYM(LINE)	;get TYMNET port
+	SETO C,			
+	HRLM C,TENTYM(LINE)	;nil out TENEX to TYMNET link
+	HRRM C,TYMTEN(A)	;nil out TYMNET to TENEX link
+	SETOM AUXSJQ(LINE)	;CLEAR AUXQUE INTERNAL TABLE ENTIES
+	SETOM AUXDJQ(LINE)
+	SETOM AUXTMQ(LINE)
+	SETOM AUXCTL(LINE)
+	RET
+
+
+LOGGER:	CALL LOGLIN		;check and/or get line
+	 JRST LOGZAP		;no free lines, just fade away
+		
+	MOVE 3,[<CONLG1>B5+ECHOF] ;INITIAL TYMLNS STATE
+	MOVEM 3,TYMLNS(2)
+
+	SETZB 6,TTPSI(LINE)	
+	DPB 6,[POINT 2,TTFLGS(LINE),29]	;set mode to binary, no ints 
+	DPB 6,TTYLMD		;to pass following TYMNET data through 
+
+	MOVEI A,3		;fake a ^C 
+	PUSH	P,LINE
+	CALL TTCHI		
+	POP	P,LINE
+
+	HLRZ A,TTFORK(LINE)	;DID FORK START?
+	CAIE A,-1
+	AOJA IPTR,TYMIN1	;yes
+
+	MOVEI 3,CONHG3		;no, hang up line
+	DPB 3,CONSTS
+	AOJA IPTR,TYMIN1	
+
+AUXLOG:	LDB 4,PISUBT		;get ident
+	EXCH 4,2		;id into ac2, saving LINE for later
+	CALL CHKAXI		;check ident
+	 JRST LOGZAP		;illegal ident
+	LDB 1,AUXSTS		;get id state
+	CAIN 1,AUXPS3		;log while PSI abort of process?
+	 JRST  [MOVEI 1,AUXPS4	;yes, say we're expecting to abort a super
+		DPB 1,AUXSTS	;response
+		JRST LOGZAP]	;and silently kill line
+	CAIE 1,AUXSGN		;login string has been sent?
+	 JRST AXLBAD		;no, bad
+	MOVEI 1,AUXLGR		;yes,
+	DPB 1,AUXSTS		;set state to "got line"
+	EXCH LINE,4		;line into ac2
+	CALL LOGLIN		;get line
+	 SETO LINE,		;no free lines, indicate w/ illegal line #
+	EXCH 4,2		;ident into ac2
+	LDB 3,AUXLIN		;get job number for line
+	DPB 4,AUXLIN		;save new line number
+	JUMPL 4,LOGZAP		;no free lines, disconnect
+	HRLM 3,TTFORK(4)	;assign tty line to job waiting for line
+	MOVE 2,4		;IBPBFR WANTS LINE # IN 2
+	CALL IBPBFR		;FIX UP IBP BUFFER PARAMETERS, NO BUFFERS YET
+	MOVE 3,[<CONAL1>B5+<IBPOF>B17] ;INITIAL TYMLNS STATE
+	MOVEM 3,TYMLNS(2)
+	AOJA IPTR,TYMIN1
+
+AXLBAD:	BUG(NTE, <TYMSRV: UNEXPECTED AUX LOGIN>)
+	JRST LOGZAP
+
+CHKAXI:	CAIN 2,AUXID		;checks incoming aux circuit id for validity
+	 JRST SKPRET		;when TYMSHARE starts building aux circuits
+	BUG(NTE, <TYMSRV: ILLEGAL AUX CIR IDENT>)
+	RET			;in parallel, this will have to be changed
+
+LOGLIN:	CAIE LINE,-1		;have line?
+	 JRST  LOGLI3		;yes, this is funny, as a login or auxlogin
+				;should be on a new line...clean things up
+
+	MOVE LINE,[-NTYMTT,,TYMTTL] ;no, find a free TENEX line
+	MOVSI C,CONMSK
+	TDNN C,TYMLNS(LINE)	;disconnected line
+	SKIPL TTFORK(LINE)	;and unassigned?
+	AOBJN LINE,.-2		;no
+
+	JUMPGE LINE,LOGLI1	;if AOBJN fell through, no free lines
+	HRRZS LINE		;line number only
+	LDB C,PIPORT		;get TYMNET port number
+	HRLM C,TENTYM(LINE)	;connect to TENEX line number
+	HRRM LINE,TYMTEN(C)	;connect TENEX line number to TYMNET port
+	MOVEI C,1B35
+	IORM C,TTFLGS(LINE)	;say "carrier on"
+	JRST SKPRET		;take good return
+
+LOGLI1:	BUG(NTE,<TYMSRV: NO UNASSIGNED TYMNET TTY LINES>)
+	RET			;take error return
+
+LOGLI3:	BUG(NTE,<TYMSRV: LOGIN ON CONNECTED LINE>)
+repeat 0,<
+	SUB P,BHC+1
+	JRST TYMC7		;intolerable internal confusion
+>
+	ret			;ajs @ sumex 3/22/78
+
+LOGZAP:	LDB LINE,PIPORT		;no free TENEX lines, get TYMNET port number
+	MOVEI C,TYPZAP
+	CALL OTYPES		;avoid conn check
+	 CALL TYMC3		;oring overflow
+	AOJA IPTR,TYMIN1	;go on for more messages
+
+NEWSUP:	AOS 1,TYMSVC		;increment supervisor version
+	CAILE 1,777		;wrap around at 9 bits
+	 SETZM TYMSVC
+	BUG(NTE,<TYMSRV: SUPERVISOR TAKEOVER>)
+	AOJA IPTR,TYMIN1
+
+SUPRSP:	MOVE A,LINE		;supervisor ack or err event
+	CALL CHKAXI		;legal ident?
+	 AOJA IPTR,TYMIN1	;no, just ignore
+	LDB 4,PISUBT		;get supervisor response
+	DPB 4,AUXSVR		;save it
+	LDB 1,AUXSTS		;get preset state of id
+	MOVE 1,BITS(1)		;turn into mask for quick checking
+	JUMPE 4,SUPACK		;event is supervisor request ack
+	TLNE 1,(1B<AUXPS2>+1B<AUXPS3>+1B<AUXPS4>) ;event is request nak
+	 JRST  [SETZM AUXINF(2)	;if we were waiting to close out PSI
+		AOJA IPTR,TYMIN1] ;interrupted build, release id
+	TLNN 1,(1B<AUXREQ>+1B<AUXSGN>+1B<AUXLGR>) 
+	 JRST SUPBAD
+	MOVEI 1,AUXRTY		;if we were building, re try
+	JRST SUPSET
+
+SUPACK:	TLNE 1,(1B<AUXREQ>)	;if we had just sent our first super req
+	 JRST  [MOVEI 1,AUXSGR	;say the super granted it
+		JRST SUPSET]
+	TLNE 1,(1B<AUXLGR>)	;if we already had a log
+	 JRST  [MOVEI 1,AUXBLT	;say we have the line
+		DPB 1,AUXSTS
+		LDB 2,AUXLIN
+		MOVEI 1,CONAL2	;confirm the connection of this line
+		DPB 1,CONSTS
+		AOJA IPTR,TYMIN1]
+	TLNE 1,(1B<AUXPS4>)	;if we were closing out a PSI intrrptd build
+	 JRST  [SETZM AUXINF(2)	;release the id
+		AOJA IPTR,TYMIN1]
+	TLNN 1,(1B<AUXPS2>)
+	 JRST SUPBAD
+	MOVEI 3,TYPSUP		;if we got a PSI after the first super req
+	CALL OTYPES		;send off a second one w/o a login string
+	 CALL TYMC3
+	MOVEI 1,AUXPS3		;to force an error and close out the id
+
+SUPSET:	DPB 1,AUXSTS
+	AOJA IPTR,TYMIN1
+	
+SUPBAD:	BUG(NTE, <TYMSRV: UNEXPECTED SUPERVISOR RESPONSE RECEIVED>)
+	SETZM AUXINF(2)		;CLEAR AUXINF SO DON'T BLOCK OUT OTHERS
+	AOJA IPTR,TYMIN1	;ignore illegal super responses
+
+CRSH:	BUG(NTE, <TYMSRV: TYMBASE COMING UP FROM CRASH>)
+IFN STATSW,<AOS YSTBCR>
+	AOJA IPTR,TYMIN1
+
+LDEC:	MOVEI C,DEFF		;remote in immediate echo mode, looks to
+	IORM C,TYMLNS(LINE)	;TENEX like half duplex
+	AOJA IPTR,TYMIN1
+
+EDEC:	MOVEI C,DEFF		;remote in deferred echo mode, looks
+	ANDCAM C,TYMLNS(LINE)	;tell ;to TENEX like full duplex
+	AOJA IPTR,TYMIN1
+
+	SUBTTL INPUT BACK PRESSURE HANDLER
+
+;	INPUT BACK PRESSURE TURNED ON AT ITYPG2 WHEN INPUT BUFFER OVERFLOWS
+;	PRESET LEVEL.
+
+;	TYMTCI JUMPED TO FROM TCI0 AND TCIBF TO TURN IBP OFF
+;	IF NEED BE
+
+TYMTCI:	MOVE 3,TYMLNS(2)	;CHECK FOR INPUT BP WAKEUP
+	TLNN 3,IBPF	;IS INPUT BACK PRESSURE ON NOW?
+	 RET		;NO, SIMPLY RETURN
+	CALL IBPKIL	;YES, SEE IF WE SHOULD TURN IT OFF.
+	 CALL [SKIPN INSKED	;TRIED TO SEND BPOFF, BUT ORING OVRFLW,
+		JRST OFULLR	;IF NOT IN SCHED, JUST MAKE FORK WAIT,
+		AOS IBPFLG	;ELSE, NOTIFY TYMSRV TO DO IT LATER.
+		RET]
+	RET
+
+IBPKIL:	LDB 3,TTIMAX	;COMPUTE WAKE UP POINT FROM BUFFER SIZE
+	LSH 3,-2	;TURN OFF BACK PRESSURE TO TYMBASE WHEN INPUT BUFF
+	CAMGE 3,TTICT(2) 	;ONE QUARTER FULL
+	 JRST SKPRET		;NOT THERE YET
+	TYMOUP		;SEND BACK PRESSURE OFF
+	 RET		;ORING OVERFLOW
+	MOVSI 3,IBPF	;AND TELL OURRSELVES WHAT WERRE DOING
+	ANDCAM 3,TYMLNS(2)
+	JRST SKPRET
+
+;	IBPCHK CALLED AFTER TYMIN AND BEFORE YELCHK AND TYMOUT TO TAKE
+;	CARE OF ANY LINES THAT TRIED TO SEND AN IBP OFF MESSAGE FROM
+;	THE SCHEDULER SIDE, BUT NOT IN TYMSRV, AND FOUND THE ORING FULL.
+
+IBPCHK:	SKIPN IBPFLG		;ANY BELATED IBPKILS WE HAVE TO DO?
+	 JRST YELCHK		;NO
+	MOVE 2,[-NTYMTT,,TYMTTL] ;YES, SET UP CHECKING LOOP
+	MOVSI 1,IBPF
+IBPCH1:	TDNN 1,TYMLNS(2)	;IS LINE HAVE IBP ON?
+	 JRST IBPCH2		;NO, SKIP CHECK
+	CALL IBPKIL		;YES, CHECK LINE, KILL IBP IF POSSIBLE
+	 CALL TYMC3		;ORING OVERFLOW
+	SOSLE IBPFLG		;TO SAVE TIME, ONLY IPBKILL THIS MANY LINES
+IBPCH2:	AOBJN 2,IBPCH1		;CHECK ALL LINES
+	SETZM IBPFLG		;RESET FLAG
+	JRST YELCHK
+
+
+	SUBTTL yellow ball handler
+
+SNDYEL:	NOSKD1
+	SKIPL TYMLNS(LINE)	;don't set yellow clock on disconnected lines
+	 JRST YELLO2
+
+	TYMYEL			;send yellow ball
+	 JRST OKRET		;if oring full, let upper level handle
+	MOVE C,TODCLK		;yellow ball send, set up clock
+	ADDI C,YELPRD
+	MOVEM C,YLTCHK(LINE)
+	JRST OKSKPR
+
+YELLOW:	SKIPE YLTCHK(LINE)	;yellow ball received, one of ours?
+	 JRST	[CALL YELLO1	;yes
+		 CALL TYMC3	;oring full
+		AOJA IPTR,TYMIN1]
+	CAIN C,TYPORG		;if orange
+	 AOJA IPTR,TYMIN1	;don't reflect
+	TYMORG			;somebody elses, echo as orange
+	 CALL TYMC3
+	AOJA IPTR,TYMIN1
+
+YELLO2:	OKSKD1
+
+YELLO1:	SETZM YLTCHK(LINE)	;yellow ball returned as orange, stop clock
+	MOVSI C,CDMPF		;if dumping chars in CIBF
+	ANDCAM C,TYMLNS(LINE)	;stop
+	LDB C,CONSTS		;get connection state
+	CAIE C,CONHG2		;hanging up line?
+	CAIN C,CONHG4
+	 JRST TYHNG2		;yes
+	CAIN C,CONAH2		;HANGING UP AUX CIRCUIT?
+	 JRST TYHNG2		;YES
+	JRST SKPRET		;normal (non-oring-full) exit
+
+YELCHK:	MOVE LINE,[XWD -NTYMTT,TYMTTL] ;scan all TYMNET lines for overdue
+
+YELCK1:	SKIPE A,YLTCHK(LINE)	;expecting yellow balls?
+	CAMLE A,TODCLK		;yes, overdue?
+	 JRST YELCK2		;no
+
+	BUG(NTE,<TYMSRV: YELLOW BALL OVERDUE>)
+
+IFN STATSW,<AOS YSTLYL>
+	CALL YELLO1		;simulate rec'd orange ball
+	 CALL TYMC3		;oring full
+
+YELCK2:	AOBJN LINE,YELCK1
+	JRST TYMOUT
+
+	SUBTTL HOST TO BASE INTERFACE DRIVER
+
+TYMOUT:	MOVSI LINE,-NTYMOT	;check a given number of lines for
+	JUMPE LINE,TYMC5	;output (no lines to check)
+	HRR LINE,LTYMOT		;starting where we left off last time
+
+TYMO1:	SKIPL TTFLGS(LINE)	;line output active?
+	 JRST TYMO6
+IFN NDLS,<
+	CAMN LINE,TTHNGL##	;checking for hung line?
+	 SETZM TTHNGT##		;if so, say active
+>
+	MOVE D,TYMLNS(LINE)
+	TLNN D,OBPF		;back pressure on
+	SKIPGE xttflg(LINE)	;or hold toggle on?
+	 JRST TYMO3		;yes
+
+TYMO4:	SKIPE C,TTECT(LINE)	;no, any echo output pending?
+	 JRST TYMSNE		;yes
+	SKIPE C,TTOCT(LINE)	;no, any normal output pending?
+	 JRST TYMSNO		;yes
+
+	MOVSI C,400000		;no, flag as silent
+	ANDCAM C,TTFLGS(LINE)
+	CALL TTRLOB		;and release buffers
+
+	CALL GREENT		;send green ball if desired and possible
+	 CALL TYMC3		;oring full
+
+TYMO6:	LDB 3,CONSTS		;no, any body waiting for output to become
+	CAIE 3,CONHG1		;inactive?
+	CAIN 3,CONHG3
+	 JRST TYHNG1
+	CAIN 3,CONAH1		;AUX CIRCUIT WAITNG FOR LINE TO CLEAR OF DATA?
+	 JRST TYHNG1		;YES
+	JRST TYMO3
+
+TYMSNE:	SKIPN D,TTEOUT(LINE)	;get echo buffer pointer
+	 BUG(HLT, <TYM ECHO OUTPUT - NO BUFFER BUT COUNT NON-ZERO>)
+
+	CALL OTYPEG		;put out as many characters as possible
+	 JRST TYMO2		;no characters output, buffer full
+
+	MOVEM D,TTEOUT(LINE)	;and pointer
+	MOVEM C,TTECT(LINE)
+	JRST TYMO5
+
+TYMSNO:	SKIPN D,TTOOUT(LINE)	;same for normal output buffer
+	 BUG(HLT, <TYM OUTPUT - NO BUFFER BUT COUNT NON-ZERO>)
+
+	CALL OTYPEG
+	 JRST TYMO2
+
+	MOVEM D,TTOOUT(LINE)
+	MOVEM C,TTOCT(LINE)
+
+TYMO5:	TRNN A,1000		;last char removed from buffer a ball code?
+	 JRST TYMO3		;no, continue normally
+
+	MOVE C,A		;reposition registers (UGH!!)
+	MOVE D,6
+	CALL OTYPED		;send control message
+	 CALL TYMC3		;oring full
+
+	JRST TYMO4		;finish emptying output buffer
+TYMO3:	MOVEI C,TYMTTL+NTYMTT-1	;line wraparound
+	CAIG C,(LINE)
+	 HRRI LINE,TYMTTL-1
+	AOBJN LINE,TYMO1
+
+TYMO2:	HRRM LINE,LTYMOT	;save line for next time
+	JRST TYMC5
+
+	SUBTTL HOST TO BASE INTERFACE HANDLER
+;
+;	single word types (A,B,C,D)
+;
+;	C/ type
+;	LINE/ TENEX port number
+;	D/ first arg
+;	5/ second arg
+;
+;	CALL routine
+;	 +1 no room in buffer/illegal pointer
+;	 +2 normal return
+;
+OTYPES:	NOSKD1
+	CALL OROOM		;entry to output put 1 word format message
+	 JRST OKRET		;w/o checking connection, or xlating line
+	MOVE 6,LINE
+	JRST OTYPE3
+
+otypea:	noskd1			;shut of sched unless that's us
+	call oroom		;any room?
+	 jrst okret		;no, do nothing
+	dpb c,potype		;yes, put item in type field
+	aoja optr,otype1	;increment pointer and return
+
+OTYPEB:
+OTYPEC:
+OTYPED:	NOSKD1
+	SKIPGE TENTYM(LINE)	;no, disconnected line?
+	 JRST OKSKPR
+	CALL OROOM		;any room?
+	  JRST OKRET		;no
+	HLRZ 6,TENTYM(LINE)	;xlate line number
+OTYPE3:	DPB C,POTYPE		;set in type field
+	DPB 6,POPORT		;set in port field
+	DPB D,POSUBT		;set in subtype field
+	DPB 5,PODATA		;set in data field
+
+	AOJ OPTR,		;advance pointer
+OTYPE1:	ANDI OPTR,ORNGS-1	;take care of wraparound
+	MOVEM OPTR,YOHP		;tell base
+IFN STATSW,<AOS YSTOMS>		;count output message packets
+
+OKSKPR:	AOS (P)
+OKRET:	OKSKD1			;turn scheduling back on
+	RET
+
+;
+;	double word type (F)
+;
+;	C/ type
+;	LINE/ TENEX port number
+;	D/ word of data
+;
+;	CALL OTYPEF
+;	 +1 no room in buffer/illegal pointer return
+;	 +2 normal return
+;
+;	!!NOT TO BE USED FROM INTERRUPT SIDE, OR ELSE INTERFACE
+;	DEADLOCK MAY DEVELOP!!!  If IRING input causes ORING output
+;	to occur which issues TYPE F when ORING host pointer at 
+;	end of ORING buffer, interrupt side will never become aware
+;	that there more room will ever become available in ORING.
+;
+OTYPEF:	NOSKD1
+	SKIPGE TENTYM(LINE)	;connected line?
+	 JRST OKSKPR		;no, ignore
+
+	CALL OROOM		;any room
+	 JRST OKRET		;no, none at all
+	SOJLE 6,R		;yes, enough room? if not return
+
+	DPB C,POTYPE		;set in type field
+	TRNN LINE,400000	;TYMNET port number
+	HLRZ 6,TENTYM(LINE)	;xlate line number
+	DPB 6,POPORT		;set in line field
+	HLRM D,ORING(OPTR)	;set in first halfword of data
+	HRLM D,ORING+1(OPTR)	;set in fecond
+
+	MOVEI OPTR,2(OPTR)	;advance pointer
+	JRST OTYPE1		;go tell base
+
+;
+;	character xfer type (G)
+;
+;	C/ maximum number of characters to xfer
+;	LINE/ port number
+;	D/ ILDB pointer to characters
+;
+;	CALL OTYPEG
+;	 +1 no room in buffer/illegal pointer
+;	 +2 normal return
+;
+;	xfers max num chars, or as many as will fit in oring
+;
+OTYPEG:	NOSKD1
+	SKIPGE TENTYM(LINE)	;ignore output to disconnected line
+	 JRST  [SETZ C,		;fake full transfer
+		JRST OKSKPR]
+
+	CALL OROOM		;any room
+	 JRST OKRET		;no
+
+	LSH 6,2			;yes, get space in characters
+	SUBI 6,2		;2 char overhead for type and port
+	CAILE 6,NXFRMX		;max number of chars
+	 MOVEI 6,NXFRMX
+	CAILE 6,(C)		;max requested chars
+	 MOVEI 6,(C)
+	PUSH P,6		;save initial char count
+
+	MOVE 5,POPORT		;get IDPB pointer
+
+OTYPG1:	TDNN D,WRPMSK		;check for buffer ptr wraparound
+	HRR D,1-TTSIZ(D)	;if so, get next buffer
+	ILDB A,D       		;get character
+	TRNE A,1000		;ball code and not regular char?
+	 JRST OTYPG2
+	ANDI A,377
+	IDPB A,5		;put it in buffer
+	SOJG 6,OTYPG1		;inc buffer count
+
+OTYPG2:	POP P,5			;get # to move
+	SUB 5,6			;sub # not moved to get # moved
+	SUB C,5
+	JUMPLE 5,OTYPG3		;if no chars sent, even though there was 
+				;space (because of control code cut off)
+				;skip making TYMNET packet
+	TRO 5,200		;make into type G byte
+
+	DPB 5,POTYPE		;set into type field
+	HLRZ 6,TENTYM(LINE)	;xlate line to port
+	DPB 6,POPORT		;set in line field
+
+	SUBI 5,200-2-3		;change to # words
+	LSH 5,-2		
+	ADD OPTR,5		;adv host pointer
+	ANDI OPTR,ORNGS-1	;take care of wraparound
+	MOVEM OPTR,YOHP		;tell base
+IFN STATSW,<AOS YSTOMS>		;count output message packets
+OTYPG3:	
+	TRNN A,1000		;ended because of control message?
+	 JRST OKSKPR		;no, ended normally
+	TDNN D,WRPMSK		;check for buffer ptr wraparound
+	HRR D,1-TTSIZ(D)	;if so, get next buffer
+	ILDB 6,D       		;get character
+	TDNN D,WRPMSK		;check for buffer ptr wraparound
+	HRR D,1-TTSIZ(D)	;if so, get next buffer
+	ILDB 5,D       		;get character
+	SUBI C,3		;update char count
+	JRST OKSKPR
+;
+;	get room in oring subroutine
+;
+OROOM:	MOVE OPTR,YOHP		;get host pointer
+	MOVE 6,YOBP		;get base pointer
+
+	SKIPL OPTR		;illegal host pointer?
+	CAIL OPTR,ORNGS
+	 JRST ILLPTR		;for shame TYMNET
+
+	SKIPL 6			;illegal base pointer?
+	CAIL 6,ORNGS
+	 JRST ILLPTR		;yes
+  
+	SUB 6,OPTR		;which one ahead
+	SOJL 6,[MOVEI 6,ORNGS	;if host pointer ahead, room is to end
+		SKIPN YOBP	;of ORING, unless base is on 0
+		MOVEI 6,ORNGS-1	;then, to leave space between pointers,
+		SUB 6,OPTR	;cannot use last ORING word. get room
+		JRST .+1]	;to end of ORING.
+	JUMPG 6,SKPRET		;if any room skip return
+	RET			;else no room exit
+
+ILLPTR:	BUG(NTE, <TYMSRV: ILLEGAL TYMBASE OUTPUT POINTER>)
+	SETOM KEYCT		;force tymbase crash
+	RET
+
+	SUBTTL TTYSRV routines
+
+TYMCHI:	MOVE D,TYMLNS(LINE)	;get line status
+	TLNE D,CDMPF		;dumping chars for a CIB?
+	 RET			;don't insert or echo char
+	TRNE D,DEFF		;remote in immediate mode?
+	 JRST TTREC4		;yes, looks like "half" duplex
+	JRST TYMCHX		;no, handle normally
+
+TYMNFK:	LDB 1,CONSTS
+	CAIE 1,CONLG1		;initial connection?
+	 RET			;no, just return
+	MOVEI 1,CONHG3		;yes
+	DPB 1,CONSTS		;set in hang up state
+	RET
+
+	SWAPCD
+
+TYMCOB:	TYMGOB			;clear output buffer
+	 CALL OFULLR		;no oring room
+	RET
+
+TYMDOB:	RET			;MAKE THIS DO NOTHING FOR NOW
+	CALL SNDYEL
+	 CALL OFULLR		;no oring room
+
+	MOVEI A,TYMOBT		;set up to dismiss until yellow
+	HRLI A,(LINE)		;ball comes back
+	JSYS EDISMS
+	RET			;output buffer now empty
+
+	RESCD
+
+TYMOBT:	SKIPE B,YLTCHK(A)	;yellow ball been received?
+	 JRST 0(4)		;no
+	JRST 1(4)		;yes, end dismiss
+
+	SWAPCD
+
+TYMCIB:	MOVSI A,CDMPF		;simulate wait for input buffer clear
+	IORM A,TYMLNS(LINE)	;tell everybody here to dump chars.
+	TYMECF			;tell remote not to echo
+	 CALL OFULLR		;(oring full)
+	MOVEI C,ECHOF		;note that we turned echo off
+	ANDCAM C,TYMLNS(LINE)
+	CALL TTDOBE		;dismiss until present output gets to
+				;remote
+	MOVSI A,CDMPF		;ok, we're back in business
+	ANDCAM A,TYMLNS(LINE)	;turn off char dump
+	CALL TYMECO		;see if we should echo again
+	RET
+
+
+TYMTYP:	MOVSI A,INITF
+	TDNN A,TYMLNS(LINE)	;ignore TYMNET set types if connection
+	 RET			;incomplete
+	CALL TYMECO		;check echo status for changed mech bits
+	HRRZ A,TTYPE(LINE)	;tab echoing, get terminal typ
+
+	MOVSI 7,-7		;set 7 TYMNET terminal parameters for each
+	PUSH P,[POINT 5,PTT]	;STTYP
+
+TYMTP1:	ILDB D,(P)		;get TYMTCS subtype number
+	LDB 5,PTT+1(7)		;get parameter for this line
+	TYMTCS
+	 CALL OFULLR		;(full oring)
+	AOBJN 7,TYMTP1
+
+	SUB P,[XWD 1,1]		;pop stack
+	RET
+
+OFULLR:	PUSH P,A		;entry to dismiss and restart
+	HRREI A,-3		;packet output
+	ADDM A,-1(P)		;back up PC
+	CAIA
+
+OFULLP:	PUSH P,A      
+IFN STATSW,<AOS YSTOFL>          ;count full orings
+
+	MOVEI A,OFULLT
+	HRL A,YOBP
+	JSYS EDISMS		;dismiss until more room in ORING
+
+	POP P,A
+	RET
+
+	RESCD
+
+;SKIPS IF TYMNET LINE SHOULD GET LF PADDING FROM TENEX
+;CALLED FROM TTYSRV AT TTSM2
+;ACCEPTS 2/ LINE #
+;	3/ TENEX TYPE #
+
+TYMLFP:	PUSH P,1			;HURT NO ACS
+	MOVE 1,3			;WHERE PTRS LIKE IT
+	LDB 1,PTTPR			;TYMNET ECONG CR WITH LF?
+	JUMPE 1,TYMLF1			;NO-PAD LINEFEED THEN
+	MOVE 1,3			;YES-TYMNET PADDING CR'S?
+	LDB 1,PTTPD
+	JUMPN 1,TYMLF0			;YES-DON'T LET TENEX PAD LF THEN
+TYMLF1:	AOS -1(P)			;SKIP TO PAD
+TYMLF0:	POP P,1				;RESTORE AC
+	RET
+
+;FIX UP INPUT BUFFER ALLOCATION FOR IBP PARAMETERS
+;ACCEPTS TTY LINE # IN 2
+;ALSO SPLICES NEW TTY BUFFERS INPLACE IF SOME BUFFERS ARE CURRENTLY ASSIGNED
+;SO MAX CHAR COUNTS WILL BE RIGHT
+
+TTBFSP:	PUSH P,1
+	PUSH P,3			;CLOBBER NO ACS
+TTBFS0:	MOVEI 3,IBPNBF			;# TTY BUFFERS FOR IBP
+	LDB 1,TTIIN			;GET MAX # NOW
+	SUB 3,1				;GET DIFF TO GET
+	JUMPE 3,TTBFS5			;NOP IF NONE, ALREADY GOT MAXIMUM
+
+	NOSKED				;KEEP SCHEULER AWAY FROM IRING
+
+	SKIPN TTIIN(2)			;ANY BUFFER CURRENTLY EXIST?
+	 JRST TTBFS4			;NO-NO SPLICE NECESSARY
+	PUSH P,3			;YES, SAVE # NEEDED
+	CALL TTGTBF			;GET THEM
+	 JRST TTBFS2			;COULDN'T, WAIT FOR THEM
+	HRRZI 3,-1(3)			;3/ ADR OF 1ST NEW BUFFER FROM PTR
+	HRRZ 1,TTIIN(2)			;GET OLD BYTE PTR ADR PART
+	TDNN 1,WRPMSK			;CONVERT TO BUFFER ADR
+	SUBI 1,TTSIZ
+	ANDCM 1,WRPMSK
+	ADDI 1,1			;1/ ADR OF OLD BUFFER
+	MOVEM 1,(P)			;SAVE IT, REUSE STACK
+TTBFS1:	MOVE 4,1			;COPY SO CAN CLOBBER
+	HRRZ 1,(4)			;GET WHAT IS PTING TO
+	CAME 1,(P)			;BACK TO STARTING BUFFER?
+	 JRST TTBFS1			;NO, LOOP FOR CHAINED RING
+	EXCH 1,(3)			;YES, SPLICE OLD BUFFERS BETWEEN
+	MOVEM 1,(4)			;1ST & 2ND NEW BUFFERS
+	JRST TTBFS3			;NOW DIDDLE STATIC MAX CHAR COUNTS
+
+;HERE WHEN COULDN'T GET ENOUGH BUFFERS FOR IBP
+
+TTBFS2:	OKSKED
+	POP P,3				;GET # NEEDED IN 3
+	MOVEI 1,TTBFST			;SCHED TEST TO WAIT ON
+	HRL 1,3				;# NEEDED IN LH TEST WORD
+	JSYS EDISMS
+	JRST TTBFS0			;TRY AGAIN
+
+;SHED TEST USED ABOVE TO WAIT FOR SUFFICIENT TTY BUFFERS
+
+TTBFST:	CAMLE 1,TTFREC			;ENOUGH?
+	 JRST 0(4)			;NOPE
+	JRST 1(4)			;YEP, WAKE UP
+
+;HERE AFTER ASSIGNING BUFFERS AND NOW NEED TO FIX STATIC MAX COUNTS
+;OR NO BUFFERS EXISTED, THEREFORE ASSIGNED NONE BUT MUST DIDDLE MAX COUNTS
+
+TTBFS3:	POP P,3				;RESYNC STACK, BUFFERS ASSIGNED
+TTBFS4:	CALL IBPBFR			;NOW DIDDLE STATIC MAX COUNTS
+
+	OKSKED
+
+TTBFS5:	POP P,3				;RESTORE ACS
+	POP P,1
+	RET
+
+
+;ADJUST STATIC MAX INPUT BUFFER PARAMETERS
+
+IBPBFR:	PUSH P,1
+	MOVEI 1,IBPNBF		;NUMBER OF INPUT BUFFERS
+	DPB 1,TTNIN
+	MOVEI 1,IBPNBF		;MAX # INPUT BUFFERS (EXTERNAL ARITHMETIC)
+	IMULI 1,NYCHBF		;MAX # CHARS
+	SUBI 1,1		;ADJUST
+	DPB 1,TTIMAX
+	POP P,1
+	RET
+
+;UNDO WHAT IBPBFR DID FOR US
+;ACCEPTS TTY LINE # IN 2
+;ASSUMES THERE ARE NO TTY BUFFERS CURRENTLY ASSIGNED
+;SO NO NEED TO WORRY ABOUT CHAR MAX CHAR COUNTS FOR BUFFERS
+
+IBPRFB:	PUSH P,1
+	MOVEI 1,NINBUF		;NUMBER OF INPUT BUFFERS
+	DPB 1,TTNIN
+	MOVEI 1,NINBUF		;MAX # INPUT BUFFERS (EXTERNAL ARITHMETIC)
+	IMULI 1,NYCHBF		;MAX # CHARS
+	SUBI 1,1		;ADJUST
+	DPB 1,TTIMAX
+	POP P,1
+	RET
+
+
+
+OFULLT:	CAMN A,YOBP		;see if base has moved its output ptr
+	JRST 0(4)		;no, not yet, keep waiting
+	JRST 1(4)		;yes, it has, go stuff some more
+
+	SUBTTL line disconnect handler
+
+;
+;	can be called from either program or interrupt side
+;	to wait for output buffer to clear, send and receive
+;	a yellow ball, disconnect the line, and re-init the line
+;THIS MAY NOW BE CALLED TO HANG UP AUX CIRCUITS TOO.
+;JOB 0 TAKES CARE OF THE FINAL STATE HANGUP AND DOES RELD FOR AUX CIRCUITS
+;
+TYHNGU:	NOSKED
+	LDB 3,CONSTS		;get connection status
+	TRNN 3,<CONNF>B47	;is line connected
+	 JRST OKRET		;if not, ignore
+	TRNE 3,<AUXF>B47	;WORKING ON AN AUX CIRCUIT?
+	 JRST [MOVEI 3,CONAH1	;YES - KEEP AUX STATUS
+		JRST TYHN1U]
+	MOVEI 3,CONHG1		;wait for buffer to empty
+TYHN1U:	DPB 3,CONSTS
+	JRST OKRET
+
+TYHNG1:	CAIN 3,CONAH1		;WORKING ON AUX CIRCUIT HANGUP?
+	 JRST [MOVEI 3,CONAH2	;YES-STEP TO NEXT AUX CIRCUIT STATE
+		JRST TYHN11]
+	CAIN 3,CONHG3		;TENEX buffers now empty, pre-init hangup?
+	 SKIPA 3,[CONHG4]	;yes
+	MOVEI 3,CONHG2
+TYHN11:	DPB 3,CONSTS		;set state
+	CALL SNDYEL		;output buffer now empty, send yellow
+	 CALL TYMC3		;oring full
+	JRST TYMO3		;finish output driver
+
+TYHNG2:	TYMZAP			;yellow ball received, zap line
+	 RET			;oring full
+	AOS (P)			;skip return from interrupt side
+
+	LDB 3,CONSTS		;what was state?
+	CAIN 3,CONAH2		;WORKING ON AUX CIRCUIT?
+	 JRST [MOVEI 3,CONAD3	;YES-STEP TO FINAL DISC STATE FOR JOB 0
+		JRST TYHN12]
+	CAIN 3,CONHG4		;if waiting for pre-init close out
+	 SKIPA 3,[CONFRE]	;disappear silently,
+	MOVEI 3,CONDC3		;else, ask for job 0 to type disc msg
+TYHN12:	DPB 3,CONSTS
+	CAIE 3,CONAD3		;AUX FINAL STATE?
+	CAIN 3,CONDC3
+	 AOS JB0FLG		;ask job 0 TO CLEAN UP APPROPRIATELY
+	JRST TYDISC
+
+
+;CALLED BY RELDD TO CHECK TO SEE IF USER CAN DO IT FOR AUX LINE
+;PREVIOUSLY THIS HAD BEEN THE WAY TO HANGUP AUX CIRCUITS BUT IS 
+;UNACCEPTABLE NOW.  USER MUST USE THE AUXRLS FUNCTION OF .TYMOP
+;WHICH WILL GET JOB 0 TO RELD THE LINE AFTER PROPER ZAPPING
+;AND CLEANUP OF INTERNAL TABLES.
+;HOWEVER, IF LINE IS IN PROPER STATE, LET IT GO.  THATS HOW
+;JOB 0 AND OTHER KNOWLEDGEABLE USERS GET AROUND THIS CHECK.
+;CONTROLLING TTY TYMNET LINES ARE OK TOO, ITS JUST AUX WE CARE ABOUT
+
+;ACCEPTS LINE # IN 1
+
+TYMROK:	PUSH P,1
+	PUSH P,2
+	HRRZ 2,1		;WHERE CONSTS LIKES IT
+	LDB 1,CONSTS
+	TRNE 1,<AUXF>B47	;AUX CIRCUIT LINE?
+	CAIN 1,CONAD3		;YES-LEGAL STATE TO HANG IT UP?
+	 AOS -2(P)		;SKIP RET (NOT AUX OR LEGAL AUX STATE)
+	POP P,2
+	POP P,1
+	RET
+
+	SUBTTL echo handler
+;
+;	To be called any where from on the program side and decide
+;	whether the TYMNET line should be echoing at the remote or not
+;	and put it into the appropriate mode
+;
+	SWAPCD
+
+TYMECO:	MOVEI D,TMCHDX
+	MOVEI A,HDPXF
+	MOVE C,TTFLGS(LINE)	;check changed tty modes
+	TRNE C,3B33		;changed to half duplex?
+	 JRST  [TDNE A,TYMLNS(LINE)	;from full?
+		 RET			;no, already was half
+		SETO 5,			;tell remote going to half
+		TYMTCS
+		 CALL OFULLR		;full oring
+		MOVEI A,HDPXF!DEFF	;tell us remote in half-dpx
+		IORM A,TYMLNS(LINE)	;and we are not to echo
+		RET]
+	TDNE A,TYMLNS(LINE)	;to full from half?
+	 JRST  [SETZ 5,			;yes, tell remote to go to full
+		TYMTCS
+		 CALL OFULLR		;full oring
+		MOVEI A,ECHOF		;tell us remote in full dpx
+		DPB A,[POINT 4,TYMLNS(LINE),33] ;and in deffered echo
+		JRST .+1]		;check for echo and tab
+
+	MOVEI A,ECHOF
+	MOVSI D,UECOF		;always local echo?
+	TDNE D,TYMLNS(LINE)
+	 JRST NOECO		;yes
+	TRNN C,3B25
+	 JRST NOECO		;TENEX NO ECHO mode inhibits remote echo
+	TRNN C,3B29
+	 JRST NOECO		;so does BINARY mode
+;	MOVE 5,FCMOD1(LINE)	;check CCOC codes  !!removed for sake of
+;	TLNN 5,(2B15)		;apparent response time  MAH 10/8/74!!
+;	 JRST NOECO		;BELL (^G) inhibited or xlate
+;	TRNN 5,2B21
+;	 JRST NOECO		;LF (^J)       "      "   "
+;	TRNN 5,2B27
+;	 JRST NOECO		;CR (^M)       "      "   "
+
+	TDNN A,TYMLNS(LINE)	;remote should have echo on
+	 JRST  [TYMECN			;if not already on, turn it on
+		 CALL OFULLR
+		IORM A,TYMLNS(LINE)	;and note that it is on
+		JRST .+1]
+
+	MOVEI A,TABF		;see if we should turn tab echo on
+	MOVEI D,TMCCIE
+	MOVSI C,(1B2)		;mechanical tabs available?
+	TDNN C,TTFLGS(LINE)
+	 JRST NOTAB		;no
+	TRC 5,2B19		;yes, echo real tab char?
+	TRNN 5,3B19
+	 JRST NOTAB		;no
+
+	TDNE A,TYMLNS(LINE)	;already in that mode?
+	 RET			;yes
+	MOVEI 5,1		;tell remote to echo tab carh
+	TYMTCS
+	 CALL OFULLR		;oring full
+	IORM A,TYMLNS(LINE)	;note that fact for us
+	RET
+
+NOTAB:	TDNN A,TYMLNS(LINE)	;tab echo mode already off?
+	 RET			;yes
+	MOVEI 5,0		;no, turn it off
+	TYMTCS
+	 CALL OFULLR		;oring full
+	ANDCAM A,TYMLNS(LINE)	;note tab echo mode off
+	RET
+
+NOECO:	TDNN A,TYMLNS(LINE)	;echo mode already off?
+	 RET			;yes
+	TYMECF			;no, tell remote
+	 CALL OFULLR		;oring full
+	ANDCAM A,TYMLNS(LINE)	;turn off echo mode switch
+	RET
+
+	SUBTTL GREEN ball handler
+
+	RESCD
+
+GREEN:	MOVSI C,GREENF		;turn on the green ball flag
+	IORM C,TYMLNS(LINE)
+GREEN1:	CALL GREENT		;see if we can reflect a green ball now
+	 CALL TYMC3		;oring full
+	AOJA IPTR,TYMIN1
+
+RED:	MOVSI C,GREENF		;cancel any green balls
+	ANDCAM C,TYMLNS(LINE)
+	TYMRED			;echo red
+	 CALL TYMC3		;(oring full)
+	AOJA IPTR,TYMIN1
+
+GREENT:	HRRE C,TTFORK(LINE)	;see if we should send green ball
+	JUMPL C,GREEN2		;if fork is not input hung then no
+
+	SKIPGE TTFLGS(LINE)	;output active?
+	 JRST GREEN2		;no
+
+	MOVSI C,GREENF
+	TDNN C,TYMLNS(LINE)	;was green ball requested?
+	 JRST GREEN2		;no
+
+	TYMGRN			;yes, send green ball
+	 JRST	[SKIPE INSKED	;oring full, are we on program or inrpt
+		 RET		;side? On inrpt side here
+		 CALL OFULLP	;on program side here
+		 JRST GREENT]	;reque test
+
+	MOVSI C,GREENF		;green ball send, cancel flag
+	ANDCAM C,TYMLNS(LINE)
+
+GREEN2:	SKIPE INSKED		;interrupt side?
+	 AOS (P)		;yes
+	RET			;no
+
+	SUBTTL	TYMOP JSYS
+
+
+;			TYMOP		JSYS 654
+;
+; TYMnet utility OPerator; performs a variety of TYMNET utility
+; functions. like a CALLI
+;
+; Accepts in 1:	0-8   option bits    or -1 for sndcmd function
+;		9-17  function
+;		18-35 TYMNET tty designator
+;
+;	 2 & 3:	function dependent arguments
+;
+;
+;			TYMOP
+;
+; Returns + 1:	Unsuccessful, with error number in 1, and if supervisor
+;		error, supervisor error number in 2
+;	    2:	Successful, 2 & 3 possibly updated
+;
+;
+; see tymop doc for function documentation
+;
+
+	SWAPCD
+
+.TYMOP:	JSYS MENTR
+	LDB 4,[POINT 9,1,17]	;get dispatch code
+	CAIL 4,0		;SIMPLE RANGE CHECK
+	CAILE 4,NTYMOP-1	;LET RTNS CHK OTHER THEMSELVES
+	 RETERR(TYMXX7)		;illegal TYMOP code
+	JRST YOPDSP(4)		;DISPATCH, 1,2,3 ACS INTACT, 4 CLOBBERED
+
+YOPDSP:	RETERR (TYMXX7)		;0 - ILLEGAL FUNCTION CODE
+	JRST AUXBLD		;1 - BUILD AUX CIRCUIT
+	JRST GETLNS		;2 - get line status
+	JRST SETLNS		;3 - set line status
+	JRST GETINS		;4 - get interrupt status
+	JRST SETINS		;5 - set interrupt status
+	JRST QUEAUX		;6 - QUEUE AUX CIRCUIT
+	JRST CLMAUX		;7 - CLAIM AUX CIRCUIT
+	JRST DEQAUX		;10 - DEQ AUX CIRCUIT
+	JRST SETSYS		;11 - SET SYSNDX SLOT
+	JRST CLRSYS		;12 - CLEAR SYSNDX SLOT
+	JRST GETSYS		;13 - GET SYSNDX SLOT CONTENTS
+	JRST AUXRLS		;14 - RELEASE AUX CIRCUIT
+	JRST GETCMD		;15 - get deffered control message
+	JRST SNDCMD		;16 - send deffered control message
+NTYMOP==.-YOPDSP
+
+
+;RELEASE AUX CIRCUIT
+
+AUXRLS:	MOVE 4,1		;SAVE ACS
+	MOVE 5,2
+	MOVE 6,3
+	HRRZ JFN,4		;WHERE CHKTTC LIKES TTY DESIGNATOR
+	CALL CHKTTC		;CHECK ON IT
+	 RETERR (TYMXX8,<CALL UNLCKF>)
+	CALL UNLCKF		;OK, UNDO LOCK, 2/ LINE #
+	CAIL 2,TYMTTL		;RANGE CHECK
+	CAILE 2,TYMTTH
+	 RETERR (TYMXX8)	;NOT TYMNET LINE
+	HLRZ 1,TTFORK(2)	;GET OWNER IN 1
+	CAME 1,JOBNO		;SAME AS THIS JOB?
+	 RETERR (TYMXX9)	;NO-LOSE FOR NOW
+	CALL TYHNGU		;INIT: WAIT FOR LINE TO CLEAR AND ZAP
+	JRST SKMRTN		;SKIP SUCCESS
+
+
+	SUBTTL	auxilliary circuit builder
+
+;	MUST HAVE AUXBLD PRIVELEGE BIT TYMOX IN CAPMSK (OR WHEEL OR OPER)
+
+;	1/ B0 - Wait for AUXBLD process if busy
+;	   B1 - F,DATA IS IN 3
+;	2/ Asciz string pointer to signon name in user space
+;	3/ F,DATA WHERE F=0 FOR EXEC AND DATA IS DON'T CARE
+;			F=1 FOR QUE FOR JOB USING UDBITS IN DATA
+;	      F IS 8 BITS, REST IS DATA
+;	
+;	This process takes the signon string passed to it by the user,
+;	prefixes the string "AIM" to it if the user is NOT a wheel,
+;	and passes the string onto the TYMBASE (as part of the aux cir
+;	building process) where the TYMBASE prefixes the characters
+;	"SUMEX".  So all normal users can only build circuits with the
+;	sign on string "SUMEXAIM....", and enabled users can build circuits
+;	with a signon string of "SUMEX...". In both cases, if the resultant
+;	signon string is enabled in TYMNETS supervisor file for multiple
+;	machines, the desired machine may be specified by appending a
+;	":nn" where nn is the machine number. A null string supplied by
+;	the user will give a resultant string of "SUMEX" or "SUMEXAIM",
+;	both of which will build circuits back to us.
+;
+;	If all goes well, the building process is the following,
+;	1) send supervisor request (type 26); 2) receive supervisor
+;	acknowledge; 3) send signon string (character at a time with type
+;	30's); 4) terminate sting with another supervisor request (type 26);
+;	5) receive aux log in (type 7); 6) receive another supervisor
+;	acknowledge, whereupon the line is assigned to the job.  If all
+;	does not go well, see the state diagram at the beginning of this
+;	file.  In particular, since the fork can be waiting quite a while
+;	(2 mins) for a supervisor response and shouldn't stay NOINT, PSI
+;	interrupts disassociate the fork from the building process, and
+;	let the SCHED level routines abort the building process
+
+AUXBLD:	MOVE 11,1		;SAVE ARG ACS IN 11,12,13
+	MOVE 12,2
+	MOVE 13,3
+	MOVE 1,CAPMSK##		;GET CAP MASK FOR USER
+	MOVE 2,CAPENB		;GET CAPS ENABLED
+	TRNN 2,WHEEL!OPER	;THESE GUYS CAN DO IT IF ENABLED
+	TRNE 1,TYMOX		;CAN DO IT?
+	 CAIA			;OK
+	  RETERR (TYMX10)	;NOPE
+	ADD P,BHC+10		;GET STRING STORAGE SPACE
+	JUMPGE P,MSTKOV
+	TLNN 11,(1B1)		;GONNA SPECIFY FUNCTION?
+	 JRST AUXB00		;NO-FLY WITH DEFAULT
+
+	LSH 3,-^D28		;FUNCTION INTO POSITION
+	CAIL 3,0		;RANGE CHECK
+	CAILE 3,MTYMQU
+	 RETERR (TYMX18)	;BAD FUNCTION
+
+AUXB00:	MOVEI 1,-10(P)
+	MOVE 2,12		;USER MODE PTR
+	CALL CPYFU1		;COPY STRING FROM USER ONTO STACK
+	 JRST MRETNE		;PASS ERROR TO USER (CAN'T HAPPEN)
+
+	MOVEI 2,AUXID		;FAKE AN AUX CIR BLDG ID UNTIL TYMNET GETS
+				;PARALLEL CIRCUIT BUILDING
+AUXBL0:	NOSKED
+	SKIPE AUXINF(2)		;GET PROCESS
+	JRST [	OKSKED
+		TLNN 11,(1B0)	;WAIT?
+		 RETERR(TYMXX1)
+		MOVEI 1,AUXINF(2) ;WAIT FOR AUXLCK TO UNLOCK
+		CALL DISE
+		JRST AUXBL0]
+	AOS AUXINF(2)		;CLAIM PROCESS OWNERSHIP
+	NOINT
+	OKSKED
+
+	MOVSI 4,-NAXTRY		;TRY THIS MANY TIMES
+AUXBL2:	MOVE 1,TYMSVC		;NOTE SUPERVISOR VERSION TO USE IN
+	LSH 1,^D9
+	ADDI 1,AUXREQ		;SET STATE TO FIRST SUP REQ SENT
+	MOVEM 1,AUXINF(2)	;CHECKING FOR SUPERVISOR TAKEOVER
+
+	MOVEI 3,TYPSUP		;OUTPUT SUPERVISOR REQUEST
+	CALL OTYPES
+	 CALL OFULLR		;(FULL ORING)
+
+	CALL AUXBL6		;WAIT FOR RESPONSE
+	AOBJN 4,AUXBL2		;ERROR RESPONSE, TRY AGAIN
+	JUMPGE 4,AUXBL7		;SUPERVISOR ERRROR RESPONSE
+
+REPEAT 0,<
+	MOVE 1,CAPENB		;GET CAPABILITIES
+	TRNE 1,WHEEL!OPER	;WHEEL OR OPERATOR
+	 JRST AUXBL5		;YES, SEND STRING STRAIGHT
+	
+	MOVE 1,[POINT 7,[ASCIZ \AIM\]] ;NOT ENABLED, PREFIX
+	CALL AUXBL4
+>
+
+AUXBL5:	MOVEI 1,-7(P)		;GET STRING POINTER
+	HRLI 1,(POINT 7,0)
+	CALL AUXBL4
+
+	MOVE 1,TYMSVC		;NOTE SUPERVISOR VERSION USED IN CHECKING
+	LSH 1,^D9		;SUPERVISOR TAKEOVER, SAY SUPR RESP PENDING
+	HRL 1,JOBNO		;NOTE JOBNO FOR AUXLOG TO USE IN ASSIGNING
+	ADDI 1,AUXSGN		;SET SECOND SUPER REQUEST SENT STATE
+	MOVEM 1,AUXINF(2)
+
+	MOVEI 3,TYPAXC		;THIS USED TO BE TYPSUP (ANOTHER SUP RQST)
+	MOVEI 4,";"		;TERMINATE WITH ";"
+	CALL OTYPES
+	 CALL OFULLR
+
+	CALL AUXBL6		;WAIT FOR RESPONSE
+	 JRST AUXBL7		;SUPERVISOR RESPONDED WITH AN ERROR
+
+AUXB10:	LDB 1,AUXLIN		;GET LINE NUMBER
+	CAIL 1,TYMTTL		;TYMNET LINE?
+	CAIL 1,TYMTTL+NTYMTT
+	 JRST  [MOVEI 1,TYMXX3	;NO, NO FREE LINES
+		JRST AUXBL8]
+	SETZM AUXINF(2)		;CLEAR AUX IDENT VARIABLES BEFORE RELEASING
+	SUB P,BHC+10		;CLEAR STACK
+	
+	MOVE 2,1
+	NOSKED
+	LDB 3,CONSTS		;GET CONNECTION STATUS
+	TRNN 3,<CONNF>B47	;GOT ZAPPED AFTER SUPER OK RESPONSE?
+	 JRST  [MOVEI 3,CONFRE	;YES, SILENTLY FREE LINE
+		DPB 3,CONSTS
+		SETOM TTFORK(2)
+		hrrzs	ttype(2)	;clear ttyop flags
+		OKSKED
+		RETERR(TYMXX4)]	;AND RETURN ERROR
+	MOVEI 3,CONAL3		;SET INITIALZATION IN PROGRESS STATE
+	DPB 3,CONSTS
+	OKSKED
+
+	MOVEI 1,400000(2)	;SET UP LINE NUMBER
+	ADD P,BHC+3
+	JUMPGE P,MSTKOV
+	MOVEI 7,-<3-1>(P)
+	SETZM TYNODS-400000(1)
+	MOVEI 2,3		;SIZE OF EFACT BLOCK
+
+	CALL INIMSG		;SET UP LINE AND NOTE CONNECT
+	SUB P,BHC+3
+
+	ASND			;ASSIGN THE LINE TO THIS JOB
+	 JFCL			;PASS ERROR BACK TO USER
+	HRR 11,1		;RETURN LINE DESIGNATOR TO USER RH 1
+				;BUT LEAVE OPTION BITS TEMPORARILY
+	MOVE 2,NORMTF		;SET UP MODES
+	TRZ 2,3B29		;BINARY INITIAL MODE
+	STPAR
+	SFMOD
+	MOVEI 2,TYPCRT
+	STTYP
+
+	MOVEI 2,-400000(1)
+	SETZM TTLPOS(2)		;RESET POSITIONS
+	NOSKED
+	LDB 3,CONSTS		;GET CONNNECTION STATUS
+	TRNN 3,<CONNF>B47	;STILL CONNECTED?
+	 JRST  [CALL AUXZAP	;FIRE OFF LINE DETACHED INTERUPT
+		OKSKED		;AND TELL JOB 0 ABOUT IT
+		JRST AUXB11]	;AND RETURN TO USER
+	MOVEI 3,CONAUX		;LINE CONNECTED
+	DPB 3,CONSTS
+	OKSKED
+
+	SETZ 4,			;ASSUME DEFAULT EXEC FUNCTION 0
+	TLNE 11,(1B1)		;SPECFYING FUNCTION?
+	MOVE 4,13		;YES-GET INFO WORD USER SPECIFIED IN 4
+	MOVEI 2,200		;SEND HOST TO HOST PROTOCOL
+	BOUT			;AUXTTY DESIGNATOR STILL IN 1
+	MOVE 2,[POINT 8,4]	;8 BIT PTR TO 4
+	MOVNI 3,4		;FUNCTION AND D0,D1,D2
+	SOUT
+	MOVE 3,[POINT 4,4,35]	;POINT AT LAST 4 BITS OF DATA
+	LDB 2,3			;GET THEM
+	LSH 2,4			;UP INTO HI 4 BITS OF BYTE
+	BOUT			;SEND D3
+	MOVEI 2,200		;SEND TERMINATOR OF H2H PROTOCOL
+	BOUT			;FALL INTO GO HOMER
+
+
+AUXB11:	HRRZS 11		;SUCCESS, CLEAR OPTION BITS FROM USER AC 1
+	CALL AUXB20		;RET USER ACS
+	OKINT
+	JRST SKMRTN		;AND SKIP RETURN TO USER
+
+; ERROR, ABORT PROCESS
+
+AUXBL7:	LDB 12,AUXSVR		;GET ERROR CODE IN USER ACS 2
+	MOVEI 1,TYMXX5		;MAKE INTO TENEX ERROR MESSAGE
+
+AUXBL8:	MOVEM 1,LSTERR		;STORE LAST USER ERROR IN PSB
+	MOVE 11,1		;STORE ERROR IN USER AC 1
+
+AUXBL9:	SETZM AUXINF(2)		;CLEAR AUX IDENT VARIABLES BEFORE RELEASING
+	CALL AUXB20		;RET USER ACS
+	OKINT
+	JRST MRETN		;AND RETURN
+
+AUXBL4:	ILDB 4,1		;SEND LOGIN STRING, CHAR AT A TIME
+	CAIE 4,0		;STOP AT NULL
+	CAIN 4," "		;OR SPACE
+	 RET
+	CAIN 4,";"		;OR ";"
+	 RET			;WE TERMINATE LINE TO SUP, NOT USER
+	MOVEI 3,TYPAXC		;SEND AUX LOGIN CHAR
+	CALL OTYPES
+	 CALL OFULLR		;(FULL ORING)
+	JRST AUXBL4
+
+AUXB20:	UMOVEM 11,1		;RET USER ACS
+	UMOVEM 12,2
+	UMOVEM 13,3
+	RET
+
+; WAIT FOR SUPERVISOR RESPONSE
+
+AUXBL6: MOVE 1,TODCLK		;SET UP TIMER
+	ADDI 1,AUXPRD		;FOR ONE MINUTE
+	MOVEM 1,AUXCLK(2)
+
+	HRRI 1,AUXRT		;WAIT FOR RESPONSE
+	HRL 1,2			;ON THIS AUX IDENT
+	JSYS EDISMS
+	SETZM AUXCLK(2)
+
+	LDB 1,AUXSVC		;GET REASON FOR WAIT STOP
+	JRST .(1)
+
+	JRST   [SUB P,BHC+1	;NEW SUPERVISOR
+		SETZM AUXINF(2)	;CLOSE OUT PROCESS AND TREAT AS PSI
+		JRST AUXIN3]
+	JRST   [SETZM AUXINF(2)	;CLEAN UP
+		MOVEI 1,TYMXX2	;TIMER EXPIRED
+		JRST AUXBL8]
+	JRST SKPRET		;CONTINUE PROCESS
+	RET			;SUPERVISOR ERROR
+	JRST AUXINT		;PSI INTERRUPT
+
+; WAIT FOR SUPERVISOR RESPONSE TEST ROUTINE
+
+	RESCD
+AUXRT:	MOVE 2,1		;SET UP IDENT NUMBER 
+
+	MOVEI 3,1
+	LDB 1,AUXSVC		;CHECK SUPERVISOR TAKEOVER COUNT
+	CAME 1,TYMSVC		;SUPERVISOR TAKE OVER LATELY?
+	 JRST AUXRT1
+
+	LDB 1,AUXSTS		;GET STATE CODE
+	MOVEI 3,3
+	CAIE 1,AUXSGR		;GRANTED STATE
+	CAIN 1,AUXBLT		;OR GOT LINE STATE
+	 JRST AUXRT1		;CONTINUE
+	MOVEI 3,4
+	CAIN 1,AUXRTY		;SUPERVISOR ERROR
+	 JRST AUXRT1
+	
+	MOVEI 3,2
+	MOVE 1,AUXCLK(2)	;TIME EXPIRED?
+	CAMG 1,TODCLK
+	 JRST AUXRT1
+
+	SKIPN FKINT(7)		;INTERRUPT PENDING?
+	 JRST 0(4)		;NO, WAIT
+	MOVEI 3,5
+	
+AUXRT1:	DPB 3,AUXSVC		;PASS ACTION TO TAKE, BACK TO PROGRAM
+	JRST 1(4)
+
+; PSI INTERRUPT PENDING, ABORT PROCESS AND RETRY
+
+AUXINT:	SUB P,BHC+1
+	NOSKED			;WE WERE PSI INTERRUPTED, FREEZE THINGS 
+	LDB 1,AUXSTS		;WHILE WE LOOK, GET ID STATE
+	CAIN 1,AUXRTY		;RECVD SUPER ERROR?
+	 JRST AUXIN2		;IF SO, ACCEPT INTERUPT
+	CAIN 1,AUXREQ		;STILL AWAITING 1ST SUPER RESP?
+	 JRST  [MOVEI 1,AUXPS2	;SET ID INTO FIRST FLUSH STATE, AND ACCEPT
+		JRST AUXIN1]
+	CAIN 1,AUXSGR		;RECVD 1ST SUPER RESP
+	 JRST  [MOVEI 1,AUXPS3	;;YES,SET INTO SECOND FLUSH STATE
+		DPB 1,AUXSTS
+		OKSKED
+		MOVEI 3,TYPSUP	;AND SEND 2ND REQUEST W/O LOGIN STRING
+		CALL OTYPES	;TO FORCE ERROR
+		 CALL OFULLR
+		JRST AUXIN3]	;THEN ACCEPT INT
+	CAIN 1,AUXSGN		;AWAITING 2ND SUPER RESP?
+	 JRST  [MOVEI 1,AUXPS3	;YES, SET INTO SECOND FLUSH STATE, AND ACCEPT
+		JRST AUXIN1]
+	CAIN 1,AUXLGR		;GOT LOG IN
+	 JRST  [MOVEI 1,AUXPS4	;SET INTO 3RD FLUSH STATE
+		DPB 1,AUXSTS
+		LDB 2,AUXLIN
+		CAIL 2,TYMTTL	;AND IF WE GOT A LINE
+		CAIL 2,TYMTTL+NTYMTT
+		 JRST AUXIN2
+		SKIPL TYMLNS(LINE) ;CONNECTED?
+		 JRST AUXIN2	;NO, ALREADY ZAPPED
+		HLRZ 4,TENTYM(LINE) ;GET THE PORT
+		CALL TYDISC	;DISCONNECT THE PORT FROM US
+		MOVEI 3,CONFRE	;FREE UP THE STATE
+		DPB 3,CONSTS
+		HRROS TTFORK(LINE) ;FINISH DISCONNECT
+		hrrzs	ttype(2)	;clear ttyop flags
+		OKSKED
+		MOVE 2,4	;HAVE TO ZAP LINE THIS FUNNY WAY REMAIN 
+		MOVEI 3,TYPZAP	;OKSKED WHILE CALLING OTYPES YET PREVENTING
+		CALL OTYPES	;ASYNCHRONOUS ZAPS FROM TYMNET FROM SCREWING
+		 CALL OFULLR	;THINGS UP
+		JRST AUXIN3]	;AND ACCEPT INTERRUPT
+	CAIN 1,AUXBLT		;IF WE HAVE A LINE BY NOW
+	 JRST  [OKSKED		;CONTINUE DEFERR INTERRUPT TIL THROUGH
+		JRST AUXB10]
+	SETZB 1,AUXINF(2)	;WE SHOULDN'T GET HERE, BUT IF WE DO,
+				;RELEASE THE WHOLE DAMN THING
+AUXIN1:	DPB 1,AUXSTS
+AUXIN2:	OKSKED
+AUXIN3:	OKINT			;PSI INTERRUPT, ACCEPT INTERRUPT
+ 	JRST AUXBL0		;AND IF WE GET BACK, TRY AGAIN
+
+
+;0TH SLOT OF SYSNDX IS NOT USED!!!
+;ALLOWS FOR NEGATIVE SPEC OF SYSNDX INSTEAD OF JOB #
+
+;SET SYSNDX ENTRY
+;ACCEPTS 1/ OPTION BITS,11,,0
+;	 2/ SYSNDX
+;	 3/ JOB #
+
+;OPTION BITS :1B0 - JOB # IN 3
+
+;RETURNS: +1  ERROR, 1/ ERROR CODE
+;	  +2  ENTERED
+
+	SWAPCD
+
+SETSYS:	MOVE 4,1			;GET USER ACS
+	MOVE 5,2
+	MOVE 6,3
+	MOVE 1,CAPENB			;CAN DO?
+	TRNN 1,WHEEL!OPER
+	 RETERR (TYMX10)		;INSUFF CAPS
+	MOVE 1,5			;GET SYSNDX
+	CALL SYSXCK			;CHECK ON IT (CHK FREE NOSKED)
+	 RETERR (TYMX12)		;ILLEGAL
+	TLNN 4,(1B0)			;SPECIFYING JOB #?
+	MOVE 6,JOBNO			;GET DEFAULT JOB #
+	CAIL 6,0			;LEGAL JOB?
+	CAILE 6,NJOBS-1
+	 RETERR (TYMX11)		;NO
+
+	NOSKED				;PLAY SAFE
+
+	MOVE 1,SYSNDX(5)		;GET CURRENT ENTRY
+	CAME 1,MINUS1			;FREE?
+	 RETERR (TYMX13,<OKSKED>)	;NO-MUST BE TO CLOBBER IT
+	MOVEM 6,SYSNDX(5)		;STORE JOB #
+
+	OKSKED
+
+	JRST SKMRTN			;SUCCESS RETURN
+
+
+
+;CLEAR SYSNDX ENTRY
+;ACCEPTS 1/ OPTION BITS,12,,0
+;	 2/ SYSNDX
+
+;OPTION BITS:
+
+;RETURNS: +1  ERROR, 1/ ERROR CODE
+;	  +2  CLEARED , 1/ PREVIOUS CONTENTS JUST CLOBBERED
+
+CLRSYS:	MOVE 4,1			;SAVE USER ACS
+	MOVE 5,2
+	MOVE 1,CAPENB
+	TRNN 1,WHEEL!OPER
+	 RETERR (TYMX10)
+	MOVE 1,5
+	CALL SYSXCK
+	 RETERR (TYMX12)
+	SETOM SYSNDX(1)
+	UMOVEM 2,1			;RET PREVIOUS CONTENTS IN 1
+	JRST SKMRTN			;SUCCESS RETURN
+
+
+;GET SYSNDX ENTRY
+;ACCEPTS 1/ OPTION BITS,13,,0
+;	 2/ SYSNDX
+
+;OPTION BITS:
+
+;RETURNS: +1  ERROR, 1/ ERROR CODE
+;	  +2  1/ CONTENTS, -1 IF FREE
+
+GETSYS:	MOVE 4,1			;GET USER ACS
+	MOVE 5,2
+	MOVE 1,5			;GET SYSNDX IN 1
+	CALL SYSXCK			;CHECK IT
+	 RETERR (TYMX12)
+	UMOVEM 2,1
+	JRST SKMRTN			;SUCCESS RETURN
+
+;CHECK ON SYSNDX AND RETURN CONTENTS OF SLOT IF VALID
+;ACCEPTS 1/ SYSNDX
+;RETURNS +1 ILLEGAL SYSNDX
+;	 +2 2/ CONTENTS OF SLOT
+
+	RESCD
+
+SYSXCK:	CAIL 1,1			;1ST VALID IS INDEX 1!!!
+	CAILE 1,NSYSND
+	 RET
+	MOVE 2,SYSNDX(1)		;OK, GET IT
+	JRST SKPRET
+
+
+;QUEUE A TYMNET TTY FOR DJOB
+;ACCEPTS 1/ OPTION BITS,6,,TTY DESIGNATOR
+;	 2/ 0,USBITS,,0
+;	 3/ 0,UDBITS,,<DJOB (OR SYSNDX # IF NEGATIVE)>
+;
+;OPTION BITS: NONE
+;
+;RETURNS +1 ERROR   1/ ERROR CODE
+;	 +2 OK, TTY QUEUED
+
+	SWAPCD
+
+QUEAUX:	MOVE 4,1			;GET ACS 1-3 INTO 4-6
+	MOVE 5,2
+	MOVE 6,3
+	TLZ 5,777000			;CLEAR EBITS FROM USER WORDS
+	TLZ 6,777000
+	HRRZI 2,-400000(4)		;GET LINE #
+	CAIL 2,TYMTTL			;RANGE CHECK
+	CAILE 2,TYMTTH
+	 RETERR (TYMX15)
+
+	NOSKED				;FOR QUEUE HANDLING AND DELICATE STUFF
+
+	LDB 1,CONSTS			;GET CONNECTION STATE
+	CAIE 1,CONAUX			;MUST BE IN COMPLETED CONNECTED STATE
+	CAIN 1,CONCTL
+	 CAIA
+	RETERR (TYMX15,<OKSKED>)	;AINT
+	MOVE 1,AUXDJQ(2)		;CHECK THAT LINE NOT QUEUED YET
+	CAME 1,MINUS1			;IS IT?
+	RETERR (TYMX15,<OKSKED>)	;HOW DID THIS HAPPEN?
+	HRRE 2,6			;GET DJOB OR NEG SYSNDX
+	JUMPGE 2,QUEAU1			;JUMP IF DJOB
+	MOVN 1,2			;MAKE SYSNDX
+	CALL SYSXCK			;RANGE CHECK SYSNDX
+	 RETERR (TYMX12,<OKSKED>)	;BAD RANGE
+	JUMPL 2,[RETERR (TYMX14,<OKSKED>)] ;IS FREE
+	HRR 6,2				;REPLACE SYSNDX WITH JOB #
+	TLO 6,(1B0)			;AND REMEMBER WE OBTAINED IT FROM THERE
+QUEAU1:	CAIL 2,0			;RANGE CHECK DJOB IN 2
+	CAILE 2,NJOBS-1
+	 RETERR (TYMX11,<OKSKED>)	;BAD DJOB
+	HRRZ 1,JOBDIR(2)		;LOGGED IN?
+	JUMPE 1,[RETERR (TYMX11,<OKSKED>)] ;NO-ILLEGAL
+	JRST QUEAU2			;ALL CHECKS MADE IT, DO WORK
+
+
+;ALL CHECKS PERFORMED AND BLESSED IF HERE, STILL NOSKED!!! (HURRY UP)
+
+QUEAU2:	HRRZI 2,-400000(4)			;GET LINE #
+	MOVEM 6,AUXDJQ(2)		;ENTER DESTIN JOBATION QUE
+	HRR 5,JOBNO			;ENTER SOURCE JOB #
+	MOVEM 5,AUXSJQ(2)		;ENTER SOURCE JOB QUE
+	CALL GIVAUX			;NOW DIDDLE TERMINAL OWNERSHIP
+	MOVE 1,TODCLK			;AND SET ALARM CLOCK
+	ADDI 1,AUXTIM			;TO THIS VALUE
+	MOVEM 1,AUXTMQ(2)		;WHEN TO TIMEOUT
+
+	OKSKED				;ITS SAFE NOW
+
+	UMOVEM 4,1			;UPDATE USER ACS
+	UMOVEM 5,2			;SO THEY CAN SEE WHAT
+	UMOVEM 6,3			;WE DID FOR THEM
+	JRST SKMRTN			;SUCCESS RETURN
+
+
+;CALLED NOSKED!!!
+;EXECUTED BY JOB GIVING AWAY AUXTTY TO AUXQUE STUFF
+;ACCEPTS 2/ LINE # (MUST BE LEGAL TTY UNIT #)
+
+	RESCD
+
+GIVAUX:	PUSH P,1			;SAVE SCRATCH ACS
+	PUSH P,2
+	PUSH P,3
+	MOVEI 1,QMAGCN			;TTFORK GETS QMAGCN LH FOR QUEUED
+	HRLM 1,TTFORK(2)
+	CALL AUXDEV			;GET DEV # IN RH 1
+	MOVEI 3,QMAGCN			;THE QUEUE MAGIC #
+	HRLM 3,DEVUNT(1)		;SO NOBODY CAN ASND IT
+	MOVSI 3,(1B6)			;AND SAY ASSIGNED IN CHR WRD
+	IORM 3,DEVCHR(1)
+	POP P,3				;RESTORE SCRATCH ACS
+	POP P,2
+	POP P,1
+	RET
+
+
+
+;CALLED NOSKED!!!
+;EXECUTED BY JOB TAKING AUXTTY FROM AUXQUE STUFF
+;ACCEPTS 2/ LINE # (MUST BE LEGAL TTY UNIT #)
+
+TAKAUX:	PUSH P,1			;SAVE SCRATCH ACS
+	PUSH P,2
+	PUSH P,3
+	HLRZ 1,TTFORK(2)		;GET OWNING JOB
+	CAIE 1,QMAGCN			;QUEUED FOR US?
+	 CALL AUXBDQ			;SHOULDN'T HAPPEN
+	CALL AUXDEV			;GET DEV # IN RH 1
+	HLRZ 3,DEVUNT(1)		;GET ASSIGNED STATE
+	CAIE 3,QMAGCN			;QUEUED FOR US?
+	 CALL AUXBDQ			;SHOULDN'T HAPPEN
+	MOVE 3,JOBNO			;MAKE US THE OWNER NOW
+	HRLM 3,DEVUNT(1)		;1B6 STILL ON IN DEVCHR(1)
+	HRLM 3,TTFORK(2)		;OWNER IN TTFORK TOO
+	POP P,3				;RESTORE SCRATCH ACS
+	POP P,2
+	POP P,1
+	RET
+
+AUXBDQ:	BUG(CHK,<INCONSISTENT QUEUE STATE, NOT QMAGCN>)
+	RET
+
+
+;ACCEPTS TTY UNIT # IN 2
+;RETURNS DEVICE # IN RH 1 (REALLY AOBJN PTR IN 1)
+
+AUXDEV:	PUSH P,2		;SAVE ACS
+	PUSH P,3
+	HRLI 2,12		;PUT TTY DEVICE TYPE IN LH 2
+	MOVNI 1,NDEV
+	HRLZS 1			;1/ -NDEV,,0 AOBJN PTR
+AUXDE1:	HLLZ 3,DEVCHR(1)	;GET DEVICE TYPE IN LH 3
+	TLZ 3,777000		;ONLY
+	HRR 3,DEVUNT(1)		;AND UNIT # IN RH 3
+	CAME 2,3		;RIGHT DEVICE AND UNIT #?
+	 AOBJN 1,AUXDE1		;NO-LOOP TIL FOUND
+	POP P,3			;RESTORE ACS
+	POP P,2
+	JUMPL 1,R		;RET IF FOUND
+	BUG(HLT,<ILLEGAL TTY # IN AUXDEV>)
+
+;DEQUEUE AUX CIRCUIT
+
+;ACCEPTS: 1/ OPTION BITS,10,,AUXTTY
+;	 2/ 0,<UDBITS OR 0>,,<DJOB (OR SYSNDX IF NEGATIVE)>
+;	 3/ SJOB
+
+;OPTION BITS:	1B1 - IGNORE RH 2 AND DEQUEUE ALL JOBS QUEUED BY SJOB
+;		1B3 - SJOB IN 3 (WHEEL REQUIRED)
+;		1B4 - AUXTTY IN 1 (IGNORE 2)
+
+;NOTE:  UDBITS IN 2 WILL BE USED ONLY IF NON-0 (SINCE 0 COULD NEVER WIN AND)
+
+;RETURNS:	+1 ERROR CODE IN 1
+;		+2 ACTION COMPLETED, ACS 1,2,3 UPDATED
+
+;DEQUEUE ONE JOB AT A TIME
+
+	SWAPCD
+
+DEQAUX:	MOVE 4,1			;COPY USER ACS
+	MOVE 5,2
+	MOVE 6,3
+	MOVE 1,CAPENB
+	TLNE 4,(1B3)			;WANT TO USE PRIVY BITS?
+	TRNE 1,WHEEL!OPER		;AND CAN
+	 CAIA
+	RETERR (TYMX10)
+	TLNN 4,(1B3)			;GONNA SPECIFY SJOB?
+	HRRZ 6,JOBNO			;NO-USE THIS JOB
+	TLNE 4,(1B4)			;AUXTTY SPECIFIED?
+	 JRST DEQAUA			;YES-IGNORE STUFF IN 2
+	TLNE 4,(1B1)			;NO-IGNORE RH 2?
+	 JRST DEQAU2			;IGNORE
+	HRRE 2,5			;GET DJOB OR SYSNDX
+	JUMPGE 2,DEQAU1			;JUMPE IF DJOB
+	MOVN 1,2			;MAKE TRUE INDEX
+	CALL SYSXCK			;RANGE CHECK SYSNDX
+	 RETERR (TYMX12)		;BAD RANGE
+	JUMPL 2,[RETERR (TYMX14)]	;JUMP IF FREE SLOT
+	HRR 5,2				;OK - REPLACE RH 2
+DEQAU1:	CAIL 2,0			;RANGE CHECK DJOB IN 1
+	CAILE 2,NJOBS-1
+	 RETERR (TYMX11)
+	TLNN 4,(1B3)			;SPECIFIED SJOB?
+	 JRST DEQAU2			;NO
+	HRRZ 1,6			;GET IT
+	CAIL 1,0			;RANGE CHECK IT
+	CAILE 1,NJOBS-1
+	 RETERR (TYMX11)
+
+DEQAU2:	NOSKED				;DO THE WORK SAFELY
+
+	MOVE 1,[-NTYMTT,,DUXDJQ]	;SEARCH DJOB QUE FOR IT
+	HRRZ 2,6			;SJOB (MIGHT BE US)
+DEQAU3:	CALL JBINTB			;THERE?
+	 RETERR (TYMX17,<OKSKED>)	;NO - ERROR
+	MOVE 3,(1)			;YES-SJOB LOGGED OUT?
+	TLNE 3,(1B0)
+	 JRST DEQAU6			;YES-CAN'T TOUCH IT THEN
+	TLNE 4,(1B1)			;OK - IGNORE ITS DJOB?
+	 JRST DEQAU4			;YES
+	HRRZS 3				;NO-MUST MATCH DJOB
+	CAIE 3,(5)			;SAME? (LOOK OUT ON XTENDED KL)
+	 JRST DEQAU6			;NO
+DEQAU4:	TLNN 5,000777			;YES-USE UDBITS?
+	 JRST DEQAU5			;NO - A HIT?
+	MOVE 3,(1)			;YES-GET TEST WORD
+	AND 3,5				;PLAY BITS GAME
+	TLNN 3,000777			;A HIT?
+	 JRST DEQAU6			;NO
+DEQAU5:	HRRZ 2,1			;2/ AUXDJQ+LINE #
+	SUBI 2,AUXDJQ			;2/ LINE #
+	HRRI 4,400000(2)		;PUT INTO USER ACS AS DEVICE
+	SETOM AUXDJQ(2)			;CLEAR DJOB QUE
+	SETOM AUXSJQ(2)			;AND SJOB QUE
+	SETOM AUXTMQ(2)			;AND ALARM CLOCK
+	HLRZ 3,TTFORK(2)		;GET WHO TERMINAL BELONGS TO
+	CAIE 3,QMAGCN			;QUEUE MAGIC NUMBER?
+	 CALL AUXBDQ			;NO-HESITATE
+	HRROS TTFORK(2)			;OK, CLEAR IT
+	CALL AUXDEV			;GET DEV # IN RH 1
+	HLRZ 3,DEVUNT(1)		;GET OWNER
+	CAIE 3,QMAGCN			;QUEUE MAGIC NUMBER?
+	 CALL AUXBDQ			;NO-HESITATE
+	HRROS DEVUNT(1)			;OK, CLEAR IT
+	MOVSI 3,(1B6)			;AND CLEAR BIT IN CHARACTERISTICS
+	ANDCAM 3,DEVCHR(1)
+
+	OKSKED
+
+	CALL TYHNGU			;INIT HANG UP LINE SEQ
+	UMOVEM 4,1			;UPDATE USER ACS
+	UMOVEM 5,2
+	UMOVEM 6,3
+	JRST SKMRTN			;SUCCESS RETURN
+
+DEQAU6:	AOBJN 1,DEQAU3			;STEP AOBJN FOR JBINTB ROUTINE
+	RETERR (TYMX17,<OKSKED>)	;FAILED TO FIND IT
+
+
+;AUXTTY IN 1, CAPS OK, SJOB DEFINED
+
+DEQAUA:	HRRZI 2,-400000(4)		;GET LINE #
+	CAIL 2,TYMTTL			;RANGE CHECK
+	CAILE 2,TYMTTH
+	 RETERR (TYMX15)
+
+	NOSKED				;DO THE WORK
+
+	LDB 1,CONSTS			;CHECK STS OF CONNECTION
+	CAIE 1,CONAUX			;CONNECT STATE OK?
+	CAIN 1,CONCTL
+	 CAIA				;YES
+	RETERR (TYMX15,<OKSKED>)	;NO
+	MOVE 1,AUXDJQ(2)		;QUEUED?
+	CAMN 1,MINUS1
+	 RETERR (TYMX15,<OKSKED>)	;NO
+	MOVE 1,CAPENB			;GET CAPS ENABLED
+	TRNE 1,WHEEL!OPER		;SKIP SOURCE JOB CHECK IF GOD
+	 JRST DEQA1A			;NO CHECKING
+	MOVE 1,AUXSJQ(2)		;GET SJOB
+	TLNE 1,(1B0)			;LOGGED OUT?
+	 RETERR (TYMX11,<OKSKED>)	;YES-CAN'T TOUCH
+	HRRZ 1,AUXSJQ(2)		;GET SJOB
+	CAIE 1,(6)			;QUEUED BY THIS JOB?
+	 RETERR (TYMX16,<OKSKED>)	;NO
+DEQA1A:	MOVEI 1,AUXDJQ(2)		;PT AT DJOB QUE SLOT
+	JRST DEQAU5			;JOIN CODE TO COBBER AUX CIRCUIT
+
+
+;CLAIM AUXTTY QUEUED FOR US BY SOMEONE ELSE WHEN AND OF UDBITS NON-0
+;ACCEPTS 1/ OPTION BITS,7,,0
+;	 2/ 0,<UDBITS OR 0>,,<DJOB (OR SYSNDX IF NEG) IF OPTION BIT 1B1 ON>
+
+;OPTION BITS:	1B1 - DJOB (OR SYSNDX IF NEG) IN RH 2 (WHEEL REQUIRED)
+;		1B3 - LISTEN IF NO JOBS FOUND
+
+;NOTE:  1B1 OFF => (RH 2 <= JOBNO)
+;NOTE:  UDBITS IN 2 WILL BE USED ONLY IF NON-0 (SINCE 0 COULD NEVER WIN AND)
+
+;RETURNS +1 ERROR, ERROR CODE IN 1
+;	 +2 OK - UPDATED ACS IN 1,2,3 (3 GETS SJOB STUFF)
+
+	SWAPCD
+
+CLMAUX:	MOVE 4,1			;COPY USER ACS
+	MOVE 5,2
+	SETZ 6,				;GONNA GET SJOB STUFF
+	MOVE 1,CAPENB
+	TLNE 4,(1B1)			;WANTS TO USE PRIVY BITS?
+	TRNE 1,WHEEL!OPER		;AND CAN?
+	 CAIA				;YES
+	RETERR (TYMX10)			;NOT ENOUGH CAPS
+	TLNN 4,(1B1)			;GONNA SPECIFY DJOB?
+	HRR 5,JOBNO			;NO-GET THIS JOB THEN
+	HRRE 2,5			;YES-GET DJOB OR NEG SYSNDX
+	JUMPGE 2,CLMAU1			;JUMP IF DJOB
+	MOVN 1,2			;MAKE TRUE SYSNDX #
+	CALL SYSXCK			;RANGE CHECK SYSNDX
+	 RETERR (TYMX12)		;BAD RANGE
+	JUMPL 2,[RETERR (TYMX14)]	;JUMP IF FREE SLOT
+	HRR 5,2				;OK-REPLACE DJOB WITH THIS JOB
+CLMAU1:	CAIL 2,0			;RANGE CHECK DJOB IN 2
+	CAILE 2,NJOBS-1
+	 RETERR (TYMX11)		;LOSE
+
+CLMAU0:	NOSKED				;DO THE WORK
+
+	MOVE 1,[-NTYMTT,,DUXDJQ]	;SCAN FOR DJOB
+CLMAU2:	HRRZ 2,5			;DJOB IN 2
+	CALL JBINTB			;THERE?
+	 JRST CLMAU4			;NOT FOUND
+	MOVE 3,(1)			;HIT, GET ENTRY
+	AND 3,5				;AND BITS
+	TLNE 5,000777			;USER SPECIFIED UBITS?
+	TLNE 3,000777			;YES-NON-0 AND?
+	 CAIA				;NOT SPECIFIED OR NON-0 AND
+	  JRST CLMAU3			;NO HIT-LOOP TIL FOUND
+	HRRZ 2,1			;HIT-MAKE 2/ AUXDJQ+LINE #
+	SUBI 2,AUXDJQ			;2/ LINE #
+	CALL TAKAUX			;GRAB IT
+	HRRI 4,400000(2)		;GIVE USER AUXTTY ANSWER
+	MOVE 5,AUXDJQ(2)		;GIVE USER DJOB STUFF
+	SETOM AUXDJQ(2)			;AND DJOB STUFF
+	MOVE 6,AUXSJQ(2)		;GIVE SJOB STUFF TO USER
+	SETOM AUXSJQ(2)			;AND CLEAR THAT ENTRY
+	SETOM AUXTMQ(2)			;CLOBBER UNEXPIRED ALARMCLOCK
+	SETOM AUXCTL(2)			;CLEAR THIS JUST FOR KICKS TOO
+
+	OKSKED
+
+	UMOVEM 4,1			;RETURN ACS 1,2,3
+	UMOVEM 5,2
+	UMOVEM 6,3
+	JRST SKMRTN			;SUCCESS RETURN
+
+CLMAU3:	AOBJN 1,CLMAU2			;STEP AOBJN FOR JBINTB ROUTINE
+	JRST CLMAU4
+
+;HERE IF NO QUEUED JOBS FOUND - POSSIBLY WANT TO LISTEN
+
+CLMAU4:	OKSKED
+	TLNN 4,(1B3)			;LISTEN?
+	 RETERR (TYMX17)		;NO-NO JOBS QUEUED ERROR
+	MOVE 1,5			;CREATE JOB,UBITS,,ADR
+	MOVE 2,[POINT ^D9,1,8]		;POINT AT HI 9 BITS IN AC 1
+	DPB 1,2				;SHUFFLE JOB (9 BIT RESTRICTION)
+	HRRI 1,AUXLSN			;WAIT TEST
+	JSYS EDISMS
+	JRST CLMAU0			;GO NOSKED AND CHECK IT OUT
+
+;SCHED TEST FOR ABOVE LISTENING
+
+	RESCD
+
+AUXLSN:	HRRZ 2,1			;1/ 0,,JOB#,UBITS
+	LSH 2,-^D9			;2/ JOB #
+	HRLZ 5,1
+	TLZ 5,777000			;5/ UBITS,,0
+	MOVE 1,[-NTYMTT,,DUXDJQ]	;SCAN DJOB TABLE USING DBITS
+AUXLS1:	CALL JBINTB			;IS IT THERE?
+	 JRST 0(4)			;NOT FOUND
+	JUMPE 5,1(4)			;WAKE UP IF NOT USING UBITS, FOUND JOB
+	MOVE 3,5			;CHECK THE BITS
+	AND 3,(1)			;DESTRUCTIVE TEST
+	CAIE 3,0			;SKIP IF NO HIT
+	 JRST 1(4)			;WAKE UP - FOUND ONE
+	AOBJN 1,AUXLS1			;STEP AOBJN FOR JBINTB ROUTINE
+	JRST 0(4)			;NOT FOUND
+
+
+
+	SUBTTL	CONTROL MESSAGE HANDLING
+
+; HANDLE INPUT CONTROL MESSAGES THAT ARE MASKED ON FOR A GIVEN LINE
+
+	RESCD
+
+RCVSMI:	LDB 1,TTIMAX		;DO WE HAVE ENOUGH SPACE?
+	SUBI 1,3		;IT TAKES 3 BYTES TO STORE A SPECIAL MSG
+	LDB 4,TTNIN		;ALREADY HAVE BUFFERS?
+	SKIPN TTIIN(2)		;ALREADY HAVE BUFFERS?
+	 CAMG 4,TTFREC		;NO, ENOUGH FREE?
+	CAMG 1,TTICT(2)		;YES, ENOUGH ROOM IN BUFFERS
+	 AOJA IPTR,TYMIN1	;NO, SKIP THE MESSAGE
+	MOVEI 1,1000(3)		;1000 BIT SAYS THIS IS A CONTROL MESSAGE
+	PUSH P,TTMOD1(2)	;SAVE TERMINAL DATA MODE
+	SETZ 3,
+	DPB 3,TTYLMD		;FAKE BINARY MODE TO FORCE WAKE UP
+	CALL TTRNE		;PUT BALL IN BUFFER AND WAKE UP FORK
+	LDB 1,PISUBT		;GET SUBTYPE
+	CALL TTRNE
+	LDB 1,PIDATA
+	CALL TTRNE
+	POP P,TTMOD1(2)		;RESTORE TERMINAL DATA MODE
+	AOJA IPTR,TYMIN1	;RETURN TO INPUT STREAM
+
+; CALLED FROM TCI TO HANDLE INPUT CONTROL MESSAGE INTERRUPTS
+
+	SWAPCD
+
+RCVCMP:	CAIL 2,TYMTTL
+	CAIL 2,TYMTTL+NTYMTT
+	 BUG (HLT,<TYMSRV: TYMNET DEFERRED BALL CODE ON NON TYMNET LINE>)
+	DPB 1,CMCOD		;SAVE MESSAGE CODE
+	CALL TCI0		;GET SUBTYPE DATA
+	DPB 1,CMSBT
+	CALL TCI0		;GET DATA TYPE
+	DPB 1,CMDAT
+
+	HRRZ 3,TYMCMI(2)	;GET TERMINAL CODE FOR INTERRUPT
+	SKIPN 3
+	 MOVEI 3,^D35		;DEFAULT
+	CALL TYDPSI		;GIVE DEFERRED PSI INTERRUPT
+	JRST TCI
+
+CHKRCM:	SETZ 4,			;FOR RECEIVE CHECK, SUBTYPE ALWAYS OK
+	PUSH P,[0]		;CHECK RECEIVE CONTROL MESSAGE MASK
+	JRST .+2
+CHKSCM:	PUSH P,[1]		;CHECK SEND CONTROL MESSAGE MASK
+	EXCH 3,(P)
+	PUSH P,4
+	MOVE 4,CAPENB
+	TRNE 4,WHEEL!OPER
+	 ADDI 3,2
+	POP P,4
+	TDNE 1,CMMSKS(3) 	;CHECK APPROPRIATE MASK
+	 RETERR (TYMXX6)	;ILLEGAL BIT ON
+	POP P,3
+	TRNE 1,1B<36>+1B<37>+1B<40> ;TERM CHARACTERISTIC CODE?
+	CAIG 4,14		;YES, IS SUBTYPE LEGAL?
+	 RET			;NO, DON'T CHECK SUBTYPE
+	RETERR (TYMXX6)		;NO
+
+GETCMD:	HRRZ JFN,1		;WHERE CHKTTC LIKES TTY DESIGNATOR
+	CALL CHKTTC		;CHECK ON IT
+	 RETERR (TYMXX8,<CALL UNLCKF>)
+	CALL UNLCKF		;OK, UNDO LOCK, 2/ LINE #
+	CAIL 2,TYMTTL		;RANGE CHECK
+	CAILE 2,TYMTTH
+	 RETERR (TYMXX8)	;NOT TYMNET LINE
+	MOVE 1,TYMCMR(2)
+	UMOVEM 1,2
+	JRST SKMRTN
+
+SNDCMD:	HRRZ JFN,1		;WHERE CHKTTC LIKES TTY DESIGNATOR
+	CALL CHKTTC		;CHECK ON IT
+	 RETERR (TYMXX8,<CALL UNLCKF>)
+	CALL UNLCKF		;OK, UNDO LOCK, 2/ LINE #
+	CAIL 2,TYMTTL		;RANGE CHECK
+	CAILE 2,TYMTTH
+	 RETERR (TYMXX8)	;NOT TYMNET LINE
+	UMOVE 1,2		;GET CONTROL MESSAGE
+	LDB 3,[POINT 8,1,7]	;GET CODE
+	LDB 4,[POINT 8,1,15]	;GET SUBTYPE 
+	LDB 5,[POINT 8,1,23]
+	MOVE 1,BITS(3)		;CHANGE TO MASK
+	CALL CHKSCM		;CHECK SEND CONTROL MESSAGE MASK
+SNDCM3:	NOSKED			;NO ONE ELSE TO RUN WHILE WE CHECK BUFFS
+	LDB 6,TTNOU		;GET NUMBER OF BUFFERS NEEDED
+	LDB 1,TTOMAX		;GET NUMBER OF CHARS IN BUFFS
+	SUBI 1,3		;WE WILL NEED SPACE FOR 3 CHARS
+	SKIPN TTOIN(2)		;ANY BUFFERS ALREADY?
+	 CAMG 6,TTFREC		;NO, ENOUGH FREE BUFFERS?
+	CAMG 1,TTOCT(2)		;YES, ENOUGH SPACE IN BUFFERS?
+	 JRST  [OKSKED		;NO, WAIT FOR THE ABOVE CONDITIONS TO HAPPEN
+		MOVEI 1,SNDCMT
+		HRLI 1,(2)
+		JSYS EDISMS
+		JRST SNDCM3]
+				;NOW THAT WE ARE SURE WE WONT GET A BUFFER
+				;FULL CONDX ON OUTPUT AND ALL THREE BYTES
+				;WILL GET INTO THE BUFFER
+	MOVE 1,3		;REPOSITION THE CONTROL MESSAGE CODE
+	TRO 1,1000		;1000 BIT SAYS CONTROL MESSAGE 
+	CALL TCOBQ		;SEND THE C.M. CODE
+	MOVE 1,4
+	CALL TCOBQ		;SEND THE SUBTYPE
+	MOVE 1,5
+	CALL TCOBQ		;SEND THE DATA
+	OKSKED
+	JRST SKMRTN
+
+	RESCD
+SNDCMT:	MOVE 1,2
+	LDB 1,TTOMAX		;GET CHAR COUNT IN OUTPUT BUFFER
+	SUBI 1,3		;NEED AT LEAST 3 CHARS
+	LDB 3,TTNOU		;GET NUMBER OF BUFFERS NEEDED
+	SKIPN TTOIN(2)		;ANY BUFFERS?
+	 CAMG 3,TTFREC		;NO ENOUGH FREE ONES?
+	CAMG 1,TTOCT(2)		;ENOUGH FREE CHARS IN EXISTING BUFFERS?
+	 JRST 0(4)		;NO, NO RUN
+	JRST 1(4)		;YES, RUN
+
+	SWAPCD
+
+GETLNS:	HRRZI 2,-400000(1)	;GET LINE # IN 2
+	CAIL 2,TYMTTL		;RANGE CHECK
+	CAILE 2,TYMTTH
+	 RETERR (TYMXX8)	;NOT TYMNET LINE
+	MOVE 1,TYNODS(2)		;RETURN LOGIN INFO
+	UMOVEM 1,2
+	MOVE 1,TYMLNS(2)		;AND LINE STATUS TO USER
+	UMOVEM 1,3
+	JRST SKMRTN
+
+;SETLNS TURNS ON IBPOF FLAG BUT ALSO ALLOWS LINE TO HAVE SPECIAL NUMBER
+;INPUT BUFFERS ON NEXT ASSIGNMENT OF THOSE BUFFERS TO ALLOW FOR
+;IRING OVERRUN (PHASE LAG BETWEEN GETTING CHARS AND SENDING IBP MSG)
+
+SETLNS:	HRRZ JFN,1		;WHERE CHKTTC LIKES TTY DESIGNATOR
+	CALL CHKTTC		;CHECK ON IT
+	 RETERR (TYMXX8,<CALL UNLCKF>)
+	CALL UNLCKF		;OK, UNDO LOCK, 2/ LINE #
+	CAIL 2,TYMTTL		;RANGE CHECK
+	CAILE 2,TYMTTH
+	 RETERR (TYMXX8)	;NOT TYMNET LINE
+	CALL TTBFSP		;FIX UP INPUT BUFFER STUFF
+	MOVSI 1,IBPOF		;SET INPUT BACKPRESSURE FLAG
+	IORM 1,TYMLNS(2)	;PUT IN LINE STATUS WORD
+	JRST SKMRTN
+
+
+GETINS:	HRRZ JFN,1		;WHERE CHKTTC LIKES TTY DESIGNATOR
+	CALL CHKTTC		;CHECK ON IT
+	 RETERR (TYMXX8,<CALL UNLCKF>)
+	CALL UNLCKF		;OK, UNDO LOCK, 2/ LINE #
+	CAIL 2,TYMTTL		;RANGE CHECK
+	CAILE 2,TYMTTH
+	 RETERR (TYMXX8)	;NOT TYMNET LINE
+	MOVE 1,TYMCMM(2)
+	UMOVEM 1,2
+	MOVE 1,TYMCMI(2)
+	UMOVEM 1,3
+	JRST SKMRTN
+
+SETINS:	HRRZ JFN,1		;WHERE CHKTTC LIKES TTY DESIGNATOR
+	CALL CHKTTC		;CHECK ON IT
+	 RETERR (TYMXX8,<CALL UNLCKF>)
+	CALL UNLCKF		;OK, UNDO LOCK, 2/ LINE #
+	CAIL 2,TYMTTL		;RANGE CHECK
+	CAILE 2,TYMTTH
+	 RETERR (TYMXX8)	;NOT TYMNET LINE
+	UMOVE 1,2
+	CALL CHKRCM			;CHECK FOR ALLOWABLE RECEIVE BITS
+	UMOVE 3,3
+	CAIL 3,^D36			;LEGAL TERMINAL CODE?
+	 ITERR (TERMX1)			;YES
+	NOSKED
+	MOVEM 1,TYMCMM(2)
+	MOVEM 3,TYMCMI(2)
+	OKSKED
+	JRST SKMRTN
+
+	SUBTTL login code from EXEC0
+	SWAPCD
+
+TYMX0:	NOSKED
+	LDB 3,CONSTS		;get connection status
+	TRNE 3,<INITF>B47	;already initialized?
+	 JRST OKRET		;yes
+	TRNN 3,<CONNF>B47	;line not connected?
+	 JRST TYMX3
+	MOVEI 3,CONLG2		;tell every one we're reading, a zap
+	DPB 3,CONSTS		;now would hang us for ever
+	OKSKED
+
+	ADD P,BHC+BUFSIZ	;get buffer space
+	JUMPGE P,MSTKOV
+	MOVEI 7,-<BUFSIZ-1>(P)
+
+	SETZM TYNODS(2)		;init TYNODS
+	MOVEI 1,400000(2)
+	CALL TYMX9		;get TYMNETS terminal type
+	DPB B,NODTYP		;terminal type
+	CALL TYMX9
+	DPB B,NOD1		;first half of origin node number
+	CALL TYMX9
+	DPB B,NOD2		;second half
+	CALL TYMX9		;port number at origin node
+	DPB B,NODLIN		;port number at origin node
+
+	MOVE C,[POINT 7,3(7)]	;set up to save TYMNET login name
+	MOVSI D,-<<BUFSIZ-3>*5-1> ;max number of chars to read for buffersize
+
+TYMX1:	CALL TYMX9		;get another byte
+	ANDI B,177		;save only ascii
+	SKIPGE D		;if buffer not full
+	 IDPB B,C		;put byte in FACT entry
+	CAIE B,";"		;name field finished? (";" or cr)
+	CAIN B,15
+	 AOJA D,TYMX2		;yes, count terminator
+	AOBJN D,TYMX1		;no, count char
+	JRST TYMX1		;count char if buffer is full
+
+TYMX2:	TRNE D,1		;read in an even # bytes?
+
+IFE F3FLG,< CALL TYMX9	;no, read in one more to make even>
+IFN F3FLG,< JFCL		;GOLTZ DIDN'T DO EVEN BYTE HACK RIGHT>
+
+	SETZ B,			;finish off name string
+	DPB B,C			;with null terminator
+	AOJL D,.+2		;filled buffer? (count terminating null)
+	 MOVEI D,<BUFSIZ-3>*5	;yes, use full buffer size + null as count
+	HRRZS D
+	ADDI D,4		;round up to # words
+	IDIVI D,5
+	ADDI D,3		;add in first three words
+	PUSH P,D		;save character count for later
+
+TYMX4:	MOVEI 2,-400000(1)
+	NOSKED
+	LDB C,CONSTS		;get line connection state
+	TRNN C,<CONNF>B47	;line already disconnected?
+	 JRST  [MOVEI 3,CONFRE	;yes
+		DPB 3,CONSTS	;don't give a disconnect message
+		SUB P,BHC+BUFSIZ+1 ;restore stack
+		JRST TYMX3]	;and let the exec autologout
+	MOVEI 3,CONLG3		;ready to initialize, set state accordingly
+	DPB 3,CONSTS
+	OKSKED
+
+	CALL TYMCTL		;SET UP AUXCTL BY TALKING H2H PROTOCOL
+		
+	POP P,B			;get size of efact block
+	CALL INIMSG		;do connect message
+	SUB P,BHC+BUFSIZ
+
+	MOVE B,NORMTF
+	LDB C,NODTYP		;get TYMNET terminal type
+	TRNN C,200		;TYMNET says half-duplex?
+	JFCL	;TRO B,2B33	; !!UNEXPLAINED BUG MAH 10/8/74!!
+				;occasionally the full duplex bit would get
+				;set when TYMNET didn't set it, so I ignored
+				;half duplex logins for the moment
+
+	ANDI C,17		;get TYMNET terminal type 
+	CAILE C,MXYTYP		;if out side table range use default
+	 SKIPA C,DYTYPU		;GET UNKOWN DEFAULT TERMINAL TYPE
+	MOVE C,DYTYP(C)		;xlate to our TE TYPE (FOR AUX CIRS TOO)
+
+	STPAR			;set SFMOD word
+	SFMOD
+	MOVE B,C
+	STTYP			;set type
+
+	MOVEI 2,-400000(1)
+	SETZM TTLPOS(2)		;RESET POSITIONS
+	NOSKED
+	LDB 3,CONSTS		;get connection state
+	TRNN 3,<CONNF>B47	;got zapped while initializing?
+	 JRST  [CALL CTLZAP
+		MOVEI 1,400000(2) ;restore ac1 for the rest of EXEC0
+		JRST OKRET]
+	MOVEI 3,CONCTL		;else, we're in normally
+	DPB 3,CONSTS
+	OKSKED
+	jrst tymx99			;go set up echo state
+
+TYMX3:	OKSKED
+	MOVEI 1,400000(2) ;no, probably an advise
+	MOVE 2,NORMTF		;give standard modes
+	STPAR
+	SFMOD
+	MOVE 2,TYPCRT
+	STTYP
+	MOVEI 2,-400000(1)
+	SETZM TTLPOS(2)		;RESET POSITIONS
+
+tymx99:	movsi 1,uecof		;set up to force local echo
+	hrrz 2,ctrltt		;make real sure we have a good line number
+	cail 2,tymttl		;and that it's a tymnet line
+	caile 2,tymtth		;else carefully
+	ret			;do nothing!!
+	iorm 1,tymlns(2)	;force host echo always
+	movei 1,echof		;remote echo state flag
+	jrst noeco		;go shut off for real if not already off
+
+TYMX9:	SIBE			;ANY CHARS FOR THIS LINE
+	 JRST TYMX91		;YES-EAT IT
+	CALL TYMWTC		;WAIT TIL CHAR IS THERE
+	JRST TYMX9		;TRY AGAIN
+
+TYMX91:	BIN			;GET CHAR IN 2
+	RET
+
+;WAIT UNTIL A CHAR IS CHAR INPUT BUFFER FOR TTY DESIGNATOR IN 1
+;IF LINE GETS DISCONNECTED FIRST, FALL INTO BLACK HOLE
+;ONLY RETURNS IF CHAR READY TO BE EATEN FOR CONNECTED LINE
+
+
+TYMWTC:	PUSH P,1
+	HRLI 1,-400000(1)	;set up to dismiss until something read,
+	HRRI 1,TYMXZT		;or line zapped
+	JSYS EDISMS
+	POP P,1
+	SKIPGE TYMLNS-400000(1)	;line disconnected?
+	 RET			;no, still connected, must be something there
+TYMBYE:	SETO 1,
+	LGOUT			;INITING JOB FALLS INTO BLACK HOLE
+	 JFCL
+	JRST TYMBYE
+
+	RESCD
+
+TYMXZT:	SKIPN TTICT(1)		;if buffer not empty
+	SKIPL TYMLNS(1)		;or line zapped
+	 JRST 1(4)		;continue
+	JRST 0(4)		;else wait
+	
+
+	SWAPCD
+
+INIMSG:	RET
+
+TYFACT:	RET
+
+
+;CALLED BY JOB LOGGING OUT AT HLTJB
+;SCAN DEVICE TABLES LOOKING FOR TYMNET AUX TTY ASSIGNED TO JOBNO.
+;DO AUXRLS FUNCTION OF TYMOP ON ALL FOUND
+
+TYMRLA:	MOVNI 2,NDEV##
+	HRLZS 2
+	HRRZ 3,JOBNO
+	HRLI 3,12		;3/ DEV BITS,,JOB NO
+TYMRL1:	HLLZ 1,DEVCHR(2)	;GET TEST DEV BITS
+	TLZ 1,777000		;JUST IMPORTANT BITS
+	HLR 1,DEVUNT(2)		;ASSIGNING JOB IN RH
+	CAME 1,3		;RIGHT DEV,,RIGHT JOB?
+	 JRST TYMRL2		;NO
+	HRRZ 1,DEVUNT(2)	;YES-GET TTY # IN 1
+	CAIL 1,TYMTTL		;TYMNET RANGE CHECK
+	CAILE 1,TYMTTH
+	 JRST TYMRL2		;NOT
+	PUSH P,2		;SAVE AOBJN PTR
+	MOVE 2,1		;GET TTY # IN 2 FOR CONSTS
+	LDB 1,CONSTS		;GET CONNECTION STATE
+	POP P,2			;RESTORE AOBJN PTR
+	TRNN 1,<AUXF>B47	;AUX CIRCUIT?
+	 JRST TYMRL2		;NO
+	HRRZ 1,DEVUNT(2)	;TTY #
+	ADD 1,[14,,400000]	;MAKE FUNCTION,,DEVICE DESIGNATOR
+	TYMOP			;RELEASE AUX CIRCUIT
+	 JFCL
+TYMRL2:	AOBJN 2,TYMRL1		;LOOP FOR ALL DEVICES
+	RET
+
+;CALLED BY JOB LOGGING OUT AT PROCESS LEVEL.
+;CLEANS UP AUXQUE TABLES FOR THAT JOB.
+
+;ACTION:
+;IF JOB FOUND IN SYSNDX TABLE:
+;	CLEAR ENTRY IN SYSNDX TABLE
+;IF JOB FOUND IN AUXDJQ:
+;	CLEAR ENTRY IN AUXDJQ
+;	CLEAR CORRESPONDING ENTRY IN AUXSJQ
+;	CLEAR CORRESPONDING ENTRY IN AUXTMQ
+;	ZAP CORRESPONDING AUX CIRCUITS
+;IF JOB FOUND IN AUXSJQ:
+;	SET "LOCAL JOB LOGGED OUT" BIT IN ENTRY IN AUXSJQ
+
+	SWAPCD
+
+LGOAUX:	PUSH P,1
+	PUSH P,2
+	PUSH P,3			;SAVE ALL ACS CLOBBERED
+
+	NOSKED				;SAFE WHILE MANIPULATING
+
+	MOVE 1,[-NSYSND,,SYSNDX]	;WORK ON SYSNDX TABLE
+	MOVE 2,JOBNO			;THE JOB NUM
+LGOAU1:	CALL JBINTB			;JOBNO IN TABLE?
+	 JRST LGOAU2			;NO-DONE WITH TABLE
+	SETOM (1)			;CLEAR THIS SLOT
+	AOBJN 1,LGOAU1			;LOOP, STEP AOBJN IN 1
+					;POSSIBLY FALL THROUGH
+
+LGOAU2:	MOVE 1,[-NTYMTT,,DUXDJQ]	;WORK ON AUXDJQ TABLE
+LGOAU3:	MOVE 2,JOBNO			;THE JOB NUM
+	CALL JBINTB			;IN TABLE?
+	 JRST LGOAU4			;NO-DONE WITH DUXDJQ
+	HRRZ 2,1			;2/ AUXDJQ+LINE #
+	SUBI 2,AUXDJQ			;2/ LINE #
+	SETOM AUXDJQ(2)			;CLEAR DJOB STUFF
+	SETOM AUXSJQ(2)			;AND SJOB STUFF
+	SETOM AUXTMQ(2)			;AND TIMER STUFF
+	SETOM AUXCTL(2)			;AND THIS FOR KICKS TOO
+	PUSH P,1			;SAVE STUFF WE CARE ABOUT
+	CALL TYHNGU			;INIT AUX CIRCUIT HANGUP SEQ
+	POP P,1
+	AOBJN 1,LGOAU3			;LOOP. STEP AOBJN IN 1
+					;POSSIBLY FALL THROUGH
+
+LGOAU4:	MOVE 1,[-NTYMTT,,DUXSJQ]	;NOW WORK ON DUXSJQ
+	MOVE 2,JOBNO			;THE JOB NUM
+	MOVSI 3,(1B0)			;THE SOURCE JOB LOGGED OUT BIT
+LGOAU5:	CALL JBINTB			;IN TABLE?
+	 JRST LGOAU6			;NO-DONE WITH TABLE
+	IORM 3,(1)			;YES-SAY SOURCE JOB LOGGED OUT
+	AOBJN 1,LGOAU5			;LOOP, STEP AOBJN IN 1
+					;POSSIBLY FALL THROUGH
+LGOAU6:	OKSKED
+	POP P,3				;RESTORE ACS
+	POP P,2
+	POP P,1
+	RET
+
+
+;ACCEPTS 1/ AOBJN PTR TO TABLE
+;	 2/ JOB NUM TO SEARCH FOR
+
+;SKIPS IF JOB NUM FOUND WITH 1/ AOBJN PTR PTING TO SLOT
+;NO SKIP IF NOT FOUND, EXHAUSTED AOBJN PTR IN 1
+
+	RESCD
+
+JBINTB:	PUSH P,2		;CLOBBER ONLY AC 1
+JBINT1:	HRRZ 2,(1)		;GET JOB NUM IN RH OF TABLE ENTRY
+	CAMN 2,0(P)		;SAME AS WHAT WE ARE LOOKING FOR?
+	 AOSA -1(P)		;SKIP RET WITH PTR IN 1
+	AOBJN 1,JBINT1		;LOOP TIL EXHAUSTED OR FOUND
+JBINT2:	POP P,2			;RESTORE 2
+	RET
+
+
+;AUXCTL ENTRY LOOKS LIKE:
+
+;	!---------------------------------------!
+;	!		-1			!	;FREE
+;	!---------------------------------------!
+;	!   F   !   D0   !   D1   !   D2   ! D3 !	;IN USE
+;	!---------------------------------------!
+;	!      7!      15!      23!      31!  35!	;BIT POSITIONS
+
+;WHERE F IS THE FUNCTION CODE AND Dn ARE THE DATA
+
+;CURRENTLY DEFINED FUNCTIONS:
+
+;	EXEC:	F=0, DATA IS <DON'T CARE>
+;	QUE:	F=1, DATA IS <UDBITS,,DJOB (OR SYSNDX IF NEGATIVE)>
+
+;EVERYTHING COMES IN AS A STREAM OF 8 BIT BYTES IN HOST TO HOST PROTOCOL
+;FORMAT (H2H):
+
+;	200,F,D0,D1,D2,D3,200
+
+;NOTE: ONLY THE HI 4 BITS OF D3 ARE RETAINED
+
+;UTILITY POINTERS FOR MANIPULATING AUXCTL ENTRIES
+
+	SWAPCD
+
+AUXCTP:	POINT 8,AUXCTL-400000(1)	;IDPB STARTING WITH FUNCTION BYTE
+
+AUXCTF:	POINT 8,AUXCTL-400000(1),7	;DPB FOR FUNCTION BYTE
+AUXCT0:	POINT 8,AUXCTL-400000(1),15	;DPB FOR DATA BYTE 0
+AUXCT1:	POINT 8,AUXCTL-400000(1),23	;DPB FOR DATA BYTE 1
+AUXCT2:	POINT 8,AUXCTL-400000(1),31	;DPB FOR DATA BYTE 2
+AUXCT3:	POINT 4,AUXCTL-400000(1),35	;DPB FOR DATA BYTE 3
+
+AUXCFN:	POINT 8,AUXCTL(2),7		;LDB FOR FUNCTION CODE BYTE
+AUXCDT:	POINT 24,AUXCTL(2),35		;LDB FOR DATA
+
+
+;CALLED FROM TYMX0 (AT JOBINI TIME) TO DETERMINE IF TALKING HOST
+;TO HOST PROTOCOL AND IF SO TO SUCK UP THE BYTE STREAM AND SET UP
+;AUXCTL ENTRY FOR LINE FOR LATER USE
+;ACCEPTS TTY DESIGNATOR IN 1, TERMINAL TYPE PTED AT BY NODTYP
+;IT IS ASSUMED ONE CAN TELL THE DIFFERENCE BETWEEN NORMAL TERMINAL
+;LINES AND AUX CIRCUIT LINES BY THE TERMINAL TYPE.  TYMNET DOC
+;CLAIMS AUX CIRCUIT TERMINAL TYPE WILL BE 0.
+
+TYMCTL:	PUSH P,1
+	PUSH P,2
+	PUSH P,3
+	SETOM AUXCTL-400000(1)		;CLEAR OUT ENTRY
+	LDB 2,NODTYP			;GET TERMINAL TYPE
+	ANDI 2,17			;LOOK AT JUST INTERESTING BITS
+	CAIE 2,0			;TYPE 0 IS AUX CIRCUIT ORIGIN
+	 JRST TYMCT2			;ITS NORMAL TERMINAL, NO H2H
+	MOVSI 2,IBPOF			;ENABLE IBP FOR AUX CIRCUIT LINES
+	IORM 2,TYMLNS-400000(1)
+	MOVEI 2,-400000(1)		;SIMPLE LINE # IN 2 FOR TTBFSP
+	CALL TTBFSP			;FIX UP INPUT TTY BUFFER STUFF
+	CALL TYMCTH			;CAREFULLY CHK H2H ON 1ST CHAR
+	 JRST TYMCTX			;NO-UNEATEN CHAR IN 2
+	CALL TYMX9			;YES-UNEATEN SO EAT IT
+	CAIE 2,200			;THIS MUST BE 200 IF TYMX9 RETURNED
+	 BUG(CHK,<INCONSISTENT 1ST H2H CHAR IN TYMCTL>)
+	MOVEI 3,4			;OK - H2H - EAT THIS MANY IN LOOP
+	MOVE 4,AUXCTP			;PT AT AUXCTL ENTRY
+TYMCT1:	CALL TYMX9			;EAT A BYTE
+	IDPB 2,4			;STORE IT
+	SOJG 3,TYMCT1			;LOOP
+	CALL TYMX9			;GET ONE MORE
+	LSH 2,-4			;SLIDE IT DOWN TO GET HI BITS
+	MOVE 4,AUXCT3			;PUT IT HERE
+	DPB 2,4
+	CALL TYMX9			;GET TERMINATOR BYTE NOW
+	CAIE 2,200			;IS IT?
+	 SETOM AUXCTL-400000(1)		;NO-MAKE BELIEVE NEVER DID IT
+TYMCT2:	POP P,3
+	POP P,2
+	POP P,1
+	RET
+
+;HERE WITH UNEATEN CHAR IN 2 AND TTY DESIGNATOR IN 1
+;1ST CHAR DETERMINED NOT TO BE 1ST OF H2H PROTOCOL
+;IF IT IS A 177, EAT IT AND PASS ON THROUGH (USER GETTING AROUND H2H)
+;OTHERWISE EAT NO CHARS AND PASS ON THRU
+
+TYMCTX:	CAIN 2,177			;IS 1ST UNEATEN CHAR A RUBOUT?
+	 CALL TYMX9			;YES-EAT IT AND PASS ON THROUGH
+	SETOM AUXCTL-400000(1)		;INSURE THIS IS UNUSED (NO H2H)
+	JRST TYMCT2			;PASS ON THROUGH WITH AUXCTL = UNUSED
+
+;SKIP IF TALKING H2H
+;NO SKIP IF NOT
+;IN EITHER CASE EAT NO CHARS (JUST EXAMINE INPUT BUFFER)
+;RETURNS 1ST UNEATEN CHAR IN 2
+;ACCEPTS TTY DESIGNATOR IN 1
+
+TYMCTH:	SIBE				;ANY CHARS?
+	 JRST TYMC1H			;YES-CHECK IT OUT
+	CALL TYMWTC			;NO-WAIT TIL THERE ARE
+	JRST TYMCTH			;OK-NOT DISC, TRY AGAIN
+
+TYMC1H:	MOVE 2,TTIOUT-400000(1)		;YES-GET INPUT OUTPUT PTR FOR LINE
+	ILDB 2,2			;GET 1ST CHAR, DON'T ADVANCE REAL PTR
+	ANDI 2,377			;LOOK AT JUST 8 BIT CHAR
+	CAIN 2,200			;IS IT 1ST OF H2H PROTOCOL?
+	 AOS (P)			;YES-SKIP
+	RET
+
+;ACCEPTS LINE # IN 2
+;SKIP IF TALKING AUX H2H PROTOCOL
+;NO SKIP IF NOT
+
+	SWAPCD
+
+TYMH2H:	PUSH P,2
+	MOVE 2,AUXCTL(2)		;GET ENTRY FILLED OUT ABOVE
+	CAME 2,MINUS1			;DID IT DO IT RIGHT?
+	 AOS -1(P)			;YES
+	POP P,2
+	RET
+
+
+;CALLED WITH LINE IN 2 FROM EXEC0 JUST BEFORE GETTING USER AN EXEC
+
+	SWAPCD
+
+TYMQUE:	CALL TYMH2H			;TALKING H2H FOR THIS LINE?
+	 RET				;NO-PASS THRU
+	LDB 1,AUXCFN			;YES-GET FUNCTION CODE
+	CAIL 1,0			;RANGE CHECK
+	CAILE 1,MTYMQU
+	 JRST TYMQX1			;ILLEGAL FUNCTION CODE
+	JRST @TYMQU1(1)			;DISPATCH
+
+TYMQU1:	R				;EXEC FUNCTION PASSES ON THRU
+	TYMQJB				;QUE AUX LINE FOR DJOB
+MTYMQU==.-TYMQU1-1			;MAX FUNCTION CODE ALLOWED
+
+;QUE AUX LINE FOR JOB IN AUXCTL (DJOB) ALONG WITH UDBITS
+
+TYMQJB:	NOSKED				;NOTHING CHANGES
+
+	HRRE 1,AUXCTL(2)		;GET DJOB FROM H2H DATA
+	JUMPGE 1,TYMQJ1			;JUMP IF JOB #
+	MOVNS 1				;MAKE POSITIVE SYSNDX IN 1
+	CALL SYSXCK			;CHK ON SYSNDX
+	 JRST TYMQUX			;ILLEGAL SYSNDX
+	JUMPL 2,TYMQUX			;FREE IS ILLEGAL TOO
+	MOVE 1,2			;JOB # IN 1
+TYMQJ1:	HRRE 3,JOBDIR(1)		;DJOB LOGGED?
+	JUMPE 3,TYMQUX			;JUMP IF NOT
+	HRRZ 1,CTRLTT			;THIS STORES LINE FOR US (NICE)
+	MOVE 3,AUXCTL(1)		;GET UDBITS,,DJOB
+	TLZ 3,777000			;CLR EDBITS
+	SETZ 2,				;USBITS 0
+	IOR 1,[6,,400000]		;COMPLETE FUNCTION AND DESIGNTR
+
+	OKSKED
+
+	TYMOP				;QUE IT FOR DJOB WITH UDBITS
+	 JRST TYMQX1			;FAILED
+
+TYMQJ2:	MOVE 1,JOBNO
+	HRROS JOBPT(1)
+	SETOB 1,CTRLTT			;SAY WE HAVE NO CTRLTT
+	LGOUT				;BYE
+	BUG(CHK,<FAILED TO LGOUT JOB IN TYMQUE>)
+	JRST TYMQJ2			;LOOP TIL SMASHED
+
+;HERE ON FAILURE IN TYMQUE STUFF
+
+TYMQUX:	OKSKED				;IF FAILED NOSKED
+TYMQX1:	RET				;JUST RETURN ON FAILURE
+					;SHOULD GET US AN EXEC
+
+
+;THIS HAD PREVIOUSLY BEEN CALLED AT SCHED LEVEL.  NOW JOB 0 FUNCTION
+;INCASE RUNNING ON FOO AND HAVE TO DO 300 ZEROES CROCK.
+;TURNS OFF TYMFLG SO NOBY TRIES ANYTHING WHILE WE ARE INITING
+;AT PROCESS LEVEL
+
+TYMRST:	PUSH P,TYMFLG		;SAVE STATE OF THINGS
+	SETOM TYM1ST		;SAY DID IT THE FIRST TIME
+	SETZM TYMFLG		;NOBODY DOES ANYTHING NOW
+
+IFN F3FLG,<
+
+	SKIPN 3,J0RTIM		;IS THIS A RETRY?
+	JRST TYMRS0		;NO-DO EVERYTHING
+	CAMG 3,TODCLK		;YES-TIME TO DO IT?
+	 JRST TYMRTY		;YES-DID TABLES ALREADY, TRY RESET AGAIN
+	JRST TYMRSR		;NO-JB0 HERE PREMATURELY
+
+> ;END IFN F3FLG
+
+TYMRS0:	MOVE C,[XWD TMPLT,TYMBAS] ;init interface
+	BLT C,YHCRSH
+	MOVE LINE,[XWD -NTYMTT,TYMTTL] ;detach jobs w/ zapped circuits
+TYMRS1:	PUSH P,LINE		;SAVE AOBJN PTR
+	HRRZS LINE		;JUST LINE # IN LINE FOR PSI STUFF
+	MOVEI 3,1B35		;DO CARRIER OFF FIRST SO PSI TAKES HOLD
+	ANDCAM 3,TTFLGS(LINE)	;say "carrier off"
+	LDB 3,CONSTS
+	TRNE 3,<CONNF>B47	
+	 CALL ZAP		;detach any attached terminal
+	SETOM TENTYM(LINE)	;make sure these get reset right in all cases
+	SETZM YLTCHK(LINE)	
+	SETZM TYMCMM(LINE)
+	SETZM TYMCMI(LINE)
+	SETOM AUXCTL(LINE)	;CLEAR ALL AUXQUE STUFF
+	SETOM AUXTMQ(LINE)
+	SETOM AUXDJQ(LINE)
+	SETOM AUXSJQ(LINE)
+	POP P,LINE		;RESTORE AOBJN PTR
+	AOBJN LINE,TYMRS1
+
+	SETZM AUXCTM		;JOB 0 TIMER FOR TYMCKT
+
+	MOVSI C,-NAUXLN
+
+	SETZM AUXCLK(C)
+	SETZM AUXINF(C)
+	AOBJN C,.-2
+
+IFN STATSW,<AOS YSTRST>		;count resets
+
+	SETZM TYSAVP		;init normal TYMIN entry
+	MOVEI A,TYMTTL		;reset output line check counter
+	MOVEM A,LTYMOT
+
+;JUMP TO HERE IF RETRYING TO RESET NODE (JUMP OVER RESETING TABLES)
+
+IFN F3FLG,<
+
+TYMRTY:	CALL FNSYNC		;DO FOONLY NODE SYNC
+	 JRST TYMRSR		;FAILED, J0RTIM SET
+				;SKIPPED, J0RTIM CLEARED
+> ;END IFN F3FLG
+
+	MOVEI LINE,NTYMTT	;start up interface, tell base # lines
+	MOVEI C,TYPHSI		;don't issue TYMHSI because line number
+	MOVE 4,NTHOST			;SAY WHO WE ARE TO BASE
+	CALL OTYPES		;must not be checked for CONNF
+	 JRST BADBEG		;impossible no room
+	MOVSI A,ANSF		;reset TYMBASE answering status
+	ANDCAM A,TYMSTS		;to force the appropriate ANSWER response
+	CALL ENTCHK		;set ans/shut status
+	 JRST BADBEG
+
+	MOVE A,TODCLK		;set up time to check key
+	ADDI A,KEYPRD
+	MOVEM A,KEYTIM
+	SETZM KEYCT		;set to wait for base to respond
+	MOVE A,TODCLK		;SET DISABLED BASE ALARM CLOCK
+	ADDI A,YALRMP
+	MOVEM A,YALRMC
+	MOVSI A,RESETF
+	IORM A,TYMSTS
+	MOVSI 1,JB0RST		;IF HERE MEANS DID IT ALL
+	ANDCAM 1,TYMSTS		;DON'T REQUEST TYMRST ANYMORE
+TYMRSR:	POP P,TYMFLG		;BACK TO STATE WE ENTERED WITH
+	RET
+
+BADBEG:	BUG(NTE, <TYMSRV: ORING SCREWED UP ON TYMBASE STARTUP>)
+	JRST TYMRSR
+
+IFN F3FLG,<
+
+FNSYNC:	MOVE 3,TODCLK		;GET ENTER TIME
+	ADDI 3,SNCPRD		;3/ WHEN MUST BE DONE
+	MOVE 4,TODCLK		;4/ REMEMBER ENTER TIME ALSO
+	FN.RST 0		;TURN OFF INPUT AND OUTPUT
+	MOVEI 2,NZEROS		;THIS MANY ZEROES TO INTERFACE
+FNSYN0:	FN.WRT 0		;WRITE ONE
+FNSYN1:	IMULI 1,1		;WASTE TIME FOR POOLE LOSAGE
+	IMULI 1,1		;WASTE TIME FOR POOLE LOSAGE
+	IMULI 1,1		;WASTE TIME FOR POOLE LOSAGE
+	FN.RED 1		;READ STATUS
+	TLNE 1,(1B5)		;ACCEPTED BY NODE?
+	 JRST FNSYN2		;YES-LOOP FOR MORE 0'S
+	CAMLE 3,TODCLK		;TIMED OUT?
+	JRST FNSYN1		;NO-KEEP LOOKING FOR ACCEPTANCE BIT
+	BUG(NTE,<TYMSRV: FAILED TO RESYNC WITH NODE>)
+	MOVE 1,TODCLK
+	ADDI 1,J0RPRD		;3/ WHEN TO TRY AGAIN
+	MOVEM 1,J0RTIM		;REMEMBER IT
+	JRST FNSYN3		;DIDDLE CHKTIM
+
+FNSYN2:	SOJG 2,FNSYN0		;ACCEPTED, LOOP FOR MORE
+	FN.RST 1B34!1B35	;NOW TURN ON INPUT AND OUTPUT
+	MOVSI 1,RTYWIN		;FLAG FOR JOB 0 RETRY WIN MESSAGE
+	SKIPE J0RTIM		;WAS THIS A RETRY?
+	 IORM 1,TYMSTS		;YES-REQUEST MESSAGE FROM OURSELVES (JOB 0)
+	SETZM J0RTIM		;SAY NOT RETRYING NEXT TIME IN HERE
+	AOS (P)			;SKIP SUCCESS
+FNSYN3:	MOVE 1,TODCLK
+	SUB 1,4			;1/ TIME SPENT IN HERE
+	ADDM 1,CHKTIM		;DON'T LET JOB 0 SEE TIME SPENT HERE
+	RET			;SKIP IF SUCCESS
+
+> ;END OF IFN F3FLG
+
+
+	SUBTTL JOB0 zapped line checker
+
+TYMJB0:	skipN tymflg		;NO SKIP IF TYMNET OFF
+	RET
+	MOVE 1,TYMSTS
+	TLNN 1,JB0RST		;TYMRST REQUEST?
+	SKIPN TYM1ST		;NO-BUT FIRST TIME HERE?
+	 CALL TYMRST		;DO IT, CLR JB0RST IF SUCCESS, SET TYM1ST
+	SKIPGE TADSEC		;wait for time to be set for GTAD's
+	 RET
+	MOVE LINE,[XWD -NTYMTT,TYMTTL] ;check all TYMNET lines
+
+TYJB01:	LDB 3,CONSTS		;get connection state
+	CAIE 3,CONDC3		;ctltty disconnect to report?
+	CAIN 3,CONAD3		;aux disconnect to report?
+	 CAIA			;YES-CLEAN DEVICE TABLES IF DIRTY
+	JRST TYJB02		;no
+
+	PUSH P,B		;save line number
+	MOVEI A,400000(B)	;turn line number into tty designator
+	PUSH P,A		;save tty designator
+	CALL CHKDEV		;get assignation status of line
+	 CAIE A,DEVX2		;assigned?
+	  TDZA B,B		;no
+	HRRZS DEVUNT(B)		;still assigned, smash in job 0 ownership
+	POP P,A			;restore tty designator
+	SKIPE B			;still assigned?
+	 RELD			;yes, release it INT ISSUED ALREADY
+	  JFCL
+	POP P,B			;restore line number
+
+	NOSKED			;KEEP SHEDULER AWAY FROM IRING
+	CALL TTRLAB		;NOW CLEAN UP ALL LINE BUFFERS
+	CALL IBPRFB		;UNDO WHAT WE MAY HAVE DONE FOR AUX CIRCUIT
+	OKSKED			;STATIC INPUT BUFFER COUNTS
+
+	SETZM TYMLNS(LINE)	;release line
+
+TYJB02:	AOBJN LINE,TYJB01
+
+	CALL AUXCKT		;CHECK FOR AUXQUE TIMEOUTS
+
+
+	SUBTTL CHECK INTERFACE STATUS
+
+	ADD P,BHC+3
+	JUMPGE P,MSTKOV
+	MOVEI 7,-2(P)		;set up buffer for FACT file messages
+
+	MOVE A,[XWD 163000,3]	;interface status message type
+	MOVEM A,(7)
+
+	GTAD			;time for FACT file messge
+	MOVEM A,2(7)
+
+	MOVSI D,-NYMSG		;check all possible states
+TYMS1:	HLLZ A,MSGTAB(D)	;get flag to check
+	TDNN A,TYMSTS		;is it on?
+	 JRST TYMS2		;no, go on to next
+
+	HRRZ 5,D		;GET MESSAGE #
+	ANDCAM A,TYMSTS		;YES, TURN IT OFF
+	MOVEM A,1(7)		;SET IT INTO FACT FILE MESSAGE BUFFER
+	CAIN 5,YMSGC		;CRASH MESSAGE?
+	 JRST  [LDB 1,[POINT 16,TYMCSH,15] ;PUT CRASH REASON INTO 
+		HRRM 1,1(7)	;FACT FILE MESSAGE
+		JRST .+1]
+	MOVSI A,-3		;FACT FILE MESSAGE LENGTH
+	CALL TYFACT		;ENTER FACT FILE MESSAGE
+
+	MOVEI A,101		;TELL JB0 TTY ABOUT IT
+	DOBE
+
+	SETO B,			;TIME STAMP
+	MOVSI C,045241		;SHORT FORMAT
+	ODTIM
+
+	HRRO A,MSGTAB(D)	;GET MESSAGE
+	PSOUT
+
+	CAIN 5,YMSGC		;CRASH MESSAGE?
+	 JRST  [HRROI A,[ASCIZ / @ /]
+		PSOUT
+
+		LDB 2,[POINT 16,TYMCSH,31]	;GET CRASH ADDRESS
+		MOVEI 1,101	;TYPE TO LOG TTY
+		MOVEI 3,^D8	;IN OCTAL
+		NOUT
+		 JFCL
+	
+		HRROI A,[ASCIZ / - /]
+		PSOUT
+
+		LDB 2,[POINT 16,TYMCSH,15]	;GET CRASH REASON
+		MOVEI 1,101
+		NOUT
+		 JFCL
+
+		HRROI A,[ASCIZ /: /]
+		PSOUT
+
+		HRROI 1,[ASCIZ /UNKNOWN REASON/]
+		CAIGE 2,NTYBMG
+		HRRO 1,TYBMSG(2)
+		PSOUT
+
+		JRST .+1]
+
+	CAIN 5,YMSGA		;ALARM MESSAGE?
+ 	 JRST  [HRROI A,[ASCIZ /
+/] ;YES, RING BELLS
+		PSOUT
+		JRST .+1]
+
+	MOVEI A,37
+	PBOUT
+	
+TYMS2:	AOBJN D,TYMS1		;LOOK FOR MORE
+
+	SUB P,BHC+3		;POP EFACT BUFFER
+	RET			;NO
+
+MSGTAB:	
+YMSGA==.-MSGTAB
+	XWD ALARMF,[ASCIZ / TYMBASE APPARENTLY DISABLED/]
+YMSGC==.-MSGTAB
+	XWD CRASHF,[ASCIZ / TYMBASE CRASHED/] 
+	XWD DIEDF,[ASCIZ / TYMBASE DIED/]
+	XWD RTYWIN,[ASCIZ/ TYMBASE SYNC RETRY WON/]
+	XWD RESETF,[ASCIZ / TYMBASE RESET/]
+	XWD UPF,[ASCIZ / TYMBASE UP/]
+NYMSG==.-MSGTAB
+
+TYBMSG:	[ASCIZ /HOST going down - key not refreshed/]
+	[ASCIZ /HOST crashing due to BASE crash/]
+	[ASCIZ /MIC error or MIC reject tring to read key/]
+	[ASCIZ /Read bad key from HOST/]
+	[ASCIZ /Bad data type or port number from host/]
+	[ASCIZ /Illogical data type from HOST/]
+	[ASCIZ /MIC busy trying to read HOST/]
+	[ASCIZ /Input ring processing time-out/]
+	[ASCIZ /MIC time-out error (SEN 337)/]
+	[ASCIZ /Parity error from MIC (SEN 237)/]
+	[ASCIZ /MIC busy for 232 cycles/]
+	[ASCIZ /MIC busy (IN) - obsolete, can't happen/]
+	[ASCIZ /MIC busy (LOCK)/]
+NTYBMG==.-TYBMSG
+
+
+;CALLED BY JOB 0 TO CHECK ON QUEUED AUX CIRCUITS QUEUED TOO LONG
+;SHOULD CHECK 1 LINE PER CALL IF SPENDING TOO MUCH TIME HERE
+
+	SWAPCD
+
+AUXCKT:	MOVE 1,TODCLK			;GET TIME NOW
+	SKIPE AUXCTM			;SET YET?
+	CAML 1,AUXCTM			;YES-TIME TO DO THIS?
+	 CAIA				;1ST TIME OR TIME TO DO IT
+	RET				;WAIT TIL TIME TO DO IT
+	MOVE 1,[-NTYMTT,,DUXTMQ]	;SCAN ALARM CLK TABLE
+AUXCK1:	MOVE 2,(1)			;GET TODCLK
+	CAMN 2,MINUS1			;UNUSED?
+	 JRST AUXCK2			;SKIP IT
+	CAMG 2,TODCLK			;TIMED OUT?
+	 CALL AUXCK3			;YES-DEQUE IT
+AUXCK2:	AOBJN 1,AUXCK1			;LOOP TIL ENTIRE TABLE SEEN
+	MOVE 1,TODCLK			;UPDATE TIMER FOR THIS ROUTINE
+	ADDI 1,AUXTMC			;THIS MUCH LATER
+	MOVEM 1,AUXCTM			;REMEMBER IT
+	RET
+
+AUXCK3:	PUSH P,1			;SAVE AOBJN PTR
+	HRRZS 1				;1/ AUXTMQ+LINE #
+	SUBI 1,AUXTMQ			;1/ LINE #
+	HRRZ 3,AUXSJQ(1)		;GET SJOB IN 3
+	IOR 1,[1B3!1B4!10B17!400000B35]	;OPTION BITS, CODE & DEVICE BITS
+	TYMOP				;DEQUE IT
+	 BUG(CHK,<JOB 0 FAILED TO DEQ TIMED OUT AUX CIRCUIT IN QUE>)
+	POP P,1
+	RET
+
+
+	SUBTTL TYMNET BUFFER UTILITY JSYS'S
+
+;
+;	get/put word from/into TYMNET buffer, utility JSYS
+;	for loading TYMBASE, debugging, etc.
+;
+;	1/ word to get/put
+;	2/ offset address into TYMNET buffer
+;	
+;	always returns +1, no errors, ever.
+;
+.TYMBW:	SKIPL 2			;set word into TYMNET buffer
+	CAIL 2,TYMBSZ		;no op if address is outside of buffer
+	 XCT MJRSTF
+	MOVEM 1,TYMBUF(2)
+	XCT MJRSTF
+
+.TYMBR:	SKIPL 2			;read word from TYMNET buffer
+	CAIL 2,TYMBSZ
+	 XCT MJRSTF
+	MOVE 1,TYMBUF(2)
+	XCT MJRSTF
+
+;
+;	TYMLI JSYS
+;
+;	always returns +1 with node information for connected TYMNET
+;	line.  for non-TYMNET lines, or non-TTY devices, returns
+;	-1.
+;
+;	TYMNET node info is:
+;		0 - 8   9   -   16    17  -  23    24  - 35
+;		  0   terminal type  port number  origin node
+;
+.TYMLI:	JSYS MENTR
+	CALL CHKTTY		;get TYMNET particular information
+	 JRST .GTTY1		;not a tty, return not TYMNET tty info
+
+	CAIL LINE,TYMTTL
+	CAIL LINE,TYMTTL+NTYMTT
+.GTTY1:	SKIPA A,[-1]		;not TYMNET tty, give -1
+	MOVE A,TYNODS(LINE)	;TYMNET tty, get right info.
+
+	UMOVEM A,B
+	CALL UNLCKF
+	JRST MRETN
+
+	END
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             

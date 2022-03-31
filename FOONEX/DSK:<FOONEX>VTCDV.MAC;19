@@ -1,0 +1,379 @@
+;DSK:<FOONEX>VTCDV.MAC;1 22-Sep-80 22:57:57, Edit by DANG
+; Initial version of versatec device driver
+
+	search	prolog,stenex
+	lall
+ifndef	vtcn,<vtcn==:0>
+ifn	vtcn,<				; This whole module is under VTC cond
+
+	title	vtcdv
+	subttl	Definitions
+
+; Internal symbols
+intern	vtcini				; Initialization routine
+intern	vtcsv				; Interrupt service
+intern	vtcrst				; Restart
+intern	vtcchk				; Sched level timeout check
+intern	vtcdtb				; Dispatch table
+
+; External symbols
+extern	vtcchr				; Return from interrupt service
+extern	vtctim				; VTC check timer
+extern	cpopj,dislt,dislet,edisms,lcktst,pbytpo,pbytsz,skpret
+
+; Parameters
+ifndef	vtc,<vtc=520>			; Device number
+
+; Definitions
+bufsiz==^d132/5+2			; Size of buffers
+ios=6					; IO Status register
+	opn==	1b0			; Device is open
+	bytmsk==3b4			; Mask for byte mode field
+	byte7==	1b4			; 7 bit byte mode
+	byte8==	2b4			; 8 bit byte mode
+	byte44==3b4			; 36 bit byte mode
+	plotmd==1b5			; Plot mode
+
+; CONI/CONO bits
+vc%clr==1b0				; Clear versatec buffer and errors
+vc%rst==1b1				; Clear buffer only
+vc%cut==1b2				; Paper cut 
+vc%dac==1b3				; Disable automatic cutting
+vc%daf==1b4				; Disable automatic form feeds
+vc%trm==1b5				; Terminate line
+vc%ff==	1b6				; Terminate line and form feed
+vc%ffc==1b7				; Terminate, form feed, and cut
+vc%tnr==1b9				; Turn toner system on
+vc%plt==1b10				; Plot mode
+vc%spp==1b11				; Simultaneous print/plot mode
+
+vc%off==1b18				; Printer is offline
+vc%sup==1b19				; Low paper or toner supply
+vc%bnf==1b20				; Buffer not full
+vc%pap==1b21				; Paper out
+vc%tof==1b22				; Toner system is off
+vc%ok==	1b23				; Set if no error; zero if inv code
+vc%rdy==1b25				; Ready
+vc%don==1b26				; Done
+vc%enb==1b30				; Enable interrupt on VC%RDY
+; Bits 31-32 describe the byte packing mode
+vc%mod==3b32				; Mask for byte packing mode
+vc%7b==	1b32				; 7 bit byte mode
+vc%8b==	2b32				; 8 bit byte mode 
+vc%44b==3b32				; 44 bit byte mode
+; Bits 33-35 are PI level
+
+defvc%==vc%dac!vc%daf+vtcchn		; Default cono word
+
+; Local storage
+ls	vtcbf1,bufsiz			; Buffer 1, first word is byte count
+ls	vtcbf2,bufsiz			; Buffer 2, first word is byte count
+ls	vtccnt				; Count of full buffers
+ls	vtcdon				; Done outputing buffers
+ls	vtcinb				; Input buf - neg for 1, pos for 2
+ls	vtclck				; VTC open lock
+ls	vtcoub				; Output buf - neg 1, pos 2, zero nil
+ls	vtcsav				; Saved register in interrupt service
+ls	vtcsts				; Status word (see IOS def'n)
+ls	vtcsvr				; Return address from interrupt call
+
+	subttl	Dispatch table
+
+use	swappc
+
+vtcdtb::cpopj				; Set directory
+	cpopj				; Name lookup
+	cpopj				; Extension lookup
+	cpopj				; Version lookup
+	cpopj				; Protection insertion
+	cpopj				; Account
+	cpopj				; Status insertion
+	vtcopn				; File open
+	cpopj				; Sequential input
+	vtcsqo				; Sequential output
+	vtcclz				; File close
+	cpopj				; File rename
+	cpopj				; File delete
+	cpopj				; Dump mode input
+	cpopj				; Dump mode output
+	cpopj				; Mount
+	cpopj				; Dismount
+	cpopj				; Initialize directory
+	vtcmtr				; MTOPR
+	cpopj				; Get status
+	cpopj				; Set status
+
+	subttl	Initialization
+
+use	respc
+
+; Initialize the versatec driver
+vtcini::setom	vtclck			; Clear open lock
+	setom	vtccnt			; No full buffers
+	setom	vtcdon			; Not waiting for an interrupt
+	setzm	vtcsts			; Clear status
+	cono	vtc, [vc%rst]		; Reset the printer, no interrupts
+	ret
+
+; Restart versatec output
+vtcrst::;+++ hm, resume outputting the buffer?  could be paritally out?
+	ret
+
+; Clock level check
+; +++ might be nice to modify vtcini, vtcopn, vtcclz and vtcchk to have a
+; very very long timeout when not outputting to minimize calls to vtcchk
+vtcchk::movei	a, ^d30000		; 30 seconds interval
+	movem	a, vtctim
+	skipge	vtcdon			; Waiting for an interrupt
+	 ret				; No
+	conso	vtc, [vc%off!vc%pap]	; Hung?  (paper out, offline)
+	 ret				; No errors? +++ should do something
+	;+++ wakeup from error condition!
+	ret
+
+use	swappc
+
+	subttl	Interrupt service
+
+use	respc
+
+; Interrupt handler.
+; Cannot clobber any ACs and must check for spurious calls
+vtcsv::	xwd	vtcsvr,.+1		; JSYS dispatch
+	skipl	vtcdon			; Waiting for completion
+	 conso	vtc, [vc%don!vc%rdy]	; And device done?
+	 jrst	@vtcsvr			; No, return
+	skipl	vtccnt			; Any buffers being output?
+	 sosge	vtccnt			; One less buffer being output
+	 jrst	vtcsvx			; No more buffers to output, done
+	movem	a, vtcsav		; Save register
+	movns	vtcoub			; Switch buffers
+	movei	a, vtcbf1+1		; Get buffer address
+	skipl	vtcoub
+	 movei	a, vtcbf2+1
+	hrl	a, -1(a)		; Negative byte count
+	datao	vtc, a			; Start outputting buffer
+	move	a, vtcsav		; Restore register
+	jrst	@vtcsvr			; And return
+
+vtcsvx:	setom	vtcdon			; Signal done
+	jrst	@vtcsvr			; And exit
+
+use	swappc
+
+	subttl	Monitor interfaces
+
+; Open the versatec
+; Expects:	JFN	The job file number
+; Returns:	+1	Failure, error number in AC1
+;		+2	Success
+vtcopn:	lock	vtclck,<call lcktst>	; Lock this routine
+	move	ios, vtcsts		; Get device status
+	tloe	ios, (opn)		; Set open status
+	 jrst	vtcbsy			; Already was open
+	unlock	vtclck			; No longer need to be locked
+;;;	consz	vtc, [vc%off]		; Device offline?
+	conso	vtc, [vc%rdy]		; Ready?  (offline flag currently bad)
+	 jrst	[ movei	a, opnx8	; Yes
+		  ret ]
+	movsi	ios, (opn)		; Initial status
+	ldb	a, pbytsz		; User specified byte size
+	cain	a, 7			; 7 bit?
+	 tlo	ios, (byte7)
+	cain	a, 8			; 8 bit?
+	 tlo	ios, (byte8)
+	cain	a, 44			; 36 bit?
+	 tlo	ios, (byte44)
+	tlnn	ios, (bytmsk)		; Proper byte mode set?
+	 jrst	[ movei	a, opnx14	; No
+		  ret ]
+	ldb	a, [point 4,sts,35]	; Get user specified mode
+	cain	a, 1			; Plot?
+	 tlo	ios, (plotmd)		; Yes
+	movem	ios, vtcsts		; Remember new status
+	setom	vtccnt			; No full buffers
+	setom	vtcinb			; Use buffer 1
+	setom	vtcoub
+	call	setsts			; Setup device status
+	call	setbuf			; Setup buffer pointers
+	movsi	a, (vc%cut)		; Eject and cut
+	call	vtccno
+	jrst	skpret			; And return successfully
+
+; Versatec is busy, error return
+vtcbsy:	unlock	vtclck
+	movei	a, opnx9
+	ret
+
+
+
+; Close the versatec
+; Expects:	JFN	The job file number
+; Returns:	+1	Failure, error number in AC1
+; 		+2	Success
+vtcclz:	move	a, [vc%ffc!vc%enb] 	; Wait for IO, eject and cut paper
+	call	vtccno
+	move	a, [vtcdon,,dislt]	; Waiting for completion
+	skipl	vtcdon
+	 jsys	edisms
+	setzm	vtcsts			; Clear status (in particular OPN)
+	cono	vtc, [vc%rst]		; Reset device, turn off interrupts
+	jrst	skpret			; And return successfully
+
+
+
+; Sequential output
+; Expects:	a	Byte to output
+;		JFN	The job file number
+; Returns:	+1	Always
+vtcsqo:
+repeat	0,<
+	move	ios, vtcsts		; Get status
+	tlne	ios, (plotmd)		; In plot mode?
+	 jrst	vtcsq1			; Yes, don't look at byte much
+	;+++ EOL check, count lines?
+>; End repeat 0
+vtcsq1:	sosge	filcnt(jfn)		; Buffer full?
+	 jrst	dmpsqo			; Yes, output it
+	idpb	a, filbyt(jfn)		; Deposit in buffer
+	aos	filbyn(jfn)		; Increment byte count
+	ret				; And return
+
+dmpsqo:	push	p, a			; Save output byte
+	call	dmpbuf			; Dump buffer
+	pop	p, a			; Restore output byte
+	jrst	vtcsq1
+
+
+; MTOPR - Perform some device function
+; Expects:	B	MTOPR function code
+vtcmtr:	caile	b, mtrmax-1		; Range check opcode
+	 ret				;+++ Error?
+	jrst	@mtrtab-1(b)		; Dispatch to handler
+
+mtrtab:	mtrclr				; Clear device
+	mtrrst				; Reset device
+	mtrcut				; Cut paper
+	mtrtrm				; Terminate line
+	mtrff				; Terminate and formfeed
+	mtrffc				; Formfeed and cut paper
+	mtrplt				; Go into plot mode
+	mtrasc				; Go into ascii mode
+mtrmax==.-mtrtab
+
+; Clear device
+mtrclr:	movsi	a, (vc%clr)
+	jrst	vtccno
+
+; Reset device
+mtrrst:	movsi	a, (vc%rst)
+	jrst	vtccno
+
+; Cut paper
+mtrcut:	movsi	a, (vc%cut)
+	jrst	vtccno
+
+; Terminate line
+mtrtrm:	move	a, [vc%trm!vc%enb]
+	jrst	vtccno
+
+; Terminate and formfeed
+mtrff:	move	a, [vc%ff!vc%enb]
+	jrst	vtccno
+
+; Formfeed and cut paper
+mtrffc:	move	a, [vc%ffc!vc%enb]
+	jrst	vtccno
+
+; Go into plot mode
+mtrplt:	movsi	a, (plotmd)		; Set plot status
+	iorb	ios, vtcsts
+	jrst	setsts
+
+; Go into ascii mode
+mtrasc:	movsi	a, (plotmd)		; Clear plot status
+	andcab	ios, vtcsts
+	jrst	setsts
+
+	subttl	Buffer and device manipulation
+
+; Setup JFN area to point to a free buffer
+; Expects:	IOS	Status
+setbuf:	move	a, [vtccnt,,dislet]	; Wait for an available buffer
+	skiple	vtccnt
+	 jsys	edisms
+	movei	a, vtcbf1+1		; Use buffer 1
+	skipl	vtcinb			; Unless in buffer 2
+	 movei	a, vtcbf2+1		; In which case use buffer 2
+	hrrm	a, filbyt(jfn)		; Save buffer address in byte pointer
+	movei	a, 44			; Position to left of first word
+	dpb	a, pbytpo		; Save byte position field
+	movei	a, 44			; Calculate bytes per buffer
+	ldb	b, pbytsz		; User's byte size
+	idiv	a, b			; Bytes per word
+	imuli	a, bufsiz-1		; Bytes per buffer
+	movem	a, filcnt(jfn)		; Save available byte count
+	setzm	filbyn(jfn)		; No bytes in buffer
+	test	(z,wndf)		; Set flag to indicate buffer setup
+	ret
+
+; Start outputting buffer to versatec
+; Expects:	IOS	Status register
+dmpbuf:	movei	a, vtcbf1		; Get buffer address
+	skipl	vtcinb
+	 movei	a, vtcbf2
+	movn	b, filbyn(jfn)		; Get negative byte count
+	movem	b, (a)			; Save in buffer word 0
+	aosn	vtccnt			; Increment count of full buffers
+	 call	dmpout			; If first buffer start output
+	movns	vtcinb			; Switch to other input buffer
+	jrst	setbuf			; And setup for new buffer
+
+; Output current buffer to versatec
+; Expects:	a	Address of buffer to dump out
+dmpout:	push	p, a			; Save buffer address
+	move	a, [vtcdon,,dislt]	; Wait for device to be ready
+	skipl	vtcdon
+	 jsys	edisms
+	move	a, vtcinb		; Set output buffer to input buffer
+	movem	a, vtcoub
+	pop	p, a			; Pop buffer address
+	move	b, (a)			; Negative byte count in buffer
+	hrli	a, (b)			; <-byte count>,,buffer address
+	aoj	a,			; Skip past byte count
+	setzm	vtcdon			; Signal waiting for completion
+	datao	vtc, a			; Start outputting buffer
+	ret
+
+; Set up device status register from our status
+; Expects:	IOS	Status
+setsts:	move	a, [defvc%]		; Get default cono
+	ldb	b, [point 2,ios,4]	; Get mode desired
+	dpb	b, [point 2,a,32]	; Set it
+	tlne	ios, (plotmd)		; Want plot mode?
+	 tlo	a, (vc%plt)		; Yes
+	jrst	vtccn1			; Perform the cono
+
+; Output cono function
+vtccno:	push	p, a			; Save cono word
+	skipe	filbyn(jfn)		; Bytes in output buffer?
+	 call	dmpbuf			; Yes, output them first
+	pop	p,a			; Cono word
+	coni	vtc, b			; Retain current status
+	ior	a, b
+vtccn1:	push	p, a			; Save cono word
+	move	a, [vtcdon,,dislt]	; Wait for printer to be ready
+	skipl	vtcdon
+	 jsys	edisms
+	pop	p, a			; Cono word
+	trne	a, vc%enb		; Want an interrupt on ready?
+	 setzm	vtcdon			; Yes, waiting for ready interrupt
+	cono	vtc, a
+	ret
+
+
+
+>; End of ifdef vtcn from page 1
+
+	end
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               

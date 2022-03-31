@@ -1,0 +1,1242 @@
+		LINK-10 symbol map of	MAP		page 1
+	Produced by LINK-10 version 3A(560) on  9-Jun-81 at 16:02:03
+
+	Low  segment starts at	     0 ends at	172125 length	172126 = 123P
+	High segment starts at	400000 ends at	451071 length	 51072 = 42P
+	426 words free in Low segment, 454 words free in high segment
+	2578 Global symbols loaded, therefore min. hash size is 2865
+	Start address is   4000, located in program POSTLD
+
+		*************
+
+STENEX	from DSK:STENEX.REL	created by MACRO on 30-May-81 at 15:45:00
+
+	Zero length module
+
+		*************
+
+TENDMP	from DSK:TENDMP.REL	created by MACRO on 30-May-81 at 15:46:00
+	Low  segment starts at	   400 ends at	   407 length	    10 (octal),     8. (decimal)
+
+	TENDMP	         400	Global	Relocatable 	
+
+		*************
+
+PROLOG	from DSK:PROLOG.REL	created by MACRO on  9-Jun-81 at 15:31:00
+
+	Zero length module
+
+		*************
+
+IMPPAR	from DSK:IMPPAR.REL	created by MACRO on 30-May-81 at 15:46:00
+
+	Zero length module
+
+		*************
+
+SYSNAM	from DSK:VERSIO.REL	created by MACRO on  9-Jun-81 at 15:33:00
+	High segment starts at	400010 ends at	400023 length	    14 (octal),    12. (decimal)
+
+	FOOLHN	      400022	Global	Relocatable 		SVN	      400010	Global	Relocatable 	
+	SVNM	       32222	Global	Absolute    		SVNN	          11	Global	Absolute    Suppressed
+	SVNUM	      400021	Global	Relocatable 	
+
+		*************
+
+LDINIT	from DSK:LDINIT.REL	created by MACRO on 30-May-81 at 15:46:00
+
+	Zero length module
+
+		*************
+
+STORAG	from DSK:STORAG.REL	created by MACRO on 30-May-81 at 15:47:00
+
+	Zero length module
+
+		*************
+		LINK-10 symbol map of	MAP		page 2
+
+
+SCHED	from DSK:SCHED.REL	created by MACRO on 30-May-81 at 15:47:00
+	Low  segment starts at	112000 ends at	120157 length	  6160 (octal),  3184. (decimal)
+
+	JOBNO	      777014	Global	Absolute    		JOBBIT	      777015	Global	Absolute    	
+	JOBCK0	      777016	Global	Absolute    		JOBCK1	      777017	Global	Absolute    	
+	FKTAB	      777020	Global	Absolute    		FORKN	      777030	Global	Absolute    	
+	FKRT	      777031	Global	Absolute    		ENTVEC	      777032	Global	Absolute    	
+	PATADR	      777033	Global	Absolute    		PATU40	      777034	Global	Absolute    	
+	PATUPC	      777035	Global	Absolute    		MPP	      777036	Global	Absolute    	
+	UPP	      777037	Global	Absolute    		SLOWF	      777040	Global	Absolute    	
+	XMENTR	      777041	Global	Absolute    		XMENT1	      777042	Global	Absolute    	
+	INTDF	      777043	Global	Absolute    		INTDFF	      777044	Global	Absolute    	
+	MJRSTF	      777045	Global	Absolute    		ACBAS1	      777046	Global	Absolute    	
+	TW1	      777047	Global	Absolute    		TW2	      777050	Global	Absolute    	
+	ITFPC	      777051	Global	Absolute    		JTBTB	      777052	Global	Absolute    	
+	JTLCK	      777071	Global	Absolute    		JTFPC	      777072	Global	Absolute    	
+	JTTMP	      777073	Global	Absolute    		JTTMP1	      777074	Global	Absolute    	
+	JTMNW	      777075	Global	Absolute    		JTTRW	      777076	Global	Absolute    	
+	JTJDA	      777077	Global	Absolute    		PAC	      777100	Global	Absolute    	
+	PPC	      777120	Global	Absolute    		PSB40	      777121	Global	Absolute    	
+	ENSKR	      777122	Global	Absolute    		SKDPC	      777123	Global	Absolute    	
+	NSKED	      777124	Global	Absolute    		RSKED	      777125	Global	Absolute    	
+	NSWAP	      777126	Global	Absolute    		TRAPSK	      777127	Global	Absolute    	
+	PGTIM	      777177	Global	Absolute    		IFTIM	      777200	Global	Absolute    	
+	TRAPC	      777201	Global	Absolute    		UTRPCT	      777202	Global	Absolute    	
+	USWPCT	      777203	Global	Absolute    		PTTIM	      777204	Global	Absolute    	
+	IFAV	      777205	Global	Absolute    		CAPT	      777206	Global	Absolute    	
+	WSPGS	      777207	Global	Absolute    		MONBK	      777226	Global	Absolute    	
+	PIPC	      777227	Global	Absolute    		PIMSK	      777230	Global	Absolute    	
+	PIPDB	      777231	Global	Absolute    		PIAC	      777271	Global	Absolute    	
+	PIAC17	      777310	Global	Absolute    		PSICHA	      777311	Global	Absolute    	
+	PSIBW	      777317	Global	Absolute    		FORCTC	      777320	Global	Absolute    	
+	PSICHM	      777321	Global	Absolute    		SUPCHN	      777322	Global	Absolute    	
+	PSIBIP	      777323	Global	Absolute    		PSIPT	      777324	Global	Absolute    	
+	PIOLDS	      777325	Global	Absolute    		LEVCHN	      777326	Global	Absolute    	
+	PSISYS	      777327	Global	Absolute    		MONCHN	      777330	Global	Absolute    	
+	MONINT	      777331	Global	Absolute    		OVFLG	      777332	Global	Absolute    	
+	UPDL	      777333	Global	Absolute    		FPC	      777453	Global	Absolute    	
+	PGURET	      777454	Global	Absolute    		HIQCNT	      777455	Global	Absolute    	
+	SPQCNT	      777456	Global	Absolute    		JOBMAP	      601117	Global	Absolute    	
+	SYSFK	      601257	Global	Absolute    		FKPTRS	      601307	Global	Absolute    	
+	FKPSIE	      601337	Global	Absolute    		FKDPSI	      601367	Global	Absolute    	
+	FREJFK	      601417	Global	Absolute    		CTRLTT	      601420	Global	Absolute    	
+	TTSPSI	      601421	Global	Absolute    		TTSDPS	      601422	Global	Absolute    	
+	TTJTIW	      601423	Global	Absolute    		JOBPMF	      601424	Global	Absolute    	
+	CONSTO	      601425	Global	Absolute    		FLDTSL	      601426	Global	Absolute    	
+	FLDTPT	      601427	Global	Absolute    		FLDTSR	      601430	Global	Absolute    	
+	ACCTPT	      601441	Global	Absolute    		LOGBUF	      601442	Global	Absolute    	
+	ACCTSR	      601461	Global	Absolute    		SKDPDL	       52232	Global	Absolute    	
+	MSCNT	       52332	Global	Absolute    		APCLKC	       52333	Global	Absolute    	
+	CLKAC2	       52334	Global	Absolute    		CLKAC1	       52335	Global	Absolute    	
+	SYNCC	       52336	Global	Absolute    		OLDTCK	       52337	Global	Absolute    	
+	PISC7R	       52340	Global	Absolute    		FKPT6M	       52341	Global	Absolute    	
+		LINK-10 symbol map of	MAP		page 3
+SCHED
+	FORKX	       52342	Global	Absolute    		FKPGS	       52343	Global	Absolute    	
+	FKSTAT	       52543	Global	Absolute    		FKWSP	       52743	Global	Absolute    	
+	FKPGST	       53143	Global	Absolute    		FKQ	       53343	Global	Absolute    	
+	FKPT	       53543	Global	Absolute    		FKINT	       53743	Global	Absolute    	
+	FKINTB	       54143	Global	Absolute    		FKJOB	       54343	Global	Absolute    	
+	FKFLGS	       54543	Global	Absolute    		FKJTQ	       54743	Global	Absolute    	
+	FKSOLD	       55143	Global	Absolute    		FKUTIL	       55343	Global	Absolute    	
+	FKPRT	       55543	Global	Absolute    		FKUDT	       55743	Global	Absolute    	
+	FKINTT	       56143	Global	Absolute    		FKINTW	       56343	Global	Absolute    	
+	FREFK	       56543	Global	Absolute    		SYSIFG	       56544	Global	Absolute    	
+	ACCIFG	       56545	Global	Absolute    		ENTFLG	       56546	Global	Absolute    	
+	PWRDWN	       56547	Global	Absolute    		JOBDIR	       56550	Global	Absolute    	
+	JOBNAM	       56610	Global	Absolute    		JOBRT	       56650	Global	Absolute    	
+	JOBPT	       56710	Global	Absolute    		JOBACT	       56750	Global	Absolute    	
+	JOBPGF	       57010	Global	Absolute    		TTYCHS	       57050	Global	Absolute    	
+	LLORCA	       57110	Global	Absolute    		FREJOB	       57150	Global	Absolute    	
+	RUNLST	       57151	Global	Absolute    		RUNLSB	       57154	Global	Absolute    	
+	WTLST	       57157	Global	Absolute    		WTLSTB	       57160	Global	Absolute    	
+	WAITFS	       57161	Global	Absolute    		WAITLS	       57162	Global	Absolute    	
+	JTLST	       57163	Global	Absolute    		JTLSTL	       57164	Global	Absolute    	
+	JB0FLG	       57165	Global	Absolute    		NBPROC	       57166	Global	Absolute    	
+	NBRUN	       57167	Global	Absolute    		TOTRC	       57170	Global	Absolute    	
+	SYSMEM	       57171	Global	Absolute    		NRPMIN	       57172	Global	Absolute    	
+	RUNT1	       57173	Global	Absolute    		NRPLQ	       57174	Global	Absolute    	
+	RPLQ	       57175	Global	Absolute    		NPMAX	       57176	Global	Absolute    	
+	SNPMAX	       57177	Global	Absolute    		SJSIZ	       57200	Global	Absolute    	
+	IRJAV	       57201	Global	Absolute    		SKEDF1	       57202	Global	Absolute    	
+	SKEDF3	       57203	Global	Absolute    		INSKED	       57204	Global	Absolute    	
+	SSKED	       57205	Global	Absolute    		PSKED	       57206	Global	Absolute    	
+	ISKED	       57207	Global	Absolute    		FSHBAL	       57210	Global	Absolute    	
+	BKGFLG	       57211	Global	Absolute    		NGPROC	       57212	Global	Absolute    	
+	RJAVS1	       57213	Global	Absolute    		SNAMES	       57214	Global	Absolute    	
+	STIMES	       57334	Global	Absolute    		SPFLTS	       57454	Global	Absolute    	
+	SWAKES	       57574	Global	Absolute    		SBLKTM	       57714	Global	Absolute    	
+	QSUM	       60034	Global	Absolute    		SOLD	       60037	Global	Absolute    	
+	IDLE	       60041	Global	Absolute    		SWAPWT	       60043	Global	Absolute    	
+	NSKWT	       60045	Global	Absolute    		SKMAIN	       60047	Global	Absolute    	
+	SKBAL	       60051	Global	Absolute    		SKWAIT	       60053	Global	Absolute    	
+	SKLDPR	       60055	Global	Absolute    		GCCR	       60057	Global	Absolute    	
+	PPG	       60061	Global	Absolute    		PTRAP	       60063	Global	Absolute    	
+	SORTIM	       60065	Global	Absolute    		RJTSUM	       60067	Global	Absolute    	
+	BSTSUM	       60070	Global	Absolute    		NBRSUM	       60071	Global	Absolute    	
+	RJAV	       60072	Global	Absolute    		DRMRD	       60075	Global	Absolute    	
+	DRMWR	       60076	Global	Absolute    		DSKRD	       60077	Global	Absolute    	
+	DSKWR	       60100	Global	Absolute    		TOPTRP	       60101	Global	Absolute    	
+	WAKEUP	       60102	Global	Absolute    		TTINTS	       60103	Global	Absolute    	
+	NTTYIN	       60104	Global	Absolute    		NTTYOT	       60105	Global	Absolute    	
+	ENTDMS	       60106	Global	Absolute    		ENTPGF	       60107	Global	Absolute    	
+	NGCLCT	       60110	Global	Absolute    		PPCLCT	       60111	Global	Absolute    	
+	NREMJ	       60112	Global	Absolute    		HSYST1	       60113	Global	Absolute    	
+	HSYST4	       60114	Global	Absolute    		RJQNT	       60115	Global	Absolute    	
+	TIM2	       60116	Global	Absolute    		JOBRTT	       60117	Global	Absolute    	
+	SCDRQI	       60120	Global	Absolute    		SCDRQO	       60121	Global	Absolute    	
+	SCDRQB	       60122	Global	Absolute    		TODCLK	       60142	Global	Absolute    	
+		LINK-10 symbol map of	MAP		page 4
+SCHED
+	CHKTIM	       60143	Global	Absolute    		CHKTM1	       60144	Global	Absolute    	
+	DDMPFK	       60145	Global	Absolute    		SCDRN1	       60146	Global	Absolute    	
+	GLOCK	       60147	Global	Absolute    		RESDNT	       60150	Global	Absolute    	
+	CRJLCK	       60151	Global	Absolute    		CRJANS	       60152	Global	Absolute    	
+	CRJJNO	       60153	Global	Absolute    		NAPROC	       60154	Global	Absolute    	
+	DSHARE	       60265	Global	Absolute    		PIEGRP	       60376	Global	Absolute    	
+	DEFGP	       60436	Global	Absolute    		PASSES	       60437	Global	Absolute    	
+	EXCHGS	       60440	Global	Absolute    		SRTBEG	       60441	Global	Absolute    	
+	SRTEND	       60442	Global	Absolute    		SRTTMP	       60443	Global	Absolute    	
+	FLASHC	       60444	Global	Absolute    		FLASH1	       60445	Global	Absolute    	
+	FLASH2	       60446	Global	Absolute    		DSKTIM	       60447	Global	Absolute    	
+	MTATIM	       60450	Global	Absolute    		LPTTIM	       60451	Global	Absolute    	
+	SKDTIM	       60452	Global	Absolute    		RESTIM	       60453	Global	Absolute    	
+	RJATIM	       60454	Global	Absolute    		DLSTIM	       60455	Global	Absolute    	
+	TYMTIM	       60456	Global	Absolute    		CHATM0	       60457	Global	Absolute    	
+	SCDRQ	       60460	Global	Absolute    		APCLK1	      112376	Global	Relocatable 	
+	ASSFK	      114711	Global	Relocatable 		BLOCK0	      114053	Global	Relocatable 	
+	BLOCK1	      114057	Global	Relocatable 		BLOCKW	      114100	Global	Relocatable 	
+	BLST	       40000	Global	Absolute    Suppressed	CHKWT	      114331	Global	Relocatable 	
+	CHNSON	      115117	Global	Relocatable 		CLRM0	      115247	Global	Relocatable 	
+	CNFLCT	      114134	Global	Relocatable 		CNTLCK	      114110	Global	Relocatable 	
+	DISE	      114245	Global	Relocatable 		DISET	      114250	Global	Relocatable 	
+	DISG	      114231	Global	Relocatable 		DISGE	      114212	Global	Relocatable 	
+	DISGET	      114220	Global	Relocatable 		DISGT	      114234	Global	Relocatable 	
+	DISL	      114223	Global	Relocatable 		DISLE	      114237	Global	Relocatable 	
+	DISLET	      114242	Global	Relocatable 		DISLT	      114226	Global	Relocatable 	
+	DISN	      114253	Global	Relocatable 		DISNT	      114256	Global	Relocatable 	
+	EDISMS	      113722	Global	Relocatable 		ENSKED	      113655	Global	Relocatable 	
+	ETIME	      115260	Global	Relocatable 		FFF	      112000	Global	Relocatable 	
+	FORCTM	      116137	Global	Relocatable 		FREJP	         605	Global	Absolute    Suppressed
+	FREJPA	      605000	Global	Absolute    		FRZB1	         200	Global	Absolute    Suppressed
+	FRZB2	         100	Global	Absolute    Suppressed	FRZBAL	         320	Global	Absolute    Suppressed
+	FRZBB	         300	Global	Absolute    Suppressed	GETCHA	      116155	Global	Relocatable 	
+	HALTF1	      113715	Global	Relocatable 		HALTT	      113721	Global	Relocatable 	
+	HIQFK	         100	Global	Absolute    Suppressed	HLTFK1	      115215	Global	Relocatable 	
+	HLTJB	      115120	Global	Relocatable 		HOLD	         400	Global	Absolute    Suppressed
+	ILIST	      112367	Global	Relocatable 		INFERP	      115576	Global	Relocatable 	
+	ITR4	      115311	Global	Relocatable 		ITRAP	      115266	Global	Relocatable 	
+	ITRAP1	      115265	Global	Relocatable 		JFNPC0	      601500	Global	Absolute    	
+	JOBSRT	      114633	Global	Relocatable 		JRET	      115264	Global	Relocatable 	
+	JSB	      601000	Global	Absolute    		JSKP	      115263	Global	Relocatable 	
+	JTDVC1	      116534	Global	Relocatable 		JTFRZB	          20	Global	Absolute    Suppressed
+	JTMCN	      116532	Global	Relocatable 		JTULCK	      117606	Global	Relocatable 	
+	LCKTST	      114110	Global	Relocatable 		MAXQ	           2	Global	Absolute    Suppressed
+	MJFN	          66	Global	Absolute    		MPEINT	      114756	Global	Relocatable 	
+	NEVENT	          20	Global	Absolute    Suppressed	NEWFKF	      100000	Global	Absolute    Suppressed
+	NLOADT	           6	Global	Absolute    Suppressed	NNAMES	         120	Global	Absolute    Suppressed
+	NOCNT	        1000	Global	Absolute    Suppressed	NOSK	      200000	Global	Absolute    Suppressed
+	NTASKT	          30	Global	Absolute    Suppressed	P7FOV	      114750	Global	Relocatable 	
+	P7OV	      114746	Global	Relocatable 		P7POV	      114752	Global	Relocatable 	
+	PARALP	      115575	Global	Relocatable 		PATCH1	      112000	Global	Relocatable 	
+	PATCH2	      112000	Global	Relocatable 		PHIQFK	          20	Global	Absolute    Suppressed
+	PI7P	      112664	Global	Relocatable 		PISC7	      112415	Global	Relocatable 	
+	PJMA	      600000	Global	Absolute    Suppressed	PJMPG	         600	Global	Absolute    Suppressed
+		LINK-10 symbol map of	MAP		page 5
+SCHED
+	PPMA	      740000	Global	Absolute    Suppressed	PPMPG	         740	Global	Absolute    Suppressed
+	PRWAKE	      113156	Global	Relocatable 		PSB	      777000	Global	Absolute    	
+	PSIJTR	          40	Global	Absolute    Suppressed	PSILOB	         400	Global	Absolute    Suppressed
+	PSIR4	      115414	Global	Relocatable 		PSIRQ	      115406	Global	Relocatable 	
+	PSIRQ0	      115375	Global	Relocatable 		PSIRQB	      115407	Global	Relocatable 	
+	PSIRQF	      115376	Global	Relocatable 		PSISV2	      116202	Global	Relocatable 	
+	PSIT1A	      115534	Global	Relocatable 		PSIWTF	        1000	Global	Absolute    Suppressed
+	R	      112663	Global	Relocatable 		RELHIQ	      114443	Global	Relocatable 	
+	RELSPQ	      114503	Global	Relocatable 		RJFN	        3300	Global	Absolute    	
+	RNLS	       20000	Global	Absolute    Suppressed	RSKEDN	      112445	Global	Relocatable 	
+	RSKP	      112662	Global	Relocatable 		SCDIN	      112300	Global	Relocatable 	
+	SCDRQ7	      113043	Global	Relocatable 		SCDVE	777777111777	Global	Relocatable Suppressed
+	SCHED0	      112533	Global	Relocatable 		SCHEDP	      113621	Global	Relocatable 	
+	SCHEDR	      113641	Global	Relocatable 		SETHIQ	      114423	Global	Relocatable 	
+	SETOVF	      113561	Global	Relocatable 		SETSPQ	      114464	Global	Relocatable 	
+	SPQFK	          40	Global	Absolute    Suppressed	STIME	      115254	Global	Relocatable 	
+	SUPERP	      115574	Global	Relocatable 		SUSFKR	        2000	Global	Absolute    Suppressed
+	SUSWT	      115646	Global	Relocatable 		TRAPSI	      116357	Global	Relocatable 	
+	TRPSI0	      116360	Global	Relocatable 		TRPSI5	      116466	Global	Relocatable 	
+	TTFRKP	      115471	Global	Relocatable 		TTPSR1	      115456	Global	Relocatable 	
+	TTPSRQ	      115446	Global	Relocatable 		WTFK	      400000	Global	Absolute    Suppressed
+	WTFPGS	      114345	Global	Relocatable 		WTLS	         200	Global	Absolute    Suppressed
+	WTSPT	      114350	Global	Relocatable 		WTSPTT	      114362	Global	Relocatable 	
+	.DEBRK	      116224	Global	Relocatable 		.DISMS	      114153	Global	Relocatable 	
+	.HALTF	      113714	Global	Relocatable 	
+
+		*************
+
+PAGEM	from DSK:PAGEM.REL	created by MACRO on 30-May-81 at 15:48:00
+	Low  segment starts at	120160 ends at	126020 length	  5641 (octal),  2977. (decimal)
+
+	FKPAGE	       60462	Global	Absolute    		GCBALB	       60662	Global	Absolute    	
+	GCPN	       60663	Global	Absolute    		GCMOD	       60664	Global	Absolute    	
+	AGEGLB	       60665	Global	Absolute    		GCSTRT	       60666	Global	Absolute    	
+	GCDIFF	       60667	Global	Absolute    		NHIPG	       60670	Global	Absolute    	
+	SPTC	       60671	Global	Absolute    		NOF	       60672	Global	Absolute    	
+	FRESPT	       60673	Global	Absolute    		MAXSPL	       60674	Global	Absolute    	
+	MMSPTN	       60675	Global	Absolute    		LOKPGS	       60676	Global	Absolute    	
+	LOKSUM	       60677	Global	Absolute    		NXTDMP	       60700	Global	Absolute    	
+	DDTIME	       60701	Global	Absolute    		DDMPCT	       60702	Global	Absolute    	
+	IOIP	       60703	Global	Absolute    		DRMIN0	       60704	Global	Absolute    	
+	DRMIN1	       60705	Global	Absolute    		DRMIN2	       60706	Global	Absolute    	
+	JDSPTP	       60707	Global	Absolute    		PGELCT	       60710	Global	Absolute    	
+	ASOFN	      120677	Global	Relocatable 		ASSPT	      121230	Global	Relocatable 	
+	COPYB	         400	Global	Absolute    Suppressed	CORWB	         400	Global	Absolute    Suppressed
+	CST0	        4000	Global	Absolute    		CST1	       30000	Global	Absolute    	
+	CST2	       32000	Global	Absolute    		CST3	       34000	Global	Absolute    	
+	DDMP	      120367	Global	Relocatable 		DELOFN	      121263	Global	Relocatable 	
+	DESPT	      121245	Global	Relocatable 		DISKP	      120160	Global	Relocatable 	
+	DRUMP	      120161	Global	Relocatable 		DSKRT	      124326	Global	Relocatable 	
+	DWRBIT	      400000	Global	Absolute    Suppressed	FKDGCC	      125364	Global	Relocatable 	
+	FPTA	      122515	Global	Relocatable 		GCALC	      125167	Global	Relocatable 	
+	GCBLBS	      125526	Global	Relocatable 		GETCPA	      122645	Global	Relocatable 	
+	MAKPGA	      125062	Global	Relocatable 		MAKPGU	      125154	Global	Relocatable 	
+		LINK-10 symbol map of	MAP		page 6
+PAGEM
+	MKSHRP	      122555	Global	Relocatable 		MLKMA	      125247	Global	Relocatable 	
+	MLKPG	      125253	Global	Relocatable 		MONCOR	      120336	Global	Relocatable 	
+	MRMAP	      121311	Global	Relocatable 		MRPACS	      121373	Global	Relocatable 	
+	MRPT	      121312	Global	Relocatable 		MSPACS	      121513	Global	Relocatable 	
+	MULKCR	      125354	Global	Relocatable 		MULKMP	      125344	Global	Relocatable 	
+	MULKPG	      125314	Global	Relocatable 		NGCC	      125414	Global	Relocatable 	
+	NOFN	        1000	Global	Absolute    Suppressed	PGRINI	      120164	Global	Relocatable 	
+	PGRRST	      120331	Global	Relocatable 		PGRTRP	      122777	Global	Relocatable 	
+	PLCKT	      122402	Global	Relocatable 		READB	      100000	Global	Absolute    Suppressed
+	RELOFN	      121117	Global	Relocatable 		RWX	      160000	Global	Absolute    Suppressed
+	SETDVP	      122621	Global	Relocatable 		SETMPG	      121534	Global	Relocatable 	
+	SETPPG	      122733	Global	Relocatable 		SETPT	      121552	Global	Relocatable 	
+	SPC1	      120163	Global	Relocatable 		SPT	       20000	Global	Absolute    	
+	SPTH	       36000	Global	Absolute    		SWPCOR	      120337	Global	Relocatable 	
+	SWPDON	      124353	Global	Relocatable 		SWPERR	      200000	Global	Absolute    Suppressed
+	SWPIN0	      123770	Global	Relocatable 		SWPINT	      124312	Global	Relocatable 	
+	SWPRST	      120340	Global	Relocatable 		SWPRT	      124327	Global	Relocatable 	
+	SWPZPG	      124277	Global	Relocatable 		XRMRCA	      122673	Global	Relocatable 	
+	.MRPAC	      121445	Global	Relocatable 		.RWSET	      123617	Global	Relocatable 	
+
+		*************
+
+PISRV	from DSK:PISRV.REL	created by MACRO on 30-May-81 at 15:49:00
+	Low  segment starts at	126021 ends at	127324 length	  1304 (octal),   708. (decimal)
+
+	BUGHLT	       60711	Global	Absolute    		SYMPRS	       60713	Global	Absolute    	
+	DDTPRS	       60714	Global	Absolute    		BUGCHK	       60715	Global	Absolute    	
+	BUGNTE	       60717	Global	Absolute    		PIAPRX	       60721	Global	Absolute    	
+	PI1AC1	       60722	Global	Absolute    		PISC5R	       60723	Global	Absolute    	
+	PI5AC	       60724	Global	Absolute    		PI1R	       60731	Global	Absolute    	
+	PIRTI1	       60732	Global	Absolute    		PIRTI2	       60733	Global	Absolute    	
+	ADRBKA	       60734	Global	Absolute    		ADRBKF	       60735	Global	Absolute    	
+	ADRBKW	       60736	Global	Absolute    		MEMPA	       60737	Global	Absolute    	
+	MEMMAP	       60747	Global	Absolute    		MEMCST	       60750	Global	Absolute    	
+	DEVMPE	       60751	Global	Absolute    		PARTIM	       60752	Global	Absolute    	
+	PI4AC	       60753	Global	Absolute    		PI4R	       60760	Global	Absolute    	
+	PI6R	       60761	Global	Absolute    		PI6AC	       60762	Global	Absolute    	
+	ACFAIL	      126407	Global	Relocatable 		BUGADR	      126116	Global	Relocatable 	
+	CHKADR	      126146	Global	Relocatable 		CRSTAD	          73	Global	Absolute    	
+	DBUGSW	          76	Global	Absolute    		DCHKSW	          77	Global	Absolute    	
+	DLSCHR	      126600	Global	Relocatable 		DSKCHR	      126613	Global	Relocatable 	
+	GETSMF	          75	Global	Absolute    		ILUUO	      126661	Global	Relocatable 	
+	JSERT	      127061	Global	Relocatable 		LPTCHR	      126623	Global	Relocatable 	
+	MEMPAR	      126414	Global	Relocatable 		MENTR	      126717	Global	Relocatable 	
+	MONUUO	      126672	Global	Relocatable 		MRETN	      127012	Global	Relocatable 	
+	MRETNE	      127006	Global	Relocatable 		MRTNE1	      127010	Global	Relocatable 	
+	MSTKOV	      126353	Global	Relocatable 		MTACHR	      126613	Global	Relocatable 	
+	NPISET	          11	Global	Absolute    Suppressed	OV0	      126351	Global	Relocatable 	
+	OV1	      126345	Global	Relocatable 		PISETT	      126164	Global	Relocatable 	
+	RESTP	      127221	Global	Relocatable 		RESTQ	      127204	Global	Relocatable 	
+	RESTT	      127171	Global	Relocatable 		START	      126021	Global	Relocatable 	
+	SYSGO	      126021	Global	Relocatable 		SYSGO1	      126021	Global	Relocatable 	
+	SYSLOD	      126022	Global	Relocatable 		SYSRST	      126057	Global	Relocatable 	
+	UJSYS	      126715	Global	Relocatable 		UUOH1	      126721	Global	Relocatable 	
+		LINK-10 symbol map of	MAP		page 7
+PISRV
+	UUOHK	      126675	Global	Relocatable 		.ASRET	      127135	Global	Relocatable 	
+	.ASSET	      127127	Global	Relocatable 		.SAV1	      127156	Global	Relocatable 	
+	.SAVP	      127212	Global	Relocatable 		.SAVQ	      127200	Global	Relocatable 	
+	.SAVT	      127164	Global	Relocatable 		.STKRT	      127146	Global	Relocatable 	
+	.STKST	      127142	Global	Relocatable 		.TRRET	      127122	Global	Relocatable 	
+	.TRSET	      127115	Global	Relocatable 	
+
+		*************
+
+JOBINI	from DSK:JOBINI.REL	created by MACRO on  9-Jun-81 at 15:44:00
+	Low  segment starts at	127325 ends at	127531 length	   205 (octal),   133. (decimal)
+	High segment starts at	400024 ends at	401176 length	  1153 (octal),   619. (decimal)
+
+	EXBUGH	      401134	Global	Relocatable 		EXEC0	      127325	Global	Relocatable 	
+	NODD1	      400460	Global	Relocatable 		TMSGQ	      401163	Global	Relocatable 	
+	.EXEC	      401127	Global	Relocatable 	
+
+		*************
+
+JOBZRO	from DSK:JOBZRO.REL	created by MACRO on 30-May-81 at 15:49:00
+	Low  segment starts at	127532 ends at	130631 length	  1100 (octal),   576. (decimal)
+
+	CHKFRK	       60767	Global	Absolute    		NBUGTP	       60770	Global	Absolute    	
+	HSYSIN	       60771	Global	Absolute    		PRIMET	      350406	Global	Absolute    	
+	JOBORT	      350407	Global	Absolute    		PIETIM	      350447	Global	Absolute    	
+	CHKBG1	      130130	Global	Relocatable 		CHKH1	      130072	Global	Relocatable 	
+	CHKR	      130030	Global	Relocatable 		CHKR1	      130100	Global	Relocatable 	
+	CHKRI	      130326	Global	Relocatable 		CVTAD	      130246	Global	Relocatable 	
+	HSYS4	      127702	Global	Relocatable 		RUNDD	      127532	Global	Relocatable 	
+	UPDPIE	      130367	Global	Relocatable 	
+
+		*************
+
+SYSINI	from DSK:SYSINI.REL	created by MACRO on 30-May-81 at 15:49:00
+	Low  segment starts at	130632 ends at	131061 length	   230 (octal),   152. (decimal)
+	High segment starts at	401177 ends at	402024 length	   626 (octal),   406. (decimal)
+
+	DEMO	       60772	Global	Absolute    		DDTFSH	      401523	Global	Relocatable 	
+	DONSJ	      401252	Global	Relocatable 		EXECSI	      401177	Global	Relocatable 	
+	GETDDT	      401635	Global	Relocatable 		GETMST	      401677	Global	Relocatable 	
+	GETSWM	      130636	Global	Relocatable 		JB0TT	      130634	Global	Relocatable 	
+	LGNSYS	      401272	Global	Relocatable 		LOGDES	      130633	Global	Relocatable 	
+	MKPGSA	      401571	Global	Relocatable 		MKPGSU	      401573	Global	Relocatable 	
+	MONDSC	      130632	Global	Relocatable 		NLGDES	           3	Global	Absolute    Suppressed
+	NMNDSC	           1	Global	Absolute    Suppressed	NSPECJ	           1	Global	Absolute    Suppressed
+	OPTT	      130635	Global	Relocatable 		RCADDT	      401566	Global	Relocatable 	
+	SAVE32	      401570	Global	Relocatable 		SAVE36	      401567	Global	Relocatable 	
+	SBSNMS	      401247	Global	Relocatable 		SPCSTJ	      401461	Global	Relocatable 	
+	SPECJB	      401316	Global	Relocatable 		SPECJT	      401251	Global	Relocatable 	
+	SWCEND	      130707	Global	Relocatable 		TNAMS1	      401475	Global	Relocatable 	
+	WMST	      401731	Global	Relocatable 	
+
+		*************
+
+		LINK-10 symbol map of	MAP		page 8
+
+
+MONJS	from DSK:MONJS.REL	created by MACRO on 30-May-81 at 15:50:00
+	High segment starts at	402025 ends at	404200 length	  2154 (octal),  1132. (decimal)
+
+	SNMPT	       60773	Global	Absolute    		SNMLCK	       60774	Global	Absolute    	
+	ASGDSH	      402162	Global	Relocatable 		CAPX	      403013	Global	Relocatable 	
+	CTIMS	      402116	Global	Relocatable 		GETPAT	      402120	Global	Relocatable 	
+	GTBHST	      402526	Global	Relocatable 		GTBNHN	      402525	Global	Relocatable 	
+	WHEELX	      403041	Global	Relocatable 		.CPUTL	      402365	Global	Relocatable 	
+	.GET	      403042	Global	Relocatable 		.GETAB	      402336	Global	Relocatable 	
+	.GETNM	      402766	Global	Relocatable 		.GJINF	      402220	Global	Relocatable 	
+	.GTBLT	      402373	Global	Relocatable 		.GTDAL	      402265	Global	Relocatable 	
+	.GTRPI	      402257	Global	Relocatable 		.HSYS	      402025	Global	Relocatable 	
+	.JOBTM	      402230	Global	Relocatable 		.LITES	      402773	Global	Relocatable 	
+	.OPRFN	      403642	Global	Relocatable 		.PEEK	      403010	Global	Relocatable 	
+	.RUNTM	      402234	Global	Relocatable 		.SAVE	      403346	Global	Relocatable 	
+	.SETNM	      402701	Global	Relocatable 		.SSAVE	      403521	Global	Relocatable 	
+	.SWTCH	      402771	Global	Relocatable 		.SYSGT	      402313	Global	Relocatable 	
+	.TIME	      402225	Global	Relocatable 		.USRIO	      403001	Global	Relocatable 	
+
+		*************
+
+LOG2JS	from DSK:LOG2JS.REL	created by MACRO on  9-Jun-81 at 15:44:00
+	Low  segment starts at	131062 ends at	131174 length	   113 (octal),    75. (decimal)
+	High segment starts at	404201 ends at	405723 length	  1523 (octal),   851. (decimal)
+
+	FLOGO	      404364	Global	Relocatable 		LGCJM0	      404532	Global	Relocatable 	
+	LOCKPG	      405714	Global	Relocatable 		LOGCJM	      404511	Global	Relocatable 	
+	LOGFCT	      404442	Global	Relocatable 		LOGO	      404205	Global	Relocatable 	
+	LOGONM	      404460	Global	Relocatable 		LOGTOT	      404372	Global	Relocatable 	
+	UNLKPG	      405720	Global	Relocatable 		XEFACT	      404455	Global	Relocatable 	
+	.ATACH	      405136	Global	Relocatable 		.CRJOB	      405470	Global	Relocatable 	
+	.DTACH	      405101	Global	Relocatable 		.LGOUT	      404201	Global	Relocatable 	
+
+		*************
+
+FORKS	from DSK:FORKS.REL	created by MACRO on 30-May-81 at 15:50:00
+	Low  segment starts at	131175 ends at	131525 length	   331 (octal),   217. (decimal)
+	High segment starts at	405724 ends at	412103 length	  4160 (octal),  2160. (decimal)
+
+	FKDIR	      350450	Global	Absolute    		FKGRPS	      350650	Global	Absolute    	
+	CLFRET	      410123	Global	Relocatable 		CLRLFK	      407766	Global	Relocatable 	
+	DTIALL	      410431	Global	Relocatable 		FFORK1	      406664	Global	Relocatable 	
+	FKHPTN	      410502	Global	Relocatable 		FRZWT	      131226	Global	Relocatable 	
+	GFKH	      410547	Global	Relocatable 		JTRPON	      131246	Global	Relocatable 	
+	KSELF	      406500	Global	Relocatable 		MAPFKH	      407627	Global	Relocatable 	
+	MAPINF	      407615	Global	Relocatable 		PTNFKH	      410522	Global	Relocatable 	
+	RFORK1	      406743	Global	Relocatable 		RLJBFK	      410000	Global	Relocatable 	
+	SETJFK	      407775	Global	Relocatable 		SETLF1	      407752	Global	Relocatable 	
+	SETLFK	      407747	Global	Relocatable 		SKIIF	      407704	Global	Relocatable 	
+	SKIIFA	      407712	Global	Relocatable 		TRMTST	      131227	Global	Relocatable 	
+	TTFRKT	      407511	Global	Relocatable 		.AIC	      410157	Global	Relocatable 	
+	.ATI	      410272	Global	Relocatable 		.BPT	      407011	Global	Relocatable 	
+	.CFGRP	      411045	Global	Relocatable 		.CFORK	      405724	Global	Relocatable 	
+		LINK-10 symbol map of	MAP		page 9
+FORKS
+	.CIS	      410435	Global	Relocatable 		.DIC	      410165	Global	Relocatable 	
+	.DIR	      410153	Global	Relocatable 		.DTI	      410327	Global	Relocatable 	
+	.EIR	      410125	Global	Relocatable 		.EPCAP	      410653	Global	Relocatable 	
+	.FFORK	      406631	Global	Relocatable 		.GCVEC	      406313	Global	Relocatable 	
+	.GEVEC	      406306	Global	Relocatable 		.GFRKH	      407221	Global	Relocatable 	
+	.GFRKS	      407017	Global	Relocatable 		.GPJFN	      406370	Global	Relocatable 	
+	.GTRPW	      406330	Global	Relocatable 		.HFORK	      407465	Global	Relocatable 	
+	.IIC	      410172	Global	Relocatable 		.IIT	      410215	Global	Relocatable 	
+	.KFORK	      406407	Global	Relocatable 		.MSFRK	      407401	Global	Relocatable 	
+	.RCM	      410240	Global	Relocatable 		.RFACS	      407427	Global	Relocatable 	
+	.RFORK	      406717	Global	Relocatable 		.RFRKH	      407262	Global	Relocatable 	
+	.RFSTS	      407117	Global	Relocatable 		.RIR	      410266	Global	Relocatable 	
+	.RIRCM	      410261	Global	Relocatable 		.RPCAP	      410643	Global	Relocatable 	
+	.RTFRK	      412002	Global	Relocatable 		.RTIW	      410443	Global	Relocatable 	
+	.RWM	      410244	Global	Relocatable 		.SCTTY	      410670	Global	Relocatable 	
+	.SCVEC	      406322	Global	Relocatable 		.SEVEC	      406274	Global	Relocatable 	
+	.SFACS	      407437	Global	Relocatable 		.SFORK	      407344	Global	Relocatable 	
+	.SFRKV	      407276	Global	Relocatable 		.SIR	      410112	Global	Relocatable 	
+	.SIRCM	      410253	Global	Relocatable 		.SJPRI	      406347	Global	Relocatable 	
+	.SKPIR	      410146	Global	Relocatable 		.SPJFN	      406375	Global	Relocatable 	
+	.SPLFK	      406115	Global	Relocatable 		.SPRIW	      406337	Global	Relocatable 	
+	.STIW	      410457	Global	Relocatable 		.TFORK	      411154	Global	Relocatable 	
+	.UTFRK	      412022	Global	Relocatable 		.WAIT	      407013	Global	Relocatable 	
+	.WFORK	      407530	Global	Relocatable 	
+
+		*************
+
+SIGNAL	from DSK:SIGNAL.REL	created by MACRO on 30-May-81 at 15:51:00
+	Low  segment starts at	131526 ends at	131644 length	   117 (octal),    79. (decimal)
+	High segment starts at	412104 ends at	412521 length	   416 (octal),   270. (decimal)
+
+	SIGLCK	       60775	Global	Absolute    		SIGNAL	       60776	Global	Absolute    	
+	SIGJOB	       61016	Global	Absolute    		SIGQUE	       61036	Global	Absolute    	
+	SIGJB1	       61056	Global	Absolute    		SIGJB2	       61076	Global	Absolute    	
+	FKDATA	       61116	Global	Absolute    		FKLIST	       61316	Global	Absolute    	
+	RMJBRF	      412434	Global	Relocatable 		SIGINI	      131533	Global	Relocatable 	
+	SIGKIL	      412421	Global	Relocatable 		WTFORT	      131526	Global	Relocatable 	
+	.GTSIG	      412104	Global	Relocatable 		.RLSIG	      412163	Global	Relocatable 	
+	.SIGNL	      412317	Global	Relocatable 		.WTFOR	      412223	Global	Relocatable 	
+
+		*************
+
+TTYSRV	from DSK:TTYSRV.REL	created by MACRO on  9-Jun-81 at 15:34:00
+	Low  segment starts at	131645 ends at	135646 length	  4002 (octal),  2050. (decimal)
+	High segment starts at	412522 ends at	413435 length	   714 (octal),   460. (decimal)
+
+	TTOIN	       61516	Global	Absolute    		TTOOUT	       61576	Global	Absolute    	
+	TTOCT	       61656	Global	Absolute    		TTEIN	       61736	Global	Absolute    	
+	TTEOUT	       62016	Global	Absolute    		TTECT	       62076	Global	Absolute    	
+	TTIIN	       62156	Global	Absolute    		TTIOUT	       62236	Global	Absolute    	
+	TTICT	       62316	Global	Absolute    		TTMCT	       62376	Global	Absolute    	
+	TTBUFS	       62456	Global	Absolute    		TTFREC	       67456	Global	Absolute    	
+	TTFREB	       67457	Global	Absolute    		TTFLGS	       67460	Global	Absolute    	
+	TTLINK	       67540	Global	Absolute    		TTADVS	       67620	Global	Absolute    	
+		LINK-10 symbol map of	MAP		page 10
+TTYSRV
+	FCMOD1	       67700	Global	Absolute    		FCMOD2	       67760	Global	Absolute    	
+	TTLPOS	       70040	Global	Absolute    		TTPSI	       70120	Global	Absolute    	
+	TTDPSI	       70200	Global	Absolute    		TTFORK	       70260	Global	Absolute    	
+	TTCS	       70340	Global	Absolute    		TTBFRC	       70420	Global	Absolute    	
+	TTMOD1	       70500	Global	Absolute    		TTYPE	       70560	Global	Absolute    	
+	TTFRK1	       70640	Global	Absolute    		TABLST	       70670	Global	Absolute    	
+	TABBFR	       70671	Global	Absolute    		TTBIGI	       70765	Global	Absolute    	
+	TTBIGO	       70766	Global	Absolute    		TTBIGC	       70767	Global	Absolute    	
+	TTBBUF	       70770	Global	Absolute    		TTNIT1	       71170	Global	Absolute    	
+	XDLSSV	       71171	Global	Absolute    		TTCQLN	       71172	Global	Absolute    	
+	DLSLPI	       71173	Global	Absolute    		TTHNGL	       71174	Global	Absolute    	
+	TTHNGT	       71175	Global	Absolute    		TTHNGN	       71176	Global	Absolute    	
+	LINKF	       71177	Global	Absolute    		IMECHF	       71200	Global	Absolute    	
+	DLSVAP	       71201	Global	Absolute    		DLSPDL	       71202	Global	Absolute    	
+	TTIDLE	       71212	Global	Absolute    		TTCHIC	       71272	Global	Absolute    	
+	TTINPW	       71273	Global	Absolute    		CRSMSG	       71353	Global	Absolute    	
+	CRSAC	       71355	Global	Absolute    		CRSPDL	       71375	Global	Absolute    	
+	BHC	      133010	Global	Relocatable 		BITS	      133030	Global	Relocatable 	
+	BUGMSG	      132162	Global	Relocatable 		BUGTYO	      132153	Global	Relocatable 	
+	CH6TAB	      133002	Global	Relocatable 		DBGMSG	      132101	Global	Relocatable 	
+	DLSCHK	      134135	Global	Relocatable 		DLSRCF	         400	Global	Absolute    Suppressed
+	DLSSV	      134722	Global	Relocatable 		DSKVMS	      132056	Global	Relocatable 	
+	FILMSG	      132137	Global	Relocatable 		IBPNBF	          10	Global	Absolute    Suppressed
+	MINUS1	      133074	Global	Relocatable 		NAVMSG	      132067	Global	Relocatable 	
+	NINBUF	           2	Global	Absolute    Suppressed	NORMTF	      131703	Global	Relocatable 	
+	NOUBUF	           4	Global	Absolute    Suppressed	NVTCOF	      134242	Global	Relocatable 	
+	NYCHBF	          55	Global	Absolute    Suppressed	ONE	      133073	Global	Relocatable 	
+	OTYLIN	      131645	Global	Relocatable 		POP1	      133440	Global	Relocatable 	
+	PSICH	      132705	Global	Relocatable 		PSICHL	          41	Global	Absolute    Suppressed
+	PSICHO	         132	Global	Absolute    Suppressed	PSICHU	         173	Global	Absolute    Suppressed
+	RSTMSG	      132130	Global	Relocatable 		TAB81	      131704	Global	Relocatable 	
+	TAB82	      131705	Global	Relocatable 		TCI	      133645	Global	Relocatable 	
+	TCI0	      134027	Global	Relocatable 		TCIB	      133741	Global	Relocatable 	
+	TCIBF	      132534	Global	Relocatable 		TCITST	      134115	Global	Relocatable 	
+	TCO	      133075	Global	Relocatable 		TCOB	      133512	Global	Relocatable 	
+	TCOBQ	      133516	Global	Relocatable 		TCOTST	      133630	Global	Relocatable 	
+	TT733T	          11	Global	Absolute    Suppressed	TTBKPT	      412721	Global	Relocatable 	
+	TTBSIZ	         200	Global	Absolute    Suppressed	TTCH7	      134222	Global	Relocatable 	
+	TTCHI	      134247	Global	Relocatable 		TTCIBF	      132526	Global	Relocatable 	
+	TTCOBF	      132500	Global	Relocatable 		TTCOBI	      132504	Global	Relocatable 	
+	TTDELO	      135244	Global	Relocatable 		TTDIBE	      412614	Global	Relocatable 	
+	TTDOBE	      412576	Global	Relocatable 		TTEMES	      134715	Global	Relocatable 	
+	TTGTBF	      132356	Global	Relocatable 		TTGTBS	      412622	Global	Relocatable 	
+	TTICB1	      131707	Global	Relocatable 		TTICB2	      131710	Global	Relocatable 	
+	TTIFCI	      133757	Global	Relocatable 		TTILIN	      132331	Global	Relocatable 	
+	TTIMAX	      131712	Global	Relocatable 		TTINIT	      132221	Global	Relocatable 	
+	TTNIN	      131714	Global	Relocatable 		TTNOU	      131713	Global	Relocatable 	
+	TTOMAX	      131711	Global	Relocatable 		TTPS2T	      134657	Global	Relocatable 	
+	TTPSI2	      134633	Global	Relocatable 		TTRCOC	      412710	Global	Relocatable 	
+	TTREC4	      134365	Global	Relocatable 		TTRLAB	      132457	Global	Relocatable 	
+	TTRLOB	      132444	Global	Relocatable 		TTRMOD	      412667	Global	Relocatable 	
+	TTRNE	      134410	Global	Relocatable 		TTRPOS	      412706	Global	Relocatable 	
+	TTRSET	      132345	Global	Relocatable 		TTSCOC	      412713	Global	Relocatable 	
+	TTSIBE	      412557	Global	Relocatable 		TTSMOD	      412671	Global	Relocatable 	
+		LINK-10 symbol map of	MAP		page 11
+TTYSRV
+	TTSND	      135170	Global	Relocatable 		TTSOBE	      412566	Global	Relocatable 	
+	TTSOBF	      412571	Global	Relocatable 		TTSPOS	      412726	Global	Relocatable 	
+	TTSTBS	      412627	Global	Relocatable 		TTSTI	      132566	Global	Relocatable 	
+	TTSTI1	      132600	Global	Relocatable 		TTYFFC	      131702	Global	Relocatable 	
+	TTYGPI	      134465	Global	Relocatable 		TTYLMD	      131701	Global	Relocatable 	
+	TTYRSP	      133767	Global	Relocatable 		TTYSSP	      134002	Global	Relocatable 	
+	TWO	      133072	Global	Relocatable 		TYMCHX	      134353	Global	Relocatable 	
+	TYPCRT	          14	Global	Absolute    Suppressed	WAKCHK	      134442	Global	Relocatable 	
+	WRPMSK	      135152	Global	Relocatable 		XTTFLG	      131716	Global	Relocatable 	
+	ZERO	      133010	Global	Relocatable 		.ADVIZ	      413304	Global	Relocatable 	
+	.GTTYP	      412754	Global	Relocatable 		.STO	      132606	Global	Relocatable 	
+	.STPAR	      412771	Global	Relocatable 		.STTYP	      412730	Global	Relocatable 	
+	.TLINK	      413025	Global	Relocatable 		.TTMSG	      412522	Global	Relocatable 	
+
+		*************
+
+TYMSRV	from DSK:TYMSRV.REL	created by MACRO on 30-May-81 at 15:52:00
+	Low  segment starts at	135647 ends at	140753 length	  3105 (octal),  1605. (decimal)
+	High segment starts at	413436 ends at	415634 length	  2177 (octal),  1151. (decimal)
+
+	DYMLNS	       71405	Global	Absolute    		DLTCHK	       71405	Global	Absolute    	
+	DYNODS	       71405	Global	Absolute    		TYMTEN	       71405	Global	Absolute    	
+	DYMCMM	       71405	Global	Absolute    		DYMCMR	       71405	Global	Absolute    	
+	DYMCMI	       71405	Global	Absolute    		DUXINF	       71405	Global	Absolute    	
+	DUXCLK	       71406	Global	Absolute    		TYMSVC	       71407	Global	Absolute    	
+	KEYTIM	       71410	Global	Absolute    		KEYCT	       71411	Global	Absolute    	
+	LTYMOT	       71412	Global	Absolute    		TYMCSH	       71413	Global	Absolute    	
+	TYSAVP	       71414	Global	Absolute    		TYSAV1	       71415	Global	Absolute    	
+	TYMSTS	       71421	Global	Absolute    		YALRMC	       71422	Global	Absolute    	
+	TYMCS2	       71423	Global	Absolute    		TYMENT	       71424	Global	Absolute    	
+	IBPFLG	       71425	Global	Absolute    		TYM1ST	       71426	Global	Absolute    	
+	J0RTIM	       71427	Global	Absolute    		YSTLYL	       71430	Global	Absolute    	
+	YSTBZP	       71431	Global	Absolute    		YSTRST	       71432	Global	Absolute    	
+	YSTIMS	       71433	Global	Absolute    		YSTOMS	       71434	Global	Absolute    	
+	YSTOFL	       71435	Global	Absolute    		YSTBPO	       71436	Global	Absolute    	
+	YSTBCR	       71437	Global	Absolute    		AUXCTM	       71440	Global	Absolute    	
+	DUXCTL	       71441	Global	Absolute    		DUXDJQ	       71441	Global	Absolute    	
+	DUXSJQ	       71441	Global	Absolute    		DUXTMQ	       71441	Global	Absolute    	
+	DYSNDX	       71441	Global	Absolute    		AUXCLK	777777071405	Global	Absolute    	
+	AUXCTL	777777071361	Global	Absolute    		AUXDJQ	777777071361	Global	Absolute    	
+	AUXINF	777777071404	Global	Absolute    		AUXSJQ	777777071361	Global	Absolute    	
+	AUXTMQ	777777071361	Global	Absolute    		GREENT	      137556	Global	Relocatable 	
+	LGOAUX	      415065	Global	Relocatable 		NTHOST	      135663	Global	Relocatable 	
+	RCVCMP	      414455	Global	Relocatable 		SYSNDX	777777071440	Global	Absolute    	
+	TENTYM	777777071325	Global	Absolute    		TYHNGU	      137470	Global	Relocatable 	
+	TYMCHI	      137337	Global	Relocatable 		TYMCHK	      136153	Global	Relocatable 	
+	TYMCIB	      413451	Global	Relocatable 		TYMCLK	      136112	Global	Relocatable 	
+	TYMCMI	777777071325	Global	Absolute    		TYMCMM	777777071325	Global	Absolute    	
+	TYMCMR	777777071325	Global	Absolute    		TYMCOB	      413436	Global	Relocatable 	
+	TYMDOB	      413442	Global	Relocatable 		TYMECO	      413517	Global	Relocatable 	
+	TYMFLG	      136070	Global	Relocatable 		TYMINI	      136100	Global	Relocatable 	
+	TYMJB0	      415431	Global	Relocatable 		TYMLFP	      137356	Global	Relocatable 	
+	TYMLNS	777777071325	Global	Absolute    		TYMNFK	      137345	Global	Relocatable 	
+	TYMPTR	      135664	Global	Relocatable 		TYMQUE	      415227	Global	Relocatable 	
+		LINK-10 symbol map of	MAP		page 12
+TYMSRV
+	TYMRLA	      415034	Global	Relocatable 		TYMROK	      137531	Global	Relocatable 	
+	TYMTCI	      136766	Global	Relocatable 		TYMTYP	      413465	Global	Relocatable 	
+	TYMX0	      414646	Global	Relocatable 		TYNODS	777777071325	Global	Absolute    	
+	YHCRSH	        2014	Global	Absolute    		YLTCHK	777777071325	Global	Absolute    	
+	.TYMBR	      415616	Global	Relocatable 		.TYMBW	      415611	Global	Relocatable 	
+	.TYMLI	      415623	Global	Relocatable 		.TYMOP	      413577	Global	Relocatable 	
+
+		*************
+
+CHAOS	from DSK:CHAOS.REL	created by MACRO on  9-Jun-81 at 15:55:00
+	Low  segment starts at	140754 ends at	143575 length	  2622 (octal),  1426. (decimal)
+	High segment starts at	415635 ends at	420367 length	  2533 (octal),  1371. (decimal)
+
+	ASGPK1	      142041	Global	Relocatable 		ATNX13	      600724	Global	Absolute    	
+	ATNX2	      600711	Global	Absolute    		ATNX3	      600712	Global	Absolute    	
+	ATNX6	      600715	Global	Absolute    		CATNVT	      416317	Global	Relocatable 	
+	CHADTB	      415706	Global	Relocatable 		CHAINI	      415635	Global	Relocatable 	
+	CHAINP	      416451	Global	Relocatable 		CHAOUP	      416470	Global	Relocatable 	
+	CHAQGF	      142616	Global	Relocatable 		CHAVSO	      416362	Global	Relocatable 	
+	CHPKIA	      141137	Global	Relocatable 		CHTTC7	      141051	Global	Relocatable 	
+	CHXMTT	      142476	Global	Relocatable 		CO%WCL	200000000000	Global	Absolute    Suppressed
+	CR%CAP	200000000000	Global	Absolute    Suppressed	CVTCLZ	      416354	Global	Relocatable 	
+	DESX9	      601340	Global	Absolute    		FB%BSZ	  7700000000	Global	Absolute    Suppressed
+	FB%PGC	      777777	Global	Absolute    Suppressed	GJ%OLD	100000000000	Global	Absolute    Suppressed
+	GJ%SHT	     1000000	Global	Absolute    Suppressed	MTOX1	      601210	Global	Absolute    	
+	OF%BSZ	770000000000	Global	Absolute    Suppressed	OF%RD	      200000	Global	Absolute    Suppressed
+	RELCON	      141013	Global	Relocatable 		RELPKM	      142134	Global	Relocatable 	
+	RELPKT	      142127	Global	Relocatable 		SC%NAS	        2000	Global	Absolute    Suppressed
+	SC%NWZ	        4000	Global	Absolute    Suppressed	SC%OPR	      200000	Global	Absolute    Suppressed
+	SC%WHL	      400000	Global	Absolute    Suppressed	SNDPK1	      142371	Global	Relocatable 	
+	TL%EXM	 40000000000	Global	Absolute    Suppressed	.FBBYV	          11	Global	Absolute    Suppressed
+	.MOEOF	           3	Global	Absolute    Suppressed	.MONOP	          31	Global	Absolute    Suppressed
+	.MOSND	          21	Global	Absolute    Suppressed	.TTDES	      400000	Global	Absolute    Suppressed
+
+		*************
+
+CHATTY	from DSK:CHATTY.REL	created by MACRO on 30-May-81 at 15:56:00
+	Low  segment starts at	143576 ends at	144000 length	   203 (octal),   131. (decimal)
+
+	CHANEG	      143617	Global	Relocatable 		CHATCS	      143625	Global	Relocatable 	
+	CHKCVT	      143577	Global	Relocatable 		CVTCAP	      143607	Global	Relocatable 	
+	CVTDET	      143604	Global	Relocatable 		CVTUPI	      143725	Global	Relocatable 	
+	PTCONN	      143576	Global	Relocatable 	
+
+		*************
+
+DSK	from DSK:DSK.REL	created by MACRO on 30-May-81 at 15:56:00
+	Low  segment starts at	144001 ends at	145763 length	  1763 (octal),  1011. (decimal)
+	High segment starts at	420370 ends at	420417 length	    30 (octal),    24. (decimal)
+
+	DSKFRC	       71456	Global	Absolute    		ASNDRV	       71457	Global	Absolute    	
+	DSKSRQ	       71460	Global	Absolute    		DSKSWQ	       71462	Global	Absolute    	
+	DSKUWC	       71464	Global	Absolute    		DSKUQC	       71465	Global	Absolute    	
+	DSKUQ1	       71466	Global	Absolute    		DSKUQ2	       71472	Global	Absolute    	
+		LINK-10 symbol map of	MAP		page 13
+DSK
+	DSKUQ3	       71476	Global	Absolute    		DSKACP	       71502	Global	Absolute    	
+	DSKSTK	       71503	Global	Absolute    		DSKSVR	       71523	Global	Absolute    	
+	DSKBLK	       71524	Global	Absolute    		DBTJFN	       71525	Global	Absolute    	
+	DIDSCA	       71526	Global	Absolute    		FDDSCA	       71527	Global	Absolute    	
+	FILIFG	       71530	Global	Absolute    		DSKLUN	       71531	Global	Absolute    	
+	DSKCAW	       71532	Global	Absolute    		DSKDAW	       71534	Global	Absolute    	
+	DSKSTS	       71536	Global	Absolute    		DSKCTM	       71540	Global	Absolute    	
+	DSKTRY	       71542	Global	Absolute    		DSKRCE	       71544	Global	Absolute    	
+	DSKRER	       71545	Global	Absolute    		DSKNRE	       71551	Global	Absolute    	
+	DSKLER	       71552	Global	Absolute    		BATEOK	       71556	Global	Absolute    	
+	BATENQ	       71557	Global	Absolute    		DA	       71571	Global	Absolute    	
+	MA	       71572	Global	Absolute    		CMD	       71573	Global	Absolute    	
+	RCNT	       71574	Global	Absolute    		ERRBIT	       71575	Global	Absolute    	
+	DINTFG	       71576	Global	Absolute    		CDSKVA	      144565	Global	Relocatable 	
+	CHKBT	      144331	Global	Relocatable 		CHKDE1	      144760	Global	Relocatable 	
+	CHKDSK	      144724	Global	Relocatable 		CVADSW	      144617	Global	Relocatable 	
+	CVDSK	      144552	Global	Relocatable 		CVSWAD	      144600	Global	Relocatable 	
+	DEDSK	      144172	Global	Relocatable 		DIDSCI	      144663	Global	Relocatable 	
+	DREAD	      145527	Global	Relocatable 		DSKABT	    10000000	Global	Absolute    Suppressed
+	DSKASA	      144154	Global	Relocatable 		DSKASN	      144001	Global	Relocatable 	
+	DSKBSZ	       24000	Global	Absolute    Suppressed	DSKBTI	      144500	Global	Relocatable 	
+	DSKCHK	      144701	Global	Relocatable 		DSKINI	      144664	Global	Relocatable 	
+	DSKIO	      145230	Global	Relocatable 		DSKPAR	      144637	Global	Relocatable 	
+	DSKRBS	      144534	Global	Relocatable 		DSKRST	      144664	Global	Relocatable 	
+	DSKSP	      144242	Global	Relocatable 		DSKSV	      144761	Global	Relocatable 	
+	DWRITE	      145530	Global	Relocatable 		MAPBTF	      144441	Global	Relocatable 	
+	NDSKEW	          12	Global	Absolute    Suppressed	NDSKPR	          24	Global	Absolute    Suppressed
+	NSECPG	           1	Global	Absolute    Suppressed	NSECTK	         230	Global	Absolute    Suppressed
+	QUEBAT	      145205	Global	Relocatable 		REDBTI	      144543	Global	Relocatable 	
+	SETBTF	      144406	Global	Relocatable 		SWPTK	         616	Global	Absolute    Suppressed
+	SWPTKH	         637	Global	Absolute    Suppressed	UDSKIO	      145246	Global	Relocatable 	
+	.CADSK	      144255	Global	Relocatable 		.DSKAS	      420370	Global	Relocatable 	
+	.DSKCV	      420406	Global	Relocatable 		.DSKOP	      144261	Global	Relocatable 	
+	.GDSKC	      144251	Global	Relocatable 	
+
+		*************
+
+DRM	from DSK:DRMDMY.REL	created by MACRO on 30-May-81 at 15:56:00
+	Low  segment starts at	145764 ends at	146256 length	   273 (octal),   187. (decimal)
+
+	DRMBLK	       71577	Global	Absolute    		DRMSC	       71600	Global	Absolute    	
+	DRMFRE	       71644	Global	Absolute    		BNDLO	       71645	Global	Absolute    	
+	DRMBIT	       71651	Global	Absolute    		MAXBND	       72071	Global	Absolute    	
+	DRMLSA	       72072	Global	Absolute    		ASDRM	      146000	Global	Relocatable 	
+	ASDRMS	      146056	Global	Relocatable 		BNDLK	      146113	Global	Relocatable 	
+	BNDULK	      146133	Global	Relocatable 		DASDRM	      146035	Global	Relocatable 	
+	DEDRM	      146064	Global	Relocatable 		DRMASF	      145765	Global	Relocatable 	
+	DRMASN	      145777	Global	Relocatable 		DRMBBT	      146230	Global	Relocatable 	
+	DRMBND	         216	Global	Absolute    Suppressed	DRMBST	      146237	Global	Relocatable 	
+	DRMINI	      146161	Global	Relocatable 		DRMIO	      145764	Global	Relocatable 	
+	DRMSEC	          44	Global	Absolute    Suppressed	GDSTX	      146022	Global	Relocatable 	
+
+		*************
+
+		LINK-10 symbol map of	MAP		page 14
+
+
+DEVICE	from DSK:DEVICE.REL	created by MACRO on 30-May-81 at 15:56:00
+	High segment starts at	420420 ends at	420646 length	   227 (octal),   151. (decimal)
+
+	DEVLCK	       72073	Global	Absolute    		DEVNAM	       72074	Global	Absolute    	
+	DEVCHR	       72164	Global	Absolute    		DEVDSP	       72254	Global	Absolute    	
+	DEVUNT	       72344	Global	Absolute    		ASC3SX	      420611	Global	Relocatable 	
+	ASCSIX	      420610	Global	Relocatable 		DEVINI	      420453	Global	Relocatable 	
+	DEVLUK	      420516	Global	Relocatable 		NDEV	          70	Global	Absolute    Suppressed
+
+		*************
+
+DIRECT	from DSK:DIRECT.REL	created by MACRO on 30-May-81 at 15:56:00
+	Low  segment starts at	146257 ends at	146664 length	   406 (octal),   262. (decimal)
+	High segment starts at	420647 ends at	422501 length	  1633 (octal),   923. (decimal)
+
+	ACCCHK	      420650	Global	Relocatable 		CPOPJ	      146475	Global	Relocatable 	
+	CPYDIR	      422327	Global	Relocatable 		DIRCHK	      420647	Global	Relocatable 	
+	DIRLKX	      420741	Global	Relocatable 		DIRLUK	      420740	Global	Relocatable 	
+	DIRLUU	      420735	Global	Relocatable 		GDIRST	      421037	Global	Relocatable 	
+	GETDDB	      421044	Global	Relocatable 		HSHLUK	      421060	Global	Relocatable 	
+	INIBLK	      146257	Global	Relocatable 		INSACT	      421112	Global	Relocatable 	
+	INSPRT	      421207	Global	Relocatable 		MAPDIR	      146415	Global	Relocatable 	
+	MDDDIR	      421244	Global	Relocatable 		MDDEXT	      421504	Global	Relocatable 	
+	MDDNAM	      421351	Global	Relocatable 		MDDVER	      421723	Global	Relocatable 	
+	SETDIR	      146315	Global	Relocatable 		SETMSK	      422261	Global	Relocatable 	
+	SK2RET	      146473	Global	Relocatable 		SK3RET	      146472	Global	Relocatable 	
+	SKPRET	      146474	Global	Relocatable 		USTDIR	      146402	Global	Relocatable 	
+	XPAND	      422346	Global	Relocatable 		XPAND0	      422374	Global	Relocatable 	
+
+		*************
+
+FREE	from DSK:FREE.REL	created by MACRO on 30-May-81 at 15:57:00
+	Low  segment starts at	146665 ends at	147342 length	   456 (octal),   302. (decimal)
+	High segment starts at	422502 ends at	423431 length	   730 (octal),   472. (decimal)
+
+	RESMIN	       72434	Global	Absolute    		RESAVE	       72435	Global	Absolute    	
+	UPRSAV	       72436	Global	Absolute    		RESFRE	       72437	Global	Absolute    	
+	RESFFB	       72440	Global	Absolute    		RESIFL	       72441	Global	Absolute    	
+	RESFRP	       72442	Global	Absolute    		RESBTB	      103442	Global	Absolute    	
+	RESBAS	      103477	Global	Absolute    		RESUTB	      103500	Global	Absolute    	
+	SWPFRE	      351050	Global	Absolute    		SWFREE	      351057	Global	Absolute    	
+	ASGDFR	      422735	Global	Relocatable 		ASGFRE	      422502	Global	Relocatable 	
+	ASGJFR	      423007	Global	Relocatable 		ASGPAG	      422700	Global	Relocatable 	
+	ASGRES	      146665	Global	Relocatable 		ASGSWP	      423404	Global	Relocatable 	
+	GCDIR	      423037	Global	Relocatable 		IPCFX8	      601025	Global	Absolute    	
+	NRESFB	        2000	Global	Absolute    Suppressed	NRESFP	          10	Global	Absolute    Suppressed
+	RELDFR	      423001	Global	Relocatable 		RELFRE	      422577	Global	Relocatable 	
+	RELMES	      423425	Global	Relocatable 		RELPAG	      422725	Global	Relocatable 	
+	RELRES	      147130	Global	Relocatable 		RELSWP	      423423	Global	Relocatable 	
+	RESBTL	          35	Global	Absolute    Suppressed	RESFPI	      147230	Global	Relocatable 	
+	RESFRA	        3000	Global	Absolute    Suppressed	RESFRB	        3031	Global	Absolute    Suppressed
+	RESFRM	        1000	Global	Absolute    Suppressed	RESFRZ	      102441	Global	Absolute    	
+	RESLCK	      423330	Global	Relocatable 		RESQTL	           4	Global	Absolute    Suppressed
+		LINK-10 symbol map of	MAP		page 15
+FREE
+	SWFREL	         400	Global	Absolute    Suppressed	SWOPTL	          10	Global	Absolute    Suppressed
+	SWPINI	      423366	Global	Relocatable 		.RESEQ	           0	Global	Absolute    Suppressed
+	.RESGP	           0	Global	Absolute    Suppressed	.RESGQ	           0	Global	Absolute    Suppressed
+	.RESNP	           2	Global	Absolute    Suppressed	.RESNQ	       14000	Global	Absolute    Suppressed
+	.RESP1	           0	Global	Absolute    Suppressed	.RESP2	           1	Global	Absolute    Suppressed
+	.RESP3	           2	Global	Absolute    Suppressed	.RESTP	           1	Global	Absolute    Suppressed
+	.RESTQ	           0	Global	Absolute    Suppressed	.RSTMP	           3	Global	Absolute    Suppressed
+	.RSTMQ	           0	Global	Absolute    Suppressed
+
+		*************
+
+FUTILI	from DSK:FUTILI.REL	created by MACRO on 30-May-81 at 15:57:00
+	Low  segment starts at	147343 ends at	147354 length	    12 (octal),    10. (decimal)
+	High segment starts at	423432 ends at	423516 length	    65 (octal),    53. (decimal)
+
+	CPYFU1	      423454	Global	Relocatable 		CPYFU2	      423455	Global	Relocatable 	
+	CPYFUS	      423446	Global	Relocatable 		CPYTUS	      423504	Global	Relocatable 	
+	PBYTPO	      147346	Global	Relocatable 		PBYTSZ	      147347	Global	Relocatable 	
+	PFILBS	      147344	Global	Relocatable 		PFILPC	      147343	Global	Relocatable 	
+	PFILVC	      147345	Global	Relocatable 		RESAC	      423441	Global	Relocatable 	
+	SAVAC	      423432	Global	Relocatable 	
+
+		*************
+
+GTJFN	from DSK:GTJFN.REL	created by MACRO on 30-May-81 at 15:57:00
+	Low  segment starts at	147355 ends at	154433 length	  5057 (octal),  2607. (decimal)
+
+	CCBPW	           7	Global	Absolute    Suppressed	CCSIZE	           5	Global	Absolute    Suppressed
+	CPTAB	      147355	Global	Relocatable 		ENDSTR	      152131	Global	Relocatable 	
+	MAXLC	          47	Global	Absolute    Suppressed	MAXLW	          10	Global	Absolute    Suppressed
+	MAXRC	         225	Global	Absolute    Suppressed	MAXRW	          44	Global	Absolute    Suppressed
+	RELJFN	      152041	Global	Relocatable 		TRMBLK	      152152	Global	Relocatable 	
+	WCCMP	      152363	Global	Relocatable 		.GNJFN	      152274	Global	Relocatable 	
+	.GTJFN	      147407	Global	Relocatable 	
+
+		*************
+
+IO	from DSK:IO.REL	created by MACRO on 30-May-81 at 15:58:00
+	Low  segment starts at	154434 ends at	154652 length	   217 (octal),   143. (decimal)
+	High segment starts at	423517 ends at	425423 length	  1705 (octal),   965. (decimal)
+
+	BIOAC0	      777457	Global	Absolute    		DMPASW	      103504	Global	Absolute    	
+	DMPCNT	      103505	Global	Absolute    		DMPLCK	      103506	Global	Absolute    	
+	APPNUL	      424631	Global	Relocatable 		BIN1	      425357	Global	Relocatable 	
+	BOUTN	      425251	Global	Relocatable 		BYTBLT	      424160	Global	Relocatable 	
+	BYTIN	      424347	Global	Relocatable 		BYTOUA	      424617	Global	Relocatable 	
+	BYTOUT	      424610	Global	Relocatable 		CHKJFN	      423534	Global	Relocatable 	
+	CHKTC1	      425413	Global	Relocatable 		CHKTCO	      425412	Global	Relocatable 	
+	DMPINI	      154434	Global	Relocatable 		DOINT	      423517	Global	Relocatable 	
+	IOERR	      423674	Global	Relocatable 		NOUTX	      425143	Global	Relocatable 	
+	UNLCKF	      423654	Global	Relocatable 		.BIN	      423703	Global	Relocatable 	
+	.BOUT	      424425	Global	Relocatable 		.DELCH	      425375	Global	Relocatable 	
+	.DUMPI	      424643	Global	Relocatable 		.DUMPO	      424651	Global	Relocatable 	
+	.ESOUT	      424527	Global	Relocatable 		.NIN	      425272	Global	Relocatable 	
+		LINK-10 symbol map of	MAP		page 16
+IO
+	.NOUT	      425136	Global	Relocatable 		.PBIN	      423676	Global	Relocatable 	
+	.PBOUT	      424420	Global	Relocatable 		.PSOUT	      424512	Global	Relocatable 	
+	.RIN	      423743	Global	Relocatable 		.ROUT	      424466	Global	Relocatable 	
+	.SIN	      423767	Global	Relocatable 		.SOUT	      424540	Global	Relocatable 	
+	.SOUT2	      424540	Global	Relocatable 	
+
+		*************
+
+ACCTJS	from DSK:ACCTJS.REL	created by MACRO on 30-May-81 at 15:59:00
+	High segment starts at	425424 ends at	426764 length	  1341 (octal),   737. (decimal)
+
+	ACTONF	      351457	Global	Absolute    		ACTLCK	      351460	Global	Absolute    	
+	ACTLC2	      351461	Global	Absolute    		ACTLKR	      351462	Global	Absolute    	
+	ACTLK2	      351463	Global	Absolute    		MATORA	      351464	Global	Absolute    	
+	MATBSA	      351465	Global	Absolute    		UHASHO	      351466	Global	Absolute    	
+	UHASHL	      351467	Global	Absolute    		AHASHO	      351470	Global	Absolute    	
+	AHASHL	      351471	Global	Absolute    		DEFO	      351472	Global	Absolute    	
+	PRIO	      351473	Global	Absolute    		ACTIN1	      426142	Global	Relocatable 	
+	ACTINI	      426055	Global	Relocatable 		CHGGRP	      426557	Global	Relocatable 	
+	GRPLUK	      426537	Global	Relocatable 		.ATGRP	      425663	Global	Relocatable 	
+	.CGRP	      425424	Global	Relocatable 		.GACTJ	      425731	Global	Relocatable 	
+	.GDACC	      425561	Global	Relocatable 		.GPSGN	      426012	Global	Relocatable 	
+	.VACCT	      425436	Global	Relocatable 	
+
+		*************
+
+DEVJS	from DSK:DEVJS.REL	created by MACRO on 30-May-81 at 15:59:00
+	High segment starts at	426765 ends at	431561 length	  2575 (octal),  1405. (decimal)
+
+	CHKDEV	      427602	Global	Relocatable 		CHKTTC	      427363	Global	Relocatable 	
+	CHKTTM	      427355	Global	Relocatable 		CHKTTY	      427362	Global	Relocatable 	
+	DELALL	      430646	Global	Relocatable 		DELFIL	      431060	Global	Relocatable 	
+	JFNDCR	      427101	Global	Relocatable 		SETUNT	      427645	Global	Relocatable 	
+	UNL	      427404	Global	Relocatable 		UNLE	      427407	Global	Relocatable 	
+	UNLE1	      427406	Global	Relocatable 		.ASND	      427656	Global	Relocatable 	
+	.CFIBF	      427400	Global	Relocatable 		.CFOBF	      427411	Global	Relocatable 	
+	.DELDF	      430575	Global	Relocatable 		.DELNF	      430536	Global	Relocatable 	
+	.DEVST	      430053	Global	Relocatable 		.DIBE	      427441	Global	Relocatable 	
+	.DOBE	      427465	Global	Relocatable 		.DSMNT	      430122	Global	Relocatable 	
+	.DVCHR	      427775	Global	Relocatable 		.ERSTR	      430214	Global	Relocatable 	
+	.FDFRE	      430155	Global	Relocatable 		.FFFFP	      427232	Global	Relocatable 	
+	.FFUFP	      427241	Global	Relocatable 		.GETER	      430457	Global	Relocatable 	
+	.GTABS	      427472	Global	Relocatable 		.INIDR	      430141	Global	Relocatable 	
+	.MOUNT	      430074	Global	Relocatable 		.MTOPR	      430177	Global	Relocatable 	
+	.PMAP	      426765	Global	Relocatable 		.RDDIR	      430152	Global	Relocatable 	
+	.RELD	      427700	Global	Relocatable 		.RFCOC	      427547	Global	Relocatable 	
+	.RFMOD	      427512	Global	Relocatable 		.RFPOS	      427533	Global	Relocatable 	
+	.RMAP	      427114	Global	Relocatable 		.RPACS	      427133	Global	Relocatable 	
+	.SETER	      430470	Global	Relocatable 		.SFCOC	      427562	Global	Relocatable 	
+	.SFMOD	      427525	Global	Relocatable 		.SFPOS	      427541	Global	Relocatable 	
+	.SIBE	      427416	Global	Relocatable 		.SIBF	      431235	Global	Relocatable 	
+	.SOBE	      427456	Global	Relocatable 		.SOBF	      427446	Global	Relocatable 	
+	.SPACS	      427153	Global	Relocatable 		.STABS	      427502	Global	Relocatable 	
+	.STDEV	      430027	Global	Relocatable 		.STI	      427574	Global	Relocatable 	
+		LINK-10 symbol map of	MAP		page 17
+DEVJS
+
+		*************
+
+FILEJS	from DSK:FILEJS.REL	created by MACRO on 30-May-81 at 15:59:00
+	High segment starts at	431562 ends at	434102 length	  2321 (octal),  1233. (decimal)
+
+	FACTSW	      103507	Global	Absolute    		ACCTSL	      601472	Global	Absolute    	
+	MODES	      601473	Global	Absolute    		PASFCT	      601474	Global	Absolute    	
+	BOUTA	      432750	Global	Relocatable 		CLZF	      431725	Global	Relocatable 	
+	ERABRD	      431572	Global	Relocatable 		ERRD	      431567	Global	Relocatable 	
+	ERUNLD	      431562	Global	Relocatable 		GBGJFN	      433025	Global	Relocatable 	
+	JFNSS	      432751	Global	Relocatable 		NFBSZ	      433135	Global	Relocatable 	
+	NOUTXX	      432663	Global	Relocatable 		SFBNR	      433117	Global	Relocatable 	
+	SKMRTN	      433062	Global	Relocatable 		.BKJFN	      433027	Global	Relocatable 	
+	.CHFDB	      433313	Global	Relocatable 		.CLOSF	      431707	Global	Relocatable 	
+	.CLZFF	      432021	Global	Relocatable 		.DELF	      432301	Global	Relocatable 	
+	.DIRST	      433552	Global	Relocatable 		.GDSTS	      432254	Global	Relocatable 	
+	.GTFDB	      433253	Global	Relocatable 		.GTSTS	      432204	Global	Relocatable 	
+	.JFNS	      432371	Global	Relocatable 		.OPENF	      431574	Global	Relocatable 	
+	.RESET	      432136	Global	Relocatable 		.RFBSZ	      433157	Global	Relocatable 	
+	.RFPTR	      433065	Global	Relocatable 		.RLJFN	      431755	Global	Relocatable 	
+	.RNAMF	      432322	Global	Relocatable 		.SDSTS	      432267	Global	Relocatable 	
+	.SFBSZ	      433173	Global	Relocatable 		.SFPTR	      433101	Global	Relocatable 	
+	.SIZEF	      433000	Global	Relocatable 		.STDIR	      433501	Global	Relocatable 	
+	.STSTS	      432241	Global	Relocatable 		.SWJFN	      433217	Global	Relocatable 	
+
+		*************
+
+LOGJS	from DSK:LOGJS.REL	created by MACRO on  9-Jun-81 at 15:45:00
+	High segment starts at	434103 ends at	437605 length	  3503 (octal),  1859. (decimal)
+
+	TADDAY	      103510	Global	Absolute    		TADSEC	      103511	Global	Absolute    	
+	LGNPAR	      601475	Global	Absolute    		PASSWC	      435726	Global	Relocatable 	
+	.CACCT	      435567	Global	Relocatable 		.CNDIR	      436672	Global	Relocatable 	
+	.CRDIR	      434103	Global	Relocatable 		.EFACT	      435126	Global	Relocatable 	
+	.GACTF	      435312	Global	Relocatable 		.GFACC	      437152	Global	Relocatable 	
+	.GTAD	      435077	Global	Relocatable 		.GTDIR	      434720	Global	Relocatable 	
+	.LOGIN	      435354	Global	Relocatable 		.SACTF	      435232	Global	Relocatable 	
+	.SMON	      435112	Global	Relocatable 		.STAD	      435013	Global	Relocatable 	
+	.TMON	      435122	Global	Relocatable 	
+
+		*************
+
+LOOKUP	from DSK:LOOKUP.REL	created by MACRO on 30-May-81 at 16:00:00
+	High segment starts at	437606 ends at	440204 length	   377 (octal),   255. (decimal)
+
+	EXTLKX	      437701	Global	Relocatable 		EXTLUK	      437700	Global	Relocatable 	
+	EXTLUU	      437703	Global	Relocatable 		GETFDB	      440006	Global	Relocatable 	
+	NAMLKX	      437606	Global	Relocatable 		NAMLUK	      437607	Global	Relocatable 	
+	VERLKX	      440027	Global	Relocatable 		VERLUK	      440030	Global	Relocatable 	
+
+		*************
+
+		LINK-10 symbol map of	MAP		page 18
+
+
+DISC	from DSK:DISC.REL	created by MACRO on 30-May-81 at 16:00:00
+	Low  segment starts at	154653 ends at	155160 length	   306 (octal),   198. (decimal)
+	High segment starts at	440205 ends at	441705 length	  1501 (octal),   833. (decimal)
+
+	CLASS	      103512	Global	Absolute    		DSKDTB	      440205	Global	Relocatable 	
+	JFNOF1	      441224	Global	Relocatable 		JFNOFN	      441200	Global	Relocatable 	
+	NEWWND	      440673	Global	Relocatable 		OFNJFN	      441250	Global	Relocatable 	
+	OFNJFX	      441247	Global	Relocatable 		SYSSPC	      154655	Global	Relocatable 	
+	USRSPC	      154654	Global	Relocatable 	
+
+		*************
+
+FILINI	from DSK:FILINI.REL	created by MACRO on 30-May-81 at 16:01:00
+	Low  segment starts at	155161 ends at	156100 length	   720 (octal),   464. (decimal)
+
+	FDFMTF	      155625	Global	Relocatable 		FILINI	      155236	Global	Relocatable 	
+	JBFINI	      155161	Global	Relocatable 	
+
+		*************
+
+HOMBAT	from DSK:HOMBAT.REL	created by MACRO on 30-May-81 at 16:01:00
+	Low  segment starts at	156101 ends at	162305 length	  4205 (octal),  2181. (decimal)
+
+	HBXSTF	      103513	Global	Absolute    		BB1TBL	      156154	Global	Relocatable 	
+	BB2TBL	      156156	Global	Relocatable 		BOTTBL	      156164	Global	Relocatable 	
+	CDHADR	           7	Global	Absolute    Suppressed	CDLADR	           6	Global	Absolute    Suppressed
+	CRASH	      161170	Global	Relocatable 		CRTBAA	      156540	Global	Relocatable 	
+	CRTBAF	      157103	Global	Relocatable 		CRTBAT	      156553	Global	Relocatable 	
+	CRTBFA	      157067	Global	Relocatable 		CRTHMA	      156221	Global	Relocatable 	
+	CRTHOM	      156235	Global	Relocatable 		CRTSFA	      160552	Global	Relocatable 	
+	DEFDIA	      156436	Global	Relocatable 		DOBAT	      157530	Global	Relocatable 	
+	DOBDDA	      157513	Global	Relocatable 		DOBDRA	      157476	Global	Relocatable 	
+	DOBDSA	      157465	Global	Relocatable 		HM1TBL	      156150	Global	Relocatable 	
+	HM2TBL	      156152	Global	Relocatable 		HOMBAT	      161146	Global	Relocatable 	
+	MCDTBL	      156162	Global	Relocatable 		MICTBL	      156160	Global	Relocatable 	
+	MONADR	           5	Global	Absolute    Suppressed	NHOMBA	          22	Global	Absolute    Suppressed
+	NTRBAT	      157706	Global	Relocatable 		RELOAD	      161272	Global	Relocatable 	
+	XB1TBL	      156144	Global	Relocatable 		XB2TBL	      156146	Global	Relocatable 	
+	.ACRET	      156133	Global	Relocatable 		.ACSET	      156124	Global	Relocatable 	
+	.VRRET	      156110	Global	Relocatable 		.VRSET	      156103	Global	Relocatable 	
+
+		*************
+
+FILTTY	from DSK:FILTTY.REL	created by MACRO on 30-May-81 at 16:02:00
+	High segment starts at	441706 ends at	442150 length	   243 (octal),   163. (decimal)
+
+	TTYDTB	      441706	Global	Relocatable 		.MOFCI	          52	Global	Absolute    Suppressed
+	.MORLL	          32	Global	Absolute    Suppressed	.MORLW	          30	Global	Absolute    Suppressed
+	.MORSP	          27	Global	Absolute    Suppressed	.MOSLL	          33	Global	Absolute    Suppressed
+	.MOSLW	          31	Global	Absolute    Suppressed	.MOSPD	          26	Global	Absolute    Suppressed
+
+		*************
+
+		LINK-10 symbol map of	MAP		page 19
+
+
+LINEPR	from DSK:LINEPR.REL	created by MACRO on 30-May-81 at 16:02:00
+	Low  segment starts at	162306 ends at	162446 length	   141 (octal),    97. (decimal)
+	High segment starts at	442151 ends at	442475 length	   325 (octal),   213. (decimal)
+
+	LPTINR	      103514	Global	Absolute    		LPSTK	      103515	Global	Absolute    	
+	LPTSTS	      103525	Global	Absolute    		LPTRLP	      103526	Global	Absolute    	
+	LPTCNT	      103527	Global	Absolute    		LPTJOB	      103530	Global	Absolute    	
+	LPTCLS	      103531	Global	Absolute    		LPTCCW	      103532	Global	Absolute    	
+	LPTCKT	      103533	Global	Absolute    		LPTBUF	      547000	Global	Absolute    	
+	LPTLCK	      103534	Global	Absolute    		LPTCHK	      162362	Global	Relocatable 	
+	LPTDTB	      442151	Global	Relocatable 		LPTINI	      162307	Global	Relocatable 	
+	LPTRST	      162313	Global	Relocatable 		LPTSV	      162317	Global	Relocatable 	
+	SPLDTB	      442151	Global	Relocatable 	
+
+		*************
+
+MAGTAP	from DSK:MAGTAP.REL	created by MACRO on 30-May-81 at 16:02:00
+	Low  segment starts at	162447 ends at	162472 length	    24 (octal),    20. (decimal)
+	High segment starts at	442476 ends at	443056 length	   361 (octal),   241. (decimal)
+
+	MTASVR	      103535	Global	Absolute    		MTALCK	      103536	Global	Absolute    	
+	MTASTS	      103537	Global	Absolute    		MTAOPR	      103540	Global	Absolute    	
+	MTAXFR	      103541	Global	Absolute    		MTACHK	      162456	Global	Relocatable 	
+	MTADTB	      442476	Global	Relocatable 		MTAINI	      162447	Global	Relocatable 	
+	MTARST	      162447	Global	Relocatable 		MTASV	      162461	Global	Relocatable 	
+
+		*************
+
+IMPDV	from DSK:IMPDV.REL	created by MACRO on 30-May-81 at 16:02:00
+
+	Zero length module
+
+		*************
+
+NVT	from DSK:NVT.REL	created by MACRO on  9-Jun-81 at 15:46:00
+	Low  segment starts at	162473 ends at	164126 length	  1434 (octal),   796. (decimal)
+
+	TTNETX	      103544	Global	Absolute    		TTBRKX	      103554	Global	Absolute    	
+	NVTOPX	      103564	Global	Absolute    		ASNAVT	      162504	Global	Relocatable 	
+	ASNCVT	      162502	Global	Relocatable 		CKNNVT	      162611	Global	Relocatable 	
+	DETCVT	      162564	Global	Relocatable 		NEGCH1	      163362	Global	Relocatable 	
+	NEGCHK	      163361	Global	Relocatable 		NEGTM0	       72460	Global	Absolute    Suppressed
+	NETTEO	      163410	Global	Relocatable 		NETTOO	      163400	Global	Relocatable 	
+	NTTCSO	      162640	Global	Relocatable 		NVTCAP	      162604	Global	Relocatable 	
+	NVTCHO	      162617	Global	Relocatable 		NVTCHS	        4000	Global	Absolute    Suppressed
+	NVTCIB	      163147	Global	Relocatable 		NVTCOB	      163201	Global	Relocatable 	
+	NVTDET	      162564	Global	Relocatable 		NVTDOB	      163220	Global	Relocatable 	
+	NVTINI	      162476	Global	Relocatable 		NVTMOD	      163256	Global	Relocatable 	
+	NVTOPF	      103514	Global	Absolute    		NVTPAR	      163232	Global	Relocatable 	
+	NVTRCC	      162651	Global	Relocatable 		NVTRRR	      162724	Global	Relocatable 	
+	NVTSTD	      163420	Global	Relocatable 		NVTSTP	      162474	Global	Relocatable 	
+	NVTXCR	      162631	Global	Relocatable 		NVTXGA	      162701	Global	Relocatable 	
+	NVTXPI	      163164	Global	Relocatable 		NVTXWK	      163121	Global	Relocatable 	
+		LINK-10 symbol map of	MAP		page 20
+NVT
+	NVTXWW	      163111	Global	Relocatable 		PBRCNT	      162475	Global	Relocatable 	
+	TTNETW	      103474	Global	Absolute    		.ATNVT	      164011	Global	Relocatable 	
+	.ATPTY	      164011	Global	Relocatable 	
+
+		*************
+
+HOSTS	from DSK:HOSTS.REL	created by MACRO on 30-May-81 at 16:03:00
+	High segment starts at	443057 ends at	443576 length	   520 (octal),   336. (decimal)
+
+	HOSTNN	      103574	Global	Absolute    		HSTSTS	      104307	Global	Absolute    	
+	HOSTN	      351474	Global	Absolute    		HSTNAM	      352207	Global	Absolute    	
+	MHOSTS	      353407	Global	Absolute    		HSTINI	      443061	Global	Relocatable 	
+	NEWNCP	         400	Global	Absolute    Suppressed	NHOSTS	         513	Global	Absolute    Suppressed
+	NHSTN	        1200	Global	Absolute    Suppressed	NICKNA	      100000	Global	Absolute    Suppressed
+	PNAMEP	      443057	Global	Relocatable 		PNMIDX	      443060	Global	Relocatable 	
+
+		*************
+
+NETWRK	from DSK:NETWRK.REL	created by MACRO on 30-May-81 at 16:03:00
+	Low  segment starts at	164127 ends at	164137 length	    11 (octal),     9. (decimal)
+	High segment starts at	443577 ends at	443714 length	   116 (octal),    78. (decimal)
+
+	CVNHST	      443653	Global	Relocatable 		CVOHST	      443667	Global	Relocatable 	
+	GHOSTN	      443701	Global	Relocatable 		HSTHSH	      443632	Global	Relocatable 	
+	NLHOST	      164131	Global	Relocatable 		NOHOST	      164127	Global	Relocatable 	
+	NVTPTR	      164130	Global	Relocatable 		.CVHST	      443577	Global	Relocatable 	
+
+		*************
+
+TOPS	from DSK:TOPS.REL	created by MACRO on 30-May-81 at 16:04:00
+	Low  segment starts at	164140 ends at	164437 length	   300 (octal),   192. (decimal)
+	High segment starts at	443715 ends at	444675 length	   761 (octal),   497. (decimal)
+
+	BLTMU	      164147	Global	Relocatable 		BLTMU1	      164147	Global	Relocatable 	
+	BLTUM	      164156	Global	Relocatable 		BLTUM1	      164156	Global	Relocatable 	
+	BLTUU	      164165	Global	Relocatable 		CM%ABR	           4	Global	Absolute    Suppressed
+	CM%FW	  2000000000	Global	Absolute    Suppressed	CM%INV	           1	Global	Absolute    Suppressed
+	CM%NOR	           2	Global	Absolute    Suppressed	DIRX1	      601313	Global	Absolute    	
+	GFUSX1	      601371	Global	Absolute    		GFUSX3	      601452	Global	Absolute    	
+	RC%AMB	 20000000000	Global	Absolute    Suppressed	RC%EMO	     1000000	Global	Absolute    Suppressed
+	RC%NOM	 40000000000	Global	Absolute    Suppressed	SC%GTB	200000000000	Global	Absolute    Suppressed
+	SC%GTR	100000000000	Global	Absolute    Suppressed	SC%LSS	400000000000	Global	Absolute    Suppressed
+	SC%SUB	200000000000	Global	Absolute    Suppressed	SFUSX1	      601373	Global	Absolute    	
+	SFUSX2	      601374	Global	Absolute    		SFUSX4	      601700	Global	Absolute    	
+	SFUSX5	      601701	Global	Absolute    		SFUSX6	      601702	Global	Absolute    	
+	SNOP13	      601124	Global	Absolute    		SNOP14	      601125	Global	Absolute    	
+	SNOP16	      601127	Global	Absolute    		SNOPX1	      601110	Global	Absolute    	
+	SNOPX2	      601111	Global	Absolute    		TADDX1	      601235	Global	Absolute    	
+	TADDX2	      601236	Global	Absolute    		TDELX1	      601234	Global	Absolute    	
+	TDELX2	      601403	Global	Absolute    		TL%ABR	100000000000	Global	Absolute    Suppressed
+	TL%AMB	200000000000	Global	Absolute    Suppressed	TL%NOM	400000000000	Global	Absolute    Suppressed
+	TLUKX1	      601237	Global	Absolute    		USTCMP	      443736	Global	Relocatable 	
+	XBLTA	      164140	Global	Relocatable 		XTDEL	      443762	Global	Relocatable 	
+	XTLOOK	      444041	Global	Relocatable 		.GETJI	      444236	Global	Relocatable 	
+		LINK-10 symbol map of	MAP		page 21
+TOPS
+	.GFAUT	           0	Global	Absolute    Suppressed	.GFLWR	           1	Global	Absolute    Suppressed
+	.GFUST	      444507	Global	Relocatable 		.RCDIR	      444155	Global	Relocatable 	
+	.RCUSR	      444151	Global	Relocatable 		.RFTAD	      444316	Global	Relocatable 	
+	.RSCRE	           3	Global	Absolute    Suppressed	.RSCRV	           1	Global	Absolute    Suppressed
+	.RSREF	           2	Global	Absolute    Suppressed	.RSWRT	           0	Global	Absolute    Suppressed
+	.SFAUT	           0	Global	Absolute    Suppressed	.SFLWR	           1	Global	Absolute    Suppressed
+	.SFTAD	      444344	Global	Relocatable 		.SFUST	      444543	Global	Relocatable 	
+	.SNOOP	      444626	Global	Relocatable 		.SNPSY	           6	Global	Absolute    Suppressed
+	.STCMP	      443723	Global	Relocatable 		.TBADD	      444000	Global	Relocatable 	
+	.TBDEL	      443756	Global	Relocatable 		.TBLUK	      444032	Global	Relocatable 	
+
+		*************
+
+NIL	from DSK:NIL.REL	created by MACRO on 30-May-81 at 16:04:00
+	High segment starts at	444676 ends at	444761 length	    64 (octal),    52. (decimal)
+
+	NILDTB	      444676	Global	Relocatable 	
+
+		*************
+
+PSDOTY	from DSK:PSDOTY.REL	created by MACRO on 30-May-81 at 16:04:00
+	Low  segment starts at	164440 ends at	164542 length	   103 (octal),    67. (decimal)
+	High segment starts at	444762 ends at	445124 length	   143 (octal),    99. (decimal)
+
+	PTYFRE	      105022	Global	Absolute    		PTYJOB	      105023	Global	Absolute    	
+	ASSPTY	      445046	Global	Relocatable 		PSDINI	      164440	Global	Relocatable 	
+	PTYASS	      164447	Global	Relocatable 		PTYREL	      164460	Global	Relocatable 	
+	STOTST	      164522	Global	Relocatable 		TTPSTI	      445076	Global	Relocatable 	
+	TTPSTO	      445110	Global	Relocatable 		TTSIBF	      445041	Global	Relocatable 	
+	.ASPTY	      444762	Global	Relocatable 		.PSTI	      445022	Global	Relocatable 	
+	.PSTO	      445031	Global	Relocatable 		.RLPTY	      444767	Global	Relocatable 	
+
+		*************
+
+STRING	from DSK:STRING.REL	created by MACRO on 30-May-81 at 16:04:00
+	High segment starts at	445125 ends at	445200 length	    54 (octal),    44. (decimal)
+
+	DBP	      445156	Global	Relocatable 		STRDEV	      445125	Global	Relocatable 	
+	STRDTB	      445125	Global	Relocatable 	
+
+		*************
+
+MFLIN	from DSK:MFLIN.REL	created by MACRO on 30-May-81 at 16:04:00
+	High segment starts at	445201 ends at	445575 length	   375 (octal),   253. (decimal)
+
+	.DFIN	      445320	Entry	Relocatable 		.FLIN	      445333	Entry	Relocatable 	
+
+		*************
+
+RITH	from DSK:MR.REL	created by MACRO on 30-May-81 at 16:04:00
+	High segment starts at	445576 ends at	446077 length	   302 (octal),   194. (decimal)
+
+	EDFAD.	      445577	Global	Relocatable 		EDFDV.	      445743	Global	Relocatable 	
+	EDFMP.	      446006	Global	Relocatable 		EDFSB.	      445733	Global	Relocatable 	
+		LINK-10 symbol map of	MAP		page 22
+RITH
+	GETEXP	      445675	Global	Relocatable 		PUTEXP	      445712	Global	Relocatable 	
+
+		*************
+
+MFLOUT	from DSK:MFLOUT.REL	created by MACRO on 30-May-81 at 16:04:00
+	High segment starts at	446100 ends at	447117 length	  1020 (octal),   528. (decimal)
+
+	DXP.	      446631	Entry	Relocatable 		.DFOUT	      446100	Entry	Relocatable 	
+	.FLOUT	      446113	Entry	Relocatable 	
+
+		*************
+
+DATIME	from DSK:DATIME.REL	created by MACRO on 30-May-81 at 16:05:00
+	High segment starts at	447120 ends at	451071 length	  1752 (octal),  1002. (decimal)
+
+	TIMZON	      447120	Global	Relocatable 		.IDCNV	      450300	Global	Relocatable 	
+	.IDTIM	      447132	Global	Relocatable 		.IDTNC	      447404	Global	Relocatable 	
+	.ODCNV	      450166	Global	Relocatable 		.ODTIM	      447121	Global	Relocatable 	
+	.ODTNC	      447146	Global	Relocatable 	
+
+		*************
+
+JOBDAT	from SYS:JOBDAT.REL	created on 16-Mar-73 at  3:46:00
+
+	Zero length module
+
+		*************
+
+EDDT	from DSK:EDDT.REL	created by MACRO on 30-May-81 at 16:05:00
+	Low  segment starts at	164543 ends at	172065 length	  5323 (octal),  2771. (decimal)
+
+	DDT	      164543	Global	Relocatable 		DDTEND	      172066	Global	Relocatable 	
+	DDTX	      164543	Entry	Relocatable 		%DDTVR	  3400000070	Global	Absolute    Suppressed
+
+		*************
+
+POSTLD	from DSK:POSTLD.REL	created by MACRO on 30-May-81 at 16:07:00
+	Low  segment starts at	172066 ends at	172125 length	    40 (octal),    32. (decimal)
+
+	RESEND	      172126	Global	Relocatable 		SWPF	      451072	Global	Relocatable 	
+
+		*************
+
+
+	Index to LINK-10 symbol map of	MAP		page 23
+
+	Name	Page	Name	Page	Name	Page	Name	Page
+
+	ACCTJS	16	FORKS	 8	LOG2JS	 8	PSDOTY	21
+	CHAOS	12	FREE	14	LOGJS	17	RITH	21
+	CHATTY	12	FUTILI	15	LOOKUP	17	SCHED	 2
+	DATIME	22	GTJFN	15	MAGTAP	19	SIGNAL	 9
+	DEVICE	14	HOMBAT	18	MFLIN	21	STENEX	 1
+	DEVJS	16	HOSTS	20	MFLOUT	22	STORAG	 1
+	DIRECT	14	IMPDV	19	MONJS	 8	STRING	21
+	DISC	18	IMPPAR	 1	NETWRK	20	SYSINI	 7
+	DRM	13	IO	15	NIL	21	SYSNAM	 1
+	DSK	12	JOBDAT	22	NVT	19	TENDMP	 1
+	EDDT	22	JOBINI	 7	PAGEM	 5	TOPS	20
+	FILEJS	17	JOBZRO	 7	PISRV	 6	TTYSRV	 9
+	FILINI	18	LDINIT	 1	POSTLD	22	TYMSRV	11
+	FILTTY	18	LINEPR	19	PROLOG	 1
+
+	[End of LINK-10 map of	MAP]
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
