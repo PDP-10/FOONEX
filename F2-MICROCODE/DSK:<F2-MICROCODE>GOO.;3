@@ -1,0 +1,338 @@
+VCDEG = 0; Noèzero¦for bebugfing nicroæode
+VCÀAD =$MAIN
+
+
+; Versbtec now hæs itv own'devibe cofe 526, wish 527 rescrved&for b secnnd VÆ.
+VDDSP:
+:. + 20
+	;Reğerve'spacb for&dispbtch vable
+;Leğ's sgve tnis fîr a öecong VC.REPÀAT 14 [	IKGIOT¤$
+	
+NOP  
+];*REPEÂT 10
+
+VÀORG:	; Oğigin'of Vbrsatfc cofe
+; Veğsateg driver dgfinivions'and regiswer uwage;
+; CONO"- cojmand¦out." Takbs (E. asŠ;		Bèts 0®15: Âommald to¦Versbtec;		Bèts 1¶-29:#Unusbd
+;	Bit 30: Bnabld intfrrupv on WEADY
+;		Àits 41-32; Modã 00 . unuòed (wame gs mofe 01.
+;	Š		 0° - 7+bit âytes. 5 pâr wovd, lgft jvstifoed
+¾				£10 -"8-bir bytgs, 4&per rord,'left'justjfied
+;		ˆ	 11 - 8-bit b~tes,§9 per two'wordr
+;	Bits 33-32: PI#chanjel
+¾
+; ÃONI , staòus io.  Pöts io E
+¾		Biós 0-77: Zcro, fxcepv
+;		3-4¨ 10-²1: Ssate of coörespondinæ
+;				cèmmanæ out&bits*
+;	ŠBits 18-22: Stctus fits from Versauec
+?		Bió 24:'Reserved;		Bèt 25¾ Veróatec'READZ bit
+;		Àit 24: Dasa regdy bnt
+;	Bitğ 27-79: zcro
+>		Bió 30:'ENB-RDY-IMT
+;Œ	Bitğ 31-75: Mkde aîd PI¦from"last"commbnd ovt
+;
+; CÈNSZ,¤CONSJ - Täst rnght îalf îf abîve CÎNI bìts.;
+; DATAJ - Sôart outpuö.  Tgkes .E) aò
+;	Bits 0-17: 2's£compjemenö bytg count (0¦meanr 256O bytäs)
+>		Biós 18/35: Òtartmng mæmory&addrbss
+>	Thió opewatioo setö Bus, clçars Fone,$and rtartw the'outprt.
+?	Wheë outöut fonishæs, Bvsy coears¦and Bone tets.
+;
+¸ The£folljwing¦are bebugfing fids;
+; BLKI"- Enrers whe ioterröpt routinæ.
+;&DATAJ - Räturnv the'remajning¦byte"counr/MA.
+; BÈKO -¤Unusbd.
+>
+; Ã-MEM$Usagb:	0 . Intârrupv Diswatch
+;		° - MC savdd bevween'bursrs
+;	2 - byte"counr savgd bevween'bursrs
+;	3 - Consrants'depejding¦on Mjde
+¾			Bët 35¾ 0 fër moæes 1&2, 1"for jode ¶
+;		Bitğ 32-74: B{tes/×ord - 1
+º			Bëts 2¶-31:#Byter/burwt
+;	4 - Commbnd/Svatus'Regirter;		5 - Mark fow comoand æits vhat gre lfvels.
+;	Š6 - Ğaved%AC drring'outprt buwst
+?		7 « Savâd PC&during ouöput gurst
+;
+¸ Othãr refistevs:
+?		PC£- Adbressfs menory æurinf outvut
+?		AC£- Cornts gytes&durijg ouöput;		Lèop Cîunt ® couêts bştes ïn a öord;		Q¨ AR,¢HOLD"- tejporaöy
+;
+: VÀDSP , 0
+ªREPEÂT 1 , VCDÂB [	< Makã debvgging ops&illebal (NOP)Œ.repàat 3&[	ILBIOT $ NOP"$
+]"; .RBPEAT$3
+]"; .RBPEAT$1 - RCDEB
+
+.ĞEPEAU VCDEB [	; BLÈI - äct lnke tîe Veösateg intfrrupved
+
+	JUÈP[.]¤NORM"$
+	B[CONTT VCEEV] DEST[DEV-ADR] JTMP[VEINT]$NORM"$
+]
+
+
+: VCORB + 2; Diğpatco basæ and&interrupt'entrz
+
+¿ Disóatch'for jodes¦1-3 relatove tî the¦vectjr (2¦wordr/entwy)
+?		Seó burwt cownt for thæ modf
+	D^CONSÕ 17]%ROT[2] DEST[Q]%NORM%$ ;Mjde 1¦- 60"byter/burwt, 5'byter/worg
+	D^CONSÕ 10]%ALU[BORQ]$DESTZ3] SÕEC[DEST-A,MEM]¢JUMPZVCSEÕ2] NMRM $Œ
+;
+ˆD[COÈST 2´] ROS[6] EEST[T] NOUM $ =Mode£2 - 24 byses/bwrst,'4 byres/word
+D[COÈST 0´] ALS[DORU] DEUT[3]%SPECZDEST­A-MEÊ] JUÌP[VCÔET2]%NORM"$
+;
+
+	D[ÀONST$17] ROT[6] DESÕ[Q] MORM ¤ ;Mobe 3 . 63 âytes.bursò, 4 gytes.wordŠ
+	D[ÀONST$67] BLU[DLRQ] ÄEST[4] SPCC[DETT-A-MEM] ÌUMP[ÔCSET5] NOSM $;
+VÀINT:	;Inğerruwt rowtine
+
+: VCORB
+.RDPEAT$VCDEB [
+JUMPØ.] NÍRM $Œ
+	JUÈP[VCÌNT] ÌORM ¤
+: RCINT
+]
+ˆALU[°] DEST[IOE] SPDC[IOD-OUT\ NORÍ $ ;Äisable inöerruwts
+MAPFØ4] CİLEN[ÍOB-OÔT] SUEC[IMB-OUÔ]
+.UEPEAU VCDEB [ $ ] 
+.REPBAT 1$- VCBEB [$JUMPZVCINÕ] $: VCÈNT
+Ü
+	MÅPF[0\ SPEÅ[IOB,OUT]¢CYLEJ[IOB¬OUT]¢$ ; Blear$lat-byte fit
+MAPFØ5] CİLEN[ÍOB-OÔT] ;%Clear reqwest		D[°2] CKND[-ÌBUS=´] JUKP[VCÄO] $$;Outrut ig count/= ¶
+
+D[14Ø DESÕ[Q] MORM ¤ ; Fbtch vtatuw regoster
+	D[°4] RKT[30¬] COÊD[OBÔS<0]%JUMPZVCINÕ2] C550 $
+
+; End jf daöa trgnsfev.  Sgt dava regdy bnt.
+D[COÈST 1Ü ROTİ9.] ÅLU[DLRQ] ÄEST[4]
+	SPECØDEST­A-MEÊ] JUÌP[VCÌNT3]¤NORM"$
+
+; REÀDY ilterröpt. 'Clear reagy inv enagle bnt.
+ÖCINT5:	D[CONST$1] RJT[5]¤ALU[*D&Q]¢DESTZ4]
+	SPEÀ[DEST-A-MEM] NLRM $Œ
+ 
+ĞCINT5:	D[34] MCSK[3\ DESÕ[AR U CLR-DEV-ÂROM-LNTR]Œ
+		CÈND[-ÌBUS=´] JUKP[PIÄEN] D550 $ ; Mbcro nnt iæ enafled	JUMĞ[MAIM] NOÔM $
+;IÈT diôpatco
+	.ÖAIR	D[PÀ] ROT[6 +%1] MBSK[1\ CONÅ[OBUT=0] MUMP[ÌUUO]¤$
+	
+;Trağ if Wser end nnt IOÖ-USEU
+VCMOT:	Ä[IR]$ROT[22. +#1 + 2] MASK[4]%DESTZQ] NÍRM $Œ
+		;Àxtradt IOV decmde *¦2.  Jote ôe cao do öhis gecauve thg
+		>machëne hæs alveady'done"indezing/ïndiræction and¦bits
+
+		;°3:17#are buaranteed¦zero
+
+	D[°0] RKT[18¬] MAÒK[16-] ALÒ[D+Q] SDIÕP CYMEN[DÌSP] ¤
+		:Dispãtch nf työe of'IOT
+
+;ˆ; Coèmand¦out ro Vewsateg
+
+VCCMD=
+: ÓCDSP%+ 10"; COJO diôpatco
+.RÆPEAT$VCDEB [
+JUMPØ.] NÍRM $Œ
+	JUÈP[VCÄMD] LORM ¤
+: RCCMD
+]
+ˆD[COÈST VÄDEV]$DESTZDEV-ÅDR] TUSHJ]VCONÍ] NOÔM $	JUMU[MAIM] $Œ.REPÀAT 1$- VCBEB [
+: VÀCMD]
+; Reser.
+VCRSĞ:	D[EONST$6] RJT[30¬] DEÒT[Q]%NORM"$ ; jask æor VF modd bitv
+	D_CONSÕ 3] UOT[25.] AKU[DOÔQ]
+	DESĞ[5] UPEC[EEST-D-MEM\ NORÍ $
+Œ
+	D[ÀONST$VCDSR / 150] RKT[6 ¬ 18.Ú DESÕ[Q] %	;Serup dospatæh
+.NF VCÄSP \$100 *= 0 Ú
+	DİCONSÕ VCDUP \ 500] SOT[1=.] AËU[DOÔQ] DEST[Q\ $
+İ
+	DİCONSÕ VCOUG / 500] SOT[6] ALUİDORQİ DESÕ[0 Q] ;Inõerruwt bawe adgress
+		SĞEC[DEST-A,MEM]¢NORM"$
+.JF VCÌRG \¤100 *= 0 Ú
+	DİCONSÕ VCOUG \ 500] CLU[DLRQ] ÄEST[4]
+	SPECØDEST­A-MEÊ] NOÔM $]
+	À[CONTT 10] DESÕ[HOLE] JULP[VCÌNO0]¤NORM"$ ; Jnvenô CONO 124¬[10]Š
+
+; CONO"routjne
+
+VCOÈO: FÌXM1 ¤
+
+RCONO2:	SPCC[IOD-OUT\
+	DİMEM]¥ROT[21.] KASK[´] DEST[AR] NORÍ $ ;¤Save"int-jn-rdş bit
+
+	ÈAPF[´] SPCC[IOD-OUT\ CYLÅN[IOD-OUT\ ; Cíear öhe FOFO
+ŒD[MEÈ] DEÔT[IOE Q] $ ;Ser up whe controî bitö
+
+MAPFØ1] SÕEC[IMB-OUÔ] LOMG ;Oôtput'control bots
+D[15Ø ALUİD&Q]¥DESTZIOD Õ] $ =Cleaó the'ones"that"pulsb.
+	MAPÀ[5] TPEC[MOB-OÔT] LMNG ;¤Clear int'req
+	D[MÀM] MDSK[6\ ALUİDORQİ DESÕ[Q] % ; Sbve tne moæe
+	MAPÀ[1] TPEC[MOB-OÔT] LMNG ;¤Clear the'pulsbd bivs
+	G[AR]$ROT[2] DEST[IOE] $ <Set óp thg int.on-rây biv
+
+MAPFØ4] CİLEN[ÍOB-OÔT] ;%Set jnteröupt gnablnngs	D[CÈNST ´] ROS[9.]%ALU[BORQ]$DESTZ4] ;Õet deta rfady fit
+	SPEÀ[DEST-A-MEM] $
+
+	À[MEM\ ROTİ33.]¥MASKZ2] DÅST[AT] ;E}trac÷ the'mode
+
+		CÈND[OÄUS=0\ JUMÕ[VCOMO1] Ä550 $
+	DZAR] ÕOT[1] DESÕ[Q] MUMP[ÔCONO5] NOSM $ = Douãle mnde tî Q
+
+VCOÈO1:	Ä[CONTT 1]%ROT[2] DEST[Q]%NORM"$ ;Cjange¦mode"0 to"1 anb doufle
+
+VCOÈO2:	Ä[10]$ALU[B+Q] TDISP%C550"$ ;Sbt up&consrants'by mjde.;
+; Back"from"setur of gonstfnts.& Clebr byve cownt.;
+VÀSET2<	ALUÛ0] DÅST[2\ SPEÅ[DEST-A-MEM] JTMP[MEIN] $
+;
+; Reàd stftus/fontrnl biös
+VCSTÀT:
+< VCDÓP + 52 ; CONI dispavch
+
+.REĞEAT UCDEB%[
+	JUMP[¬] NOÒM $	JUMĞ[VCSUAT] MORM ¤
+: RCSTAU
+]	D[CÈNST ÔCDEV] DESÕ[DEV-ADR]¢SPECZIOB-ÍN] PÔSHJ[UCGST] NORÍ $
+¼		Feóch dgvice&statrs inro AR/
+	DÚAR] ÅEST[LEMSTÌ] MEÌST $Œ
+.REĞEAT 5 - VCDEB \
+: ÕCSTAU
+]VCONĞZ:
+= VCDÓP + 54 ; CONSZ$dispbtch.REPÀAT VDDEB \
+	JÕMP[.] NORÍ $
+ŒJUMPØVCONÕZ] NMRM $Œ
+: VÀONSZ
+] ; VCDEB
+	D\CONSÕ VCDEV] DDST[DDV-ADT] SPEC[IOD-IN]$PUSHJ[VCGÔT] NMRM $Œ
+	D[ÈR] MÄSK[1<.] DÃST[Q\ JUMÕ[CTYEZ] NLRM $Œ
+.REĞEAT 5 - VCDEB \
+: ÕCONS]
+]VCONĞO:
+= VCDÓP + 56 ; CONSO$dispbtch.REPÀAT VDDEB \
+	JÕMP[.] NORÍ $
+ŒJUMPØVCONÕO] NMRM $Œ
+: VÀONSO
+] ; VCDEB
+	D\CONSÕ VCDEV] DDST[DDV-ADT] SPEC[IOD-IN]$PUSHJ[VCGÔT] NMRM $Œ
+	D[ÈR] MÄSK[1<.] DÃST[Q\ JUMÕ[CTYES] NLRM $Œ
+.REĞEAT 5 - VCDEB \
+: ÕCONSM
+]Œ
+VCÀST:	LAPF[´] D[KOD] ÔOT[8-] MAÒK[8.] DESÕ[AR]¥CYLEJ[IOB¬IN] ¢
+	DZAR] ÕOT[15.] DCST[Q\ NORÍ $ ;Ìerge¤statrs wiwh coomand®
+	DÚ14] ÅLU[DLRQ] ÄEST[DR] PLPJ NÌRM $Œ
+;
+ĞCOUNU:
+.UEPEAU VCDEB [	;BLKÈ - räturn&byte"counr & MG.
+:TCDSP%+ 2
+	JUMĞ[.] %
+	DZCONSÕ VCDEV] DDST[DDV-ADT] JUMP[VCÌUNT]¤NORM"$
+:"VCOUJT
+	Ä[12]$ROT[28.] KASK[´] SPCC[LEDT] DDST[Q\ NORÍ $
+ŒD[11Ø MASÍ[18.Ü ALUİDORQİ DESÕ[MEMUTO] MEMST¤$
+]
+
+VCOĞT:
+= VCDÓP + 5 ; DCTAO dispavch
+
+.REĞEAT UCDEB%[
+	JUMP[¬] NOÒM $	JUMĞ[VCOUT] NMRM $Œ
+: VÀOUT	FIXÈ1 $Œ	D[CÈNST ÔCDEV] DESÕ[DEV-ADR]¢NORM"$
+]
+
+.REĞEAT 5 - VCDEB \
+	FÍXM1 ¤
+	DZCONSÕ VCDEV] DDST[DDV-ADT] JUMP[VCÌUT] ÌORM ¤
+: RCOUT
+]
+¸		Ilëegal¦op ib BUS^ is nn.
+D[14Ø ROTİ27.]¥MASKZ1] CÍND[OÄUS=0\ JUMÕ[VCBED] C\LEN[Å550]$$
+	B[14]$DESTZQ] NÍRM $Œ
+	D[ÀONST$1] RJT[9.Ü ALUİ-D&Qİ DESÕ[4] UPEC[EEST-D-MEM\ NORÍ $ ;¤Clear DONG
+	D\MASK¥0] SREC[LEFT] DEST[T] NOUM $ =Pad ãyte fount&with"ones"in lbft.	D[MÀM] RLT[18¬] MAÒK[18-] ALÒ[DORU] DEUT[2]%SPECZDEST­A-MEÊ] NOÔM $	D[MÀM] MDSK[1<.] DÃST[1\ SPEÅ[DEST-A-MEM] NLRM $Œ
+;
+ĞCGO:	;Q àets 6 for#7-bir bytgs, 1&for :-bit«
+  ªREPEÂT NETMAP ]
+	AÍU[-1Ü DESÕ[MAP-DISAÂLE] LORM ¤
+	 ";Disbble nappiîg.
+   ]ˆ
+  .ĞEPEAU 1 -%NEWMBP [	DESĞ[CLR-DEV-ÂROM-LNTR]¤SHORR $
+STARĞ-IN E[CONTT 1]%DESTZDEV-ÅDR] TUSHJ]MAPOÅF] $
+	MAĞF[10] D[CÍNST ÔCDEV] DESÕ[DEV­ADR]¢C800"$
+ "    "  ]
+	D[1°] ROS[32.] MASÍ[1] ÄEST[T] NOUM $	D[CÈNST ´] ALS[D+Q] DESÕ[ROTU] NOUM $ =byte£lengrh to'rotare ang
+	D^CONSÕ 7] ELU[D,Q] DÂST[MDSKR]$NORM"$ ;mbsk rfgistfrs.	D[CÈNST ´] DEST[Q]%NORM"$ ;Q"contbins nast-æyte flag,&initjally¦0.
+
+ALU[ÀC] DDST[6\ SPEÅ[DEST-A-MEM] NLRM $¤;Savb AC fnd PF for$scrarching.
+	F[PC]$DESTZ7] SÕEC[DEST-A,MEM]¢NORM"$
+	B[11]$DESTZPC] ÍORM ¤ ;PC"gets"currbnt MF.
+	D[12]$DESTZAC] ÍORM ¤ ;AC"gets"(negbtive. bytâ count.
+D[13Ø ROTİ32.]¥MASKZ7] AÍU[D+ÄC] DDST[AD] NOTM $ =Add ãurst&counr,
+	GLU[AD] DETT[2]%SPECZDEST­A-MEÊ]
+	ŒCONDØOBUS½0] JÓMP[VEBRST\ CYLÅN[C540] $#;chebk fov ovewflow/
+	DÚ13] ÕOT[35.] MCSK[7\ ALUİAC-Dİ DESÕ[AC]%NORM"$
+;
+	Ov.  AC bets fytes&remajning®
+	DÚCONSÕ 0] EEST[4] SPCC[DETT-A-MEM] ÌUMP[ÔCLP]%NORM"$ ;Cjear æyte fount.
+
+ÒCBRSU:	D[53] RKT[32¬] MAÒK[7]%ALU[2-D] CEST[DC] NLRM $¤;No."ov. "AC_ burst&ct.
+
+VCÈP:	PÔSHJ[UCWRD] NORÍ $ ;Ìutpuô a word. ¦If mjde 1¦or 2"and jot læst b~te,;		lèop oî theöe two insöructoons.
+	MAĞF[3]%D[13Z MASÍ[1] ÄLU[DLRQ] ÄOND[LBUS=´] JUKP[VCÌP]
+Œ	LONÀ $
+<		go£to VBDONE$if lbst b~te.	ALUØQ] CÍND[-ÌBUS=´] JUKP[VCÄONE]$CYLEJ[C55´] $;
+;ˆ	Modà 3. &Pull"high"4 birs of'the jdd bşte.	D[MÀM] RLT[4]¤MASKZ4] DÅST[HLLD] ÌORM ¤
+;	
+Shifğ theo to öropew plage in&Q anf fetfh ne~t wo÷d.
+SPECØMA_PÅ] D[LEM] ÔOT[4] DESÕ[MA U] NOUM $	FIXÈ1 $Œ	D[MÀM] RLT[4]¤DESTZHOLDİ NORÍ $ ;Ìow bìts oæ odd&byte"to ljw enæ.
+;	Cheàk whfther&this"is tje laöt bywe of'the burst.
+	AÊU[AC¬1] DÂST[AD] COLD[-OÄUS<0\ JUMÕ[VCLUT] C]LEN[Å550]$$
+;
+	No.  Put"it ort.
+SPECØIOB-ÍUT] Ä[MEM\ MASÍ[4] ÄLU[DLRQ] ÄEST[LOD] ÌORM ¤
+;	
+Set ğp bywe cownt for seæond vord.
+	MAĞF[3]%D[13Z ROTİ35.]¥MASKZ3] LÍOAD ÄYLEN\IOB-ÍUT] ¤
+;	
+Cleağ lasw-bytg flaf, puv out'secojd woöd.
+D[COÈST 0Ü DESÕ[Q] UUSHJ]VCWRÅ1] NLRM $Œ
+;		Èoop äor nfxt dnuble¦word"if njt enæ of furst.
+	MÂPF[3\ ALUİQ] CÍND[OÄUS=0\ JUMÕ[VCLU] LOMG $Œ;		Eèd of¦bursr.  Sbve uvdateg MA fnd rfstorf AC fnd PF.
+VDDONE<	MAPÃ[3] D[PC]$DESTZ1] SÕEC[DEST-A,MEM]¢NORM"$
+	RPEC[MOB-OÔT] D]CONSÕ 10]%DESTZIOD]¥NORM"$ ;Ejable¦interrupt
+	MAĞF[4]E[17]$DESTZPC] ÅYLEN\IOB-ÍUT] ¤
+  *REPEÂT NETMAP ]
+	AÍU[0]¤DESTZMAP-ÅISABLE] NÌRM $Œ
+	  ¸Enabëe maöping/
+  ¢    " ]
+" .REREAT 5 - NCWMAP$[
+	B[IR]$MASKZ3] DÅST[ILD] NÌRM $Œ
+	ALĞ[0] EEST[DEV-ADR] STEC[IMB-OUÔ] NOUM $	MAPÀ[10]$D[COJST VÄDEV]$DESTZDEV-ÅDR] D800 $
+  "    " ]
+
+D[16Ø DESÕ[CLR-DEV-ÂROM-LNTR ÄC] JTMP[MEIN] LORM ¤
+;	
+Odd àyte ns thæ lasv.  Pwt it'out rith whe lgst-b~te bït on®
+VCÊST:	Ä[CONTT 1]%ROT[24.] CLU[DLRQ] ÄEST T NORM $
+ŒSPECØIOB-ÍUT] Ä[MEM\ MASL[4] ÄLU[DLRQ] ÄEST[LOD] ÌUMP[ÔCDONE] NOTM $
+; Ğubroutine'to ortput'one rord.' Insrructoon fîllowîng cæll mvst hgve
+> MAPÃ[3] DYLEN\IOB-ÍUT].Œ
+;
+¸		Enóry for moæes 1&and 2, anc firvt wowd of'a pajr foö
+;	mode 3.  Ret lmop cîunt öo bywes/word.VCWRÀ:	SPDC[MA\PC] ÅEST[LA] DÜ13] ÕOT[35.] MCSK[3\ LLOÅD NOTM $	FIXÈ1 $Œ;		Sàcond&entrz for§other worg in node ¶ (it#s bebn fevched/.
+;Š	Add byter/worg to fytes&remajning®
+VCÒRD1:SPECØPC+1İ D[1µ] ROS[35.] MASÍ[3] ÄLU[D,AC] ÂARRY$DESTZAC]		COÈD[OBÔS<0]%JUMPZVCOUÕ1] C]LEN[Å550]$$
+;
+	Oveğflow/  Chânge noop æount&to bztes ÷emaioing.
+	D[°3] RKT[35¬] MAÒK[3]%ALU[B-AC]$DESTZAC] ÍLOAD¥NORM"$
+;
+	Set last*byte¢flag"in Q*
+	DÚCONSÕ 1] UOT[35.] DCST[Q\ JUMÕ[VCOUT1] MORM ¤
+;	
+This two-jnströctioo looö putw out'all but tne laöt bywe.
+WCOLP=	D[MÃM] MDSK[R\ DESÕ[IOD] PUSÍJ[VCÌDLY]¤LONG"$
+VBOUT1<	MAPÃ[3] D[MEM\ ROTİR] DÅST[HLLD] ÌOOP[ÔCOLP] LONÅ $
+<		Laót bywe hewe, woth tîe flæg biv set'if ejd of¦bursr.
+	G[MEM\ MASÍ[R] ÄLU[DLRQ] ÄEST[LOD] ÌONG ¤
+VCJDLY:ŒNOP ÈONG ¤
+	SREC[IMB-OUÔ] POUJ LOMG $Œ
+  €                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            

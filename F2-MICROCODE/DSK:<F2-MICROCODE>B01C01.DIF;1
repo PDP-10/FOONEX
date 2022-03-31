@@ -1,0 +1,2484 @@
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 1,1
+
+**** File 1) CFMAIN.B01[TMP,F2]/1P/4L
+1)	C00006 00002	\		**** THIS COPY FOR REFERENCE ONLY ****
+1)	C00020 00003	\
+1)	C00026 00004	: 2020
+1)	C00042 00005	------------------------------------------------------------------------------
+1)	C00046 00006	------------------------------------------------------------------------------
+1)	C00057 00007	------------------------------------------------------------------------------
+1)	C00063 00008	------------------------------------------------------------------------------
+1)	C00073 00009	------------------------------------------------------------------------------
+1)	C00081 00010	------------------------------------------------------------------------------
+1)	C00087 00011	------------------------------------------------------------------------------
+1)	C00092 00012	------------------------------------------------------------------------------
+1)	C00098 00013	 IOT GROUP -- FOR NOW
+1)	C00107 00014	NON DISPATCH STUFF HERE
+1)	C00117 00015
+1)	C00124 00016	JFFO1:	ACSEL[AC+1] ALU[0] DEST[AC] JUMP[MAIN] NORM $
+1)	C00132 00017		.PAIR
+1)	C00138 00018	RESW1:
+1)	C00153 00019	------------------------------------------------------------------------------
+1)	C00164 00020
+1)	C00171 00021	------------------------------------------------------------------------------
+1)	C00177 00022	PIGEN:	 ENTER WITH CHN IN AR TO REQUEST INTRPT.
+1)	C00180 00023	PICONO:  HERE FROM ANY CONO PI,
+1)	C00184 00024	 MBOOT MOVED TO PAGE WITH REST OF TAPE STUFF
+1)	C00185 00025	------------------------------------------------------------------------------
+1)	C00202 00026	------------------------------------------------------------------------------
+1)	C00212 00027		D[MEM] MASK[13] DEST[Q] SHORT $ GET ABS PAGE #
+1)	C00222 00028	------------------------------------------------------------------------------
+1)	C00235 00029	XFIXMA:	COND[MA-AC] JUMP[XCTAC] NORM $ J IF ADDRS IS AC
+1)	C00241 00030	------------------------------------------------------------------------------
+1)	C00247 00031	PDLO1:	PUSHJ[PDLO] NORM $ SET PDLO BIT
+1)	C00255 00032	 60 HZ CLOCK READING AND INTERRUPT ROUTINES
+1)	C00257 00033
+1)	C00264 00034	.REPEAT KNYTAPE [ KENNEDY TAPE CONTROL UCODE
+1)	C00265 00035	.REPEAT TLXTAPE [ TELEX TAPE CONTROL UCODE
+1)	C00266 00036	.REPEAT SLOWTAPE [ UCODE FOR BARE 800 BPI TAPE DRIVE
+1)	C00267 00037	.REPEAT 125TAPE [ UCODE FOR BARE 800 BPI, 125 IPS TAPE DRIVE
+1)	C00268 00038
+1)	C00269 00039	FLOATING POINT, KA10 STYLE.
+1)	C00290 00040	Strays from KI instructions
+1)	C00299 00041	
+1)	C00300 00042	.REPEAT TYMNET [.DEFINE FOOLIST[] [ LIST ] ]
+1)	C00317 00043	INTERVAL TIMER CODE.
+1)	C00322 00044		IMP stuff
+1)	C00323 00045	 dsk stuff
+1)	C00327 00046	: 7400	TEMP DEBUGGING STUFF.
+1)	C00328 00047	 this should be after everything else
+1)	C00329 ENDMK
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 1,1
+
+1)	C;
+1)	COMMENT \		**** THIS COPY FOR REFERENCE ONLY ****
+1)		FOONLY F2-F3 MICRO-CODE
+**** File 2) CFMAIN.C01[TMP,F2]/1P/4L
+2)	C00009 00002	\
+2)	C00029 00003
+2)	C00036 00004	UUO1 UUO2 SMAIN SMAIN1 MAIN NMAIN1 MAIN1 MAIN2 MSMAIN MSMAIN1 MUUO MUUO2 MUUO3 MUUO4 PIMUUO MUUO44 UUOPJ MUUO5X MUUO5Y UAOP AREA216 UMOVE JSYS JSYS3 ADJSP XMOVEM1 DMOVE DMOVN KIFIX DMOVEM DMOVNM FIXR FLTR UFA DFN FSC
+2)	C00053 00005	IBP ILDB LDB IDPB DPB FAD FSB FMP FDV
+2)	C00058 00006	MOVE MOVE1 MOVEI MOVEM MOVES MOVS MOVSI MOVSM MOVSS MOVN MOVNI MOVNM MOVNS MOVM MOVM1 MOVMI MOVMM MOVMS MOVMS1 MOVMS3 MOVMS4 MOVMS5 MOVMS6 MOVMS2
+2)	C00069 00007	------------------------------------------------------------------------------
+2)	C00075 00008	------------------------------------------------------------------------------
+2)	C00085 00009	------------------------------------------------------------------------------
+2)	C00093 00010	------------------------------------------------------------------------------
+2)	C00099 00011	------------------------------------------------------------------------------
+2)	C00104 00012	------------------------------------------------------------------------------
+2)	C00110 00013	 IOT GROUP -- FOR NOW
+2)	C00119 00014	MSTART MSTRT1 BADPC ILDB1 ILDB2 IDPB1 IDPB2 ILDB3 LDB1 LDB5 LDB2 LDB4 DPB1 DPB5 DPB7 IDPB3 DPB2 DPB4 BIIH1 BIIH BII IBP1 IBT1
+2)	C00132 00015	IMUL1 IMUL2 IMUL3 MUL1 MUL2 MUL3 DOIMUL MSETOV DOMMUL DOMUL DOMUL1 DOMUL4 IDIV1 IDIV2 IDIV3 DIV1 DIV2 DIV3 DODDIV DODIV DODIV1 DODIV3 DODIV2 STOVFQ DODIV4 DODIV6 DODIV5
+2)	C00143 00016	JFFO1 JFFO2 JFFO3 JFFO5 JFFO4 ROTDO BIGLSH LSHPDO LSHDO LSHDO1 ASHDO1 BIGASH SETOV1 ASHDO ASHDOP BIGAS2 ASHC1 ASHC8 ASHC6 ASHC9 ASHC4 ASHC2 ASHC7 ROTC1 ROTC2 LSHC1 LSHC2 SJMAIN PUSH1 POP1 POPJ1 PUSHJ1
+2)	C00151 00017	BLTA2 BLT1 BLT7 BLT5 BLT3 BLT2 BLT9 BLT4 BLT6 BLT8 BLTA3 BLTL1 BLTA4 BLTA1 BLTAL2 BLTA10 BLTL2 BLTA12 ANDCA1 ANDCA2 ANDCA3 LOG2 LOG3 ORCM2 ORCM3
+2)	C00157 00018	SWINT NORSW NOSW RESW1 RESET RESET RESLOP DOHALT STPLOP STPLP1 NORSW2 RESW2 STRTSW CONSW DEPTSW DEPNSW DEPSW1 EXMTSW EXMNSW SETLTS EXMSW1 BRPNT MOVSS1 MOVNS1 HLLZS1 HRLZS1 HRRZS1 HLRZS1 HRAR HLAR HLLEM1 HRLEM1 HLREM1 HRREM1 HSMAIN HSMN1 HLLOS1 HRROS1 HLLES1 HRRES1 HLLES2 HMV HHS HLSZ HOR HRSZ HOL HRLM1 HLLM1 HLRM1 HRRM1 JRST1 JRST4 JRST5 JRST9 JRST8 JRST2 JRST3 JFCL1 JSR2 JSA1 JRA1 MUJSR MUJSP MUJSA MUJSYS MUJSM1
+2)	C00173 00019	CTYDSP AREA51 CTYINT CTYIOT CTYDI CTYDO CTYCO CTYCI CTYCI2 CTYCI1 CTYCI9 CTYCI8 CTYCI3 CTYCO1 CTYCO3 CTYCO4 CTYCO5 CTYRST ctyrs1 AREA52 CTYCZ CTYCS
+2)	C00184 00020	DSKRST SDSKO2 UDSKST TYMRST CLKRST CLKCLR DEV6CL DEV6ST DEV6ST1 DEV6ST2 TAPRST APRRST CLRDEVINT
+2)	C00192 00021	------------------------------------------------------------------------------
+2)	C00198 00022	PIGEN:	 ENTER WITH CHN IN AR TO REQUEST INTRPT.
+2)	C00201 00023	PICONO:  HERE FROM ANY CONO PI,
+2)	C00205 00024	 MBOOT MOVED TO PAGE WITH REST OF TAPE STUFF
+2)	C00206 00025	MAPIOT MAPIO1 MAPCO0 MAPCOB MAPCOC MFT1 MFT1A MFT1D MFRD MFOTH MBLT3 SETHLF QORCRY SETHFU BWRTA1 MBLT2 MAPCWT MAPCW1 MAPCW2
+2)	C00223 00026	MAPCOA MAPCOE MAPCO1 MAPCOG MAPCO4 MPOFF1 MAPOFF MAPCO6 MAPCO7 MAPCW9 MAPDO MFUS MFA3 MFA7 MFA6 MFA4 MFT1B MFHIEX MFA1 MFA2 MFB3 MFTYP1 MFTYP0
+2)	C00234 00027	MFA5 JSMFR MFTR1 MFTR10 MFB5 MFB4 MFC1 MFTR2 MTRPAL MFTR3 MFTR4 MFTR5 MFTR6 MFTR7 MFTR9 MFTR41 MAPRST MAPRSS MAPRSL
+2)	C00245 00028	JSYS1 JSYS2 UMOVX XCT1 XCTUMV XCT5 XCT4 XCT6 XCT3 XCT13 XCT18 XCT12 XCT11 XDISP XCT2 XCTAC XCTSTK XCTS1 XCTS2 XCT10 XCTBLG XCTBYT XBY1 XBY4 XBY15 XBY14 XBY13 XBY3
+2)	C00258 00029	XFIXMA XCTBLT XBLTL XPUSH1 XPDLO2 XPOP1 XPOP2 XPOP3
+2)	C00264 00030	APRDSP PIDSP AREA53 APRCO APRCO2 APRCO3 APRIEN APRC1 APRC2 APRCHK APRCK1 APDINT APRCI APRCII APRDI APIOT
+2)	C00274 00031	PDLO1 PDLO2 PDLO5 PDLO3 PDLO4 PDLO6 PDLMEM PDLOE PDLO SOED STOPS SOVRS SECCS SOEDOV
+2)	C00283 00032	 60 HZ CLOCK READING AND INTERRUPT ROUTINES
+2)	C00285 00033
+2)	C00292 00034	.REPEAT KNYTAPE [ KENNEDY TAPE CONTROL UCODE
+2)	C00293 00035	.REPEAT TLXTAPE [ TELEX TAPE CONTROL UCODE
+2)	C00294 00036	.REPEAT SLOWTAPE [ UCODE FOR BARE 800 BPI TAPE DRIVE
+2)	C00295 00037	.REPEAT 125TAPE [ UCODE FOR BARE 800 BPI, 125 IPS TAPE DRIVE
+2)	C00296 00038
+2)	C00297 00039	FLOATING POINT, KA10 STYLE.
+2)	C00327 00040	ADJSP1 ADJSP2 DMOVE2 DMOVN2 DMOVM2 DMVNM2 DMVNM3 DMVNM4 DMVNM5 KAFIXP KAFIXN FIXR1 KIFIX1 FIXRN KIFIXN FIXER FIXER1 FIXER2 FIXER3
+2)	C00339 00041	
+2)	C00340 00042	.REPEAT TYMNET [.DEFINE FOOLIST[] [ LIST ] ]
+2)	C00357 00043	INTERVAL TIMER CODE.
+2)	C00362 00044		IMP,PAN,DLS,LPT, etc.
+2)	C00364 00045	 dsk stuff
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 1,1
+
+2)	C00368 00046	: 7400	TEMP DEBUGGING STUFF.
+2)	C00369 00047	 this should be after everything else
+2)	C00370 ENDMK
+2)	C;
+2)	COMMENT \
+2)		FOONLY F2-F3 MICRO-CODE
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/2P/115L
+1)	(End history)
+**** File 2) CFMAIN.C01[TMP,F2]/2P/115L
+2)	15 May 80 TVR	Fixed bug in DMOVNM.  Changed mechanism for PAN interrupts.
+2)			The PAN microinterrupt enable is turned off when the interrupt
+2)			for that channel is recieved and turned on by PI-CHECK-RQS
+2)			by setting all of the microinterrupt enables for the PAN to
+2)			the complement of PI IN PROGRESS and PI REQUEST.  This means
+2)			that the PAN can only request interrupts whenever something
+2)			else isn't using those channels.  This implies that any PAN
+2)			devices must be on the end of CONSZ chains, or else they will
+2)			steal interrupts from other, interrupt counting devices.
+2)	24 May 80 TVR	Grinnell interrupt bug fixes.  Starting putting names on
+2)			opcodes and stuff to make it easier to use with E.
+2)	26 May 80 TVR	Fixed problem in JRST1+1 falling thru to nothingness.  A few
+2)			more editorial changes.
+2)	07 Jul 80 TVR	Changed CONO APR, code to turn on AR INT ENB and also made
+2)			symbols some references to APR A-MEM relating to APR.
+2)			Fixed bugs in F2 version of overflow interrupt.
+2)			*** Did not look at F3 code for same. ***
+2)			More comments added.
+2)	08 Jul 80 TVR	Made attempt to fix [I]DIV by zero and no divide.
+2)			As part of that, commented the setup part of DODIV, and added
+2)			code to try to restore AC after finding no divide case.  I'm
+2)			not sure the DIV case will work properly, but we'll see...
+2)			Fixed bug in FDVR of negative number which set the flags wrong.
+2)			It had the wrong MASK when complementing a negative dividend
+2)			exponent.
+2)			Many comments added to divide and KA floating point as a result
+2)			of chasing these.  Some have (???) being i'm not sure that either
+2)			the code and/or the comments are right.
+2)	15 Jul 80 TVR	Installed LPT device.  Microcode for LPT is still being tested.
+2)			Fixed bug in PAN enabling, so that PI channels that are not
+2)			turned on do not have their micro interrupts enabled.
+2)	22 Jul 80 TVR	Fixed bug in [I]DIV which clobbered PC on divide by zero.
+2)			Sets overflow on KIFIX now.  Also, sets overflow on KAFIX, which
+2)			should not cause any problems.
+2)	25 Jul 80 TVR	Added FIXR and FLTR.
+2)	23 Aug 80 TVR	Fixed bugs in LDB/DPB having to do with bytes which overflow
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 2,2
+
+2)			word boundaries.
+2)			Ran out of micro-code space and re-adjusted .USEs to recover
+2)			some wasted space.
+2)			More work on LPT device.
+2)	20 Sep 80 TVR	Added a new switch, MUM2.  At the moment, this only causes
+2)			ECC logging information to go to 1776x instead of 0776x.
+2)			Under WAITS switch, changed APR CONI, and clock interrupt
+2)			decision, to implement special feature of SAIL's KA, which
+2)			turns on bit 27 in APR CONI when it is NOT interrupting.
+2)			
+2)	(End history)
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/3P/1L
+1)	COMMENT \
+**** File 2) CFMAIN.C01[TMP,F2]/2P/243L
+2)	;------------------------------------------------------------------------------
+2)	;
+2)	;	CPU special registers				uDevice 0
+2)	;
+2)	;------------------------------------------------------------------------------
+2)	;
+2)	; Dev  Subsel	    Read			    Write
+2)	;
+2)	;  0	 1					Address Break Register
+2)	;	 2	Data switches			Data lights
+2)	;	 4	Address and console switches	Clear latched switches (no data)
+2)	;	10	PC History (unimplemented)	Set AR,ECC enables, MAP ON, etc.
+2)	;
+2)	;  1	 1	ECC status
+2)	;	 2	MAP status			MAP (address in MA, LOCAL USER)
+2)	;	 4	(Same as 1)
+2)	;	10	(Same as 1)
+2)	;
+2)	;------------------------------------------------------------------------------
+2)	;
+2)	;	A-Mem usage					uDevice 0 & 1
+2)	;
+2)	;------------------------------------------------------------------------------
+2)	;Device 0
+2)	APRSTS = 2	;Firmware status bits for APR
+2)	APRENB = 7	;Used to save ECC,AR interrupt enables, MAP ON, etc. during map
+2)			;trap processing
+2)	;Device 1
+2)	ECCSVP = 3	;Pointer to next place to remember ECC interrupt in microcode
+2)			;memory
+2)	COMMENT \
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 3,2
+
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/3P/32L
+1)	: 2007	JUMP[7400] $
+1)	: 7400
+1)		D[10] DEST[Q AR] C550 $
+**** File 2) CFMAIN.C01[TMP,F2]/3P/33L
+2)	: 2007	JUMP[7740] $
+2)	: 7740
+2)		D[10] DEST[Q AR] C550 $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/3P/52L
+1)		JUMP[7400] $
+1)	: 7400
+1)		D[10] DEST[Q AR] C550 $
+**** File 2) CFMAIN.C01[TMP,F2]/3P/53L
+2)		JUMP[7740] $
+2)	: 7740
+2)		D[10] DEST[Q AR] C550 $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/3P/82L
+1)		DEST[CLR-DEV-FROM-INTR] JUMP[SOVRS] NORM $
+1)	: 2007 ;BOTH ECC AND OV (AT THE SAME TIME) TRAPS HERE
+**** File 2) CFMAIN.C01[TMP,F2]/3P/83L
+2)	;;;	DEST[CLR-DEV-FROM-INTR] JUMP[SOVRS] NORM $
+2)		D[CONST 1] DEST[DEV-ADR] JUMP[SOVRS] NORM $
+2)			;Start setting up to read AR enabling
+2)	: 2007 ;BOTH ECC AND OV (AT THE SAME TIME) TRAPS HERE
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/4P/1L
+1)	: 2020
+1)	;------------------------------------------------------------------------------
+**** File 2) CFMAIN.C01[TMP,F2]/4P/1L
+2)	;UUO1 UUO2 SMAIN SMAIN1 MAIN NMAIN1 MAIN1 MAIN2 MSMAIN MSMAIN1 MUUO MUUO2 MUUO3 MUUO4 PIMUUO MUUO44 UUOPJ MUUO5X MUUO5Y UAOP AREA216 UMOVE JSYS JSYS3 ADJSP XMOVEM1 DMOVE DMOVN KIFIX DMOVEM DMOVNM FIXR FLTR UFA DFN FSC
+2)	;------------------------------------------------------------------------------
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/4P/12L
+1)	UUO1:	D[CONST 40] DEST[MA] PUSHJ[UUOPJ] NORM  $
+**** File 2) CFMAIN.C01[TMP,F2]/4P/12L
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 4,4
+
+2)		.OPCODE[010]	;User UUOs 010:017
+2)	UUO1:	D[CONST 40] DEST[MA] PUSHJ[UUOPJ] NORM  $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/4P/41L
+1)	AREA202:	;(Not a lot left)
+1)		.OPCODE[020];	User UUOs 020-027
+**** File 2) CFMAIN.C01[TMP,F2]/4P/42L
+2)	AREA202 = .	;(Not a lot left)
+2)		.OPCODE[020];	User UUOs 020-027
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/4P/47L
+1)	AREA206:
+1)		.OPCODE[040];	Monitor UUOs 040-047 (CALL,INIT,CALLI)
+**** File 2) CFMAIN.C01[TMP,F2]/4P/48L
+2)	AREA206 = .
+2)		.OPCODE[040];	Monitor UUOs 040-047 (CALL,INIT,CALLI)
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/4P/169L
+1)	.REPEAT 1 - WAITS [
+**** File 2) CFMAIN.C01[TMP,F2]/4P/170L
+2)	JSYS:
+2)	.REPEAT 1 - WAITS [
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/4P/179L
+1)		D[IR] ROT[22] MASK[0] ALU[D+AC] SPEC[LEFT] DEST[Q]
+1)				COND[OBUS<0] JUMP[ADJSP1] C550$
+**** File 2) CFMAIN.C01[TMP,F2]/4P/181L
+2)	ADJSP:	D[IR] ROT[22] MASK[0] ALU[D+AC] SPEC[LEFT] DEST[Q]
+2)				COND[OBUS<0] JUMP[ADJSP1] C550$
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/4P/202L
+1)		FIXM1 $			; Fetch first word
+1)		ACSEL[AC] D[MEM] DEST[AC] JUMP[DMOVE2] CYLEN[FIXM+1] $
+**** File 2) CFMAIN.C01[TMP,F2]/4P/204L
+2)	DMOVE:	FIXM1 $			; Fetch first word
+2)		ACSEL[AC] D[MEM] DEST[AC] JUMP[DMOVE2] CYLEN[FIXM+1] $
+***************
+
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 4,4
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/4P/206L
+1)	;121, DMOVN
+1)		FIXM1 $	;Fetch first word
+1)		ACSEL[AC] D[MEM] ALU[NOTD] DEST[AC] SPEC[CRYOV]
+**** File 2) CFMAIN.C01[TMP,F2]/4P/209L
+2)		.OPCODE[121]	;DMOVN
+2)	DMOVN:	FIXM1 $	;Fetch first word
+2)		ACSEL[AC] D[MEM] ALU[NOTD] DEST[AC] SPEC[CRYOV]
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/4P/213L
+1)	;122, KIFIX
+1)		FIXM1 $	;Fetch first word
+1)		D[CONST 33] DEST[Q] JUMP[KIFIX1] NORM $
+**** File 2) CFMAIN.C01[TMP,F2]/4P/216L
+2)		.OPCODE[122]	;KIFIX
+2)	KIFIX:	FIXM1 $	;Fetch first word
+2)		D[CONST 33] DEST[Q] JUMP[KIFIX1] NORM $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/4P/225L
+1)		FIXM2 $			; Make sure first word is in core
+1)		ACSEL[AC] ALU[AC] DEST[MEMSTO] COND[-MA-AC] LBJUMP[DMOVM2] NORM $
+**** File 2) CFMAIN.C01[TMP,F2]/4P/228L
+2)	DMOVEM:	FIXM2 $			; Make sure first word is in core
+2)		ACSEL[AC] ALU[AC] DEST[MEMSTO] COND[-MA-AC] LBJUMP[DMOVM2] NORM $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/4P/229L
+1)	;125, DMOVNM
+1)	;*** Note: Like on the KI10, DMOVNM AC,AC+1 will lose.
+1)		FIXM2 $			; Make sure first word is in core
+1)		ACSEL[AC] ALU[NOTAC] DEST[AR] SPEC[CRYOV] JUMP[DMVNM2] NORM $
+**** File 2) CFMAIN.C01[TMP,F2]/4P/232L
+2)		.OPCODE[125]	;DMOVNM
+2)	;*** Note: Like on the KI10, DMOVNM AC,AC+1 will lose.
+2)	DMOVNM:	FIXM2 $			; Make sure first word is in core
+2)		ACSEL[AC] ALU[NOTAC] DEST[AR] SPEC[CRYOV] JUMP[DMVNM2] NORM $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/4P/236L
+1)	.REPEAT 127 - 126 + 1
+1)	[	UAOP1 $
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 4,4
+
+1)		NOP $
+1)		]
+1)		.OPCODE[130]	;UFA
+1)		FIXM1 $
+1)		D[CONST 11] DEST[DEV-ADR] JUMP[UFA1] $
+1)		.OPCODE[131]	;DFN
+1)		FIXM2 $
+1)		D[MEM] MASK[27.] ALU[0-D] DEST[AR] COND[OBUS=0] LBJUMP[DFN1] C600 $
+1)		.OPCODE[132]	;FSC
+1)		D[MASK 27.] ALU[D&AC] ACSEL[AC] COND[OBUS=0] JUMP[FSCZAP] C550 $
+1)		ACSEL[AC] ALU[AC] DEST[AR] JUMP[FSC1] NORM $
+**** File 2) CFMAIN.C01[TMP,F2]/4P/239L
+2)		.OPCODE[126]	;FIXR
+2)	FIXR:	FIXM1 $	;Fetch first word
+2)		D[CONST 04] ROT[24.] DEST[Q] JUMP[FIXR1] NORM $
+2)			;Start making constant 0.5
+2)		;(Continued just before TYMNET code)
+2)		.OPCODE[127]	;FLTR
+2)	FLTR:	FIXM1 $	;Fetch first word
+2)		D[MEM] DEST[AR] JUMP[FLTR1] $
+2)			;Setup for normalize
+2)		.OPCODE[130]	;UFA
+2)	UFA:	FIXM1 $
+2)		D[CONST 11] DEST[DEV-ADR] JUMP[UFA1] $
+2)		.OPCODE[131]	;DFN
+2)	DFN:	FIXM2 $
+2)		D[MEM] MASK[27.] ALU[0-D] DEST[AR] COND[OBUS=0] LBJUMP[DFN1] C600 $
+2)		.OPCODE[132]	;FSC
+2)	FSC:	D[MASK 27.] ALU[D&AC] ACSEL[AC] COND[OBUS=0] JUMP[FSCZAP] C550 $
+2)		ACSEL[AC] ALU[AC] DEST[AR] JUMP[FSC1] NORM $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/5P/6L
+1)		.OPCODE[133]	;IBP (and ADJBP)
+1)		FIXM2 COND[HALF] JUMP[MAIN] $
+1)		D[MEM] DEST[Q AR] JUMP[IBP1] NORM $
+1)		.OPCODE[134]	;ILDB
+1)		FIXM2 $
+1)		D[MEM] DEST[Q AR] COND[-HALF] LBJUMP[ILDB1] NORM $
+1)		.OPCODE[135]	;LDB
+1)		FIXM1 $
+1)		D[MEM] DEST[Q AR MA] COND[-MEM-IDX-IND] LBJUMP[LDB1] CYLEN[C500] $
+1)		.OPCODE[136]	;IDPB
+1)		FIXM2 $
+**** File 2) CFMAIN.C01[TMP,F2]/5P/6L
+2)	;------------------------------------------------------------------------------
+2)		.OPCODE[133]	;IBP (and ADJBP)
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 5,5
+
+2)	IBP:	FIXM2 COND[HALF] JUMP[MAIN] $
+2)			;A no-op if we're already incremented.
+2)		D[MEM] DEST[Q AR] COND[AC=0] LBJUMP[IBP1] NORM $
+2)			;Get byte pointer and decide if it's an ADJBP or a IBP
+2)		.OPCODE[134]	;ILDB
+2)	ILDB:	FIXM2 $
+2)		D[MEM] DEST[Q AR] COND[-HALF] LBJUMP[ILDB1] NORM $
+2)		.OPCODE[135]	;LDB
+2)	LDB:	FIXM1 $
+2)		D[MEM] DEST[Q AR MA] COND[-MEM-IDX-IND] LBJUMP[LDB1] CYLEN[C500] $
+2)	IDPB:	.OPCODE[136]	;IDPB
+2)		FIXM2 $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/5P/23L
+1)		FIXM1 $
+1)		D[MEM] DEST[Q AR MA] LBJUMP[DPB1] COND[-MEM-IDX-IND] CYLEN[C500]  $
+**** File 2) CFMAIN.C01[TMP,F2]/5P/26L
+2)	DPB:	FIXM1 $
+2)		D[MEM] DEST[Q AR MA] LBJUMP[DPB1] COND[-MEM-IDX-IND] CYLEN[C500]  $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/5P/36L
+1)		FIXM1 JUMP[FAOS1] $ NOP $
+1)		FIXM1 JUMP[FAOS2] $ NOP $
+**** File 2) CFMAIN.C01[TMP,F2]/5P/39L
+2)	FAD:	FIXM1 JUMP[FAOS1] $ NOP $
+2)		FIXM1 JUMP[FAOS2] $ NOP $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/5P/52L
+1)		FIXM1 $ FSBMAC[FAOS1] $
+1)		FIXM1 $ FSBMAC[FAOS2] $
+**** File 2) CFMAIN.C01[TMP,F2]/5P/55L
+2)	FSB:	FIXM1 $ FSBMAC[FAOS1] $
+2)		FIXM1 $ FSBMAC[FAOS2] $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/5P/65L
+1)		FIXM1 JUMP[FMP1] $ NOP $
+1)		FIXM1 JUMP[FMP2] $ NOP $
+**** File 2) CFMAIN.C01[TMP,F2]/5P/68L
+2)	FMP:	FIXM1 JUMP[FMP1] $ NOP $
+2)		FIXM1 JUMP[FMP2] $ NOP $
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 5,5
+
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/5P/79L
+1)		FIXM1 $ DIVMAC[FD1] $
+1)		FIXM1 $ DIVMAC[FD2] $
+**** File 2) CFMAIN.C01[TMP,F2]/5P/82L
+2)	FDV:	FIXM1 $ DIVMAC[FD1] $
+2)		FIXM1 $ DIVMAC[FD2] $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/6P/7L
+1)		.OPCODE[200]	;MOVE
+**** File 2) CFMAIN.C01[TMP,F2]/6P/6L
+2)	;------------------------------------------------------------------------------
+2)		.OPCODE[200]	;MOVE
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/6P/16L
+1)		ACSEL[AC] D[IR] MASK[18.] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+1)			;Store effective address into AC
+**** File 2) CFMAIN.C01[TMP,F2]/6P/17L
+2)	MOVEI:	ACSEL[AC] D[IR] MASK[18.] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+2)			;Store effective address into AC
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/6P/24L
+1)		ACSEL[AC] ALU[AC] DEST[MEMSTO]  MEMST $
+1)			;Start writing AC (selected by AC field in IR) into memory.
+**** File 2) CFMAIN.C01[TMP,F2]/6P/25L
+2)	MOVEM:	ACSEL[AC] ALU[AC] DEST[MEMSTO]  MEMST $
+2)			;Start writing AC (selected by AC field in IR) into memory.
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/6P/31L
+1)		FIXM1 COND[-AC=0] JUMP[MOVE1]  $
+1)			;If AC field (in IR) is non-zero, we treat this as if it
+**** File 2) CFMAIN.C01[TMP,F2]/6P/32L
+2)	MOVES:	FIXM1 COND[-AC=0] JUMP[MOVE1]  $
+2)			;If AC field (in IR) is non-zero, we treat this as if it
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/6P/41L
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 6,6
+
+1)		FIXM1 $
+1)		ACSEL[AC] D[MEM] ROT[18.] DEST[AC MA] SPEC[MA_PC]
+**** File 2) CFMAIN.C01[TMP,F2]/6P/42L
+2)	MOVS:	FIXM1 $
+2)		ACSEL[AC] D[MEM] ROT[18.] DEST[AC MA] SPEC[MA_PC]
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/6P/47L
+1)		ACSEL[AC] D[IR] ROT[18.] DEST[AC MA] SPEC[LEFT&MA_PC] JUMP[MAIN1] NORM$
+1)			;Just like a MOVEI except it puts the result in the left half
+**** File 2) CFMAIN.C01[TMP,F2]/6P/48L
+2)	MOVSI:	ACSEL[AC] D[IR] ROT[18.] DEST[AC MA] SPEC[LEFT&MA_PC] JUMP[MAIN1] NORM$
+2)			;Just like a MOVEI except it puts the result in the left half
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/6P/52L
+1)		ALU[AC] ACSEL[AC] DEST[AR] NORM $
+1)		D[AR] ROT[18.] DEST[MEMSTO] MEMST $
+1)			;Swap halves and write it into memory like a MOVEM
+1)	;MOVSS
+1)		SLFFXM[MOVSS1] $
+1)			;Finish read fetch of read-modify-write type cycle.
+**** File 2) CFMAIN.C01[TMP,F2]/6P/53L
+2)	MOVSM:	ALU[AC] ACSEL[AC] DEST[AR] NORM $
+2)		D[AR] ROT[18.] DEST[MEMSTO] MEMST $
+2)			;Swap halves and write it into memory like a MOVEM
+2)		.OPCODE[207]	;MOVSS
+2)	MOVSS:	SLFFXM[MOVSS1] $
+2)			;Finish read fetch of read-modify-write type cycle.
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/6P/67L
+1)		FIXM1 $
+1)		ACSEL[AC] D[MEM] ALU[0-D] DEST[AC MA] SPEC[CRYOV&MA_PC]
+**** File 2) CFMAIN.C01[TMP,F2]/6P/68L
+2)	MOVN:	FIXM1 $
+2)		ACSEL[AC] D[MEM] ALU[0-D] DEST[AC MA] SPEC[CRYOV&MA_PC]
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/6P/74L
+1)		ACSEL[AC] D[IR] ALU[0-D] MASK[18.] DEST[AC MA] SPEC[CRYOV&MA_PC]
+1)				JUMP[MAIN1] NORM $
+**** File 2) CFMAIN.C01[TMP,F2]/6P/75L
+2)	MOVNI:	ACSEL[AC] D[IR] ALU[0-D] MASK[18.] DEST[AC MA] SPEC[CRYOV&MA_PC]
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 6,6
+
+2)				JUMP[MAIN1] NORM $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/6P/85L
+1)		SLFFXM[MOVNS1] $
+1)			;Complete fetch of read-modify-write
+**** File 2) CFMAIN.C01[TMP,F2]/6P/86L
+2)	MOVNS:	SLFFXM[MOVNS1] $
+2)			;Complete fetch of read-modify-write
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/6P/95L
+1)		FIXM1 $	;Complete data fetch
+1)		ACSEL[AC] D[MEM] DEST[AC] COND[OBUS<0] LBJUMP[MOVM1] C600 $
+**** File 2) CFMAIN.C01[TMP,F2]/6P/96L
+2)	MOVM:	FIXM1 $	;Complete data fetch
+2)		ACSEL[AC] D[MEM] DEST[AC] COND[OBUS<0] LBJUMP[MOVM1] C600 $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/6P/110L
+1)		ACSEL[AC] D[IR] MASK[18.] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+1)			;Immediate implies it's positive.  Equivalent to MOVEI
+1)		.OPCODE[216]	;MOVMM
+1)		ACSEL[AC] ALU[AC] COND[OBUS<0] JUMP[MOVNM] CYLEN[C450] $
+1)			;If AC is negative, store its negation and set flags
+**** File 2) CFMAIN.C01[TMP,F2]/6P/111L
+2)	MOVMI:	ACSEL[AC] D[IR] MASK[18.] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+2)			;Immediate implies it's positive.  Equivalent to MOVEI
+2)		.OPCODE[216]	;MOVMM
+2)	MOVMM:	ACSEL[AC] ALU[AC] COND[OBUS<0] JUMP[MOVNM] CYLEN[C450] $
+2)			;If AC is negative, store its negation and set flags
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/6P/123L
+1)		COND[MA-AC] JUMP[MOVMS2]
+1)				DEST[FIXMAC-MAPF-WRT] MAPF[NORM-WRT] CYLEN[FIXM]$
+**** File 2) CFMAIN.C01[TMP,F2]/6P/124L
+2)	MOVMS:	COND[MA-AC] JUMP[MOVMS2]
+2)				DEST[FIXMAC-MAPF-WRT] MAPF[NORM-WRT] CYLEN[FIXM]$
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/7P/6L
+1)		.OPCODE[220]	;IMUL
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 7,7
+
+**** File 2) CFMAIN.C01[TMP,F2]/7P/5L
+2)	;------------------------------------------------------------------------------
+2)		.OPCODE[220]	;IMUL
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/13P/144L
+1)	;;; : TIMER-IOTS + 12.	;LEAVE SPACE FOR OPCODES 760-765
+**** File 2) CFMAIN.C01[TMP,F2]/13P/144L
+2)		.OPCODE[760]	;760:765
+2)	.REPEAT 0 * (1 - TIMER) * (765 - 760 + 1) [ILGIOT $
+2)		NOP $
+2)	 ]
+2)	;;; : TIMER-IOTS + 12.	;LEAVE SPACE FOR OPCODES 760-765
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/13P/149L
+1)	;***								TVR-Apr80
+1)		.OPCODE[766]
+**** File 2) CFMAIN.C01[TMP,F2]/13P/154L
+2)		.OPCODE[766]
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/14P/3L
+1)		.ORG[4000]
+**** File 2) CFMAIN.C01[TMP,F2]/14P/2L
+2)	;NON DISPATCH STUFF HERE
+2)		.ORG[4000]
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/14P/79L
+1)		.PAIR
+1)	ILDB1:	D[AR] ROT[14] MASK[6] DEST[MASKR] JUMP[ILDB2] NORM $
+1)		D[AR] ROT[14] MASK[6] DEST[AR MASKR] COND[BYTE-OVF] PUSHJ[IBT1] NORM $;GET S FLD, OVFL?
+1)		D[AR] ROT[36] ALU[Q-D] DEST[Q AR MEMSTO] COND[-MA-AC] JUMP[. + 2] NORM $;SUB S FROM P
+1)		ACSEL[MA] D[MEM] DEST[AC] CYLEN[MEMSTO] $
+1)	ILDB2:	ALU[Q] DEST[MA] COND[-MEM-IDX-IND] LBJUMP[ILDB3] NORM $
+1)		.PAIR
+**** File 2) CFMAIN.C01[TMP,F2]/14P/80L
+2)		.PAIR	;Goes to second if HALF is not set
+2)	ILDB1:	D[AR] ROT[14] MASK[6] DEST[MASKR] JUMP[ILDB2] NORM $
+2)			;Extract S field.  Being HALF was set, don't increment
+2)		D[AR] ROT[14] MASK[6] DEST[AR MASKR] COND[BYTE-OVF] PUSHJ[IBT1] NORM $;GET S FLD, OVFL?
+2)			;Extract S field.  Increment word if byte overflow will happen
+2)		D[AR] ROT[36] ALU[Q-D] DEST[Q AR MEMSTO] COND[-MA-AC] JUMP[. + 2] NORM $;SUB S FROM P
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 14,14
+
+2)			;Increment byte pointer, no overflow possible now
+2)			;Store into memory, check for store into AC
+2)		ACSEL[MA] D[MEM] DEST[AC] CYLEN[MEMSTO] $
+2)			;Store is into an AC, write it there.
+2)	ILDB2:	ALU[Q] DEST[MA] COND[-MEM-IDX-IND] LBJUMP[ILDB3] NORM $
+2)			;Fetch data, perhaps.  Maybe also do indexing or indirection
+2)		.PAIR
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/14P/91L
+1)		.PAIR
+1)	ILDB3:	MAPF[2] PUSHJ[BIIH] NORM $;HANDLE IDX-IND
+1)		MAPF[BYTE-ILD] ACSEL[MA] ALU[AC] DEST[FIXMAC-MAPF-RD]
+1)				JUMP[LDB2] CYLEN[FIXM] $
+1)		.USE[AREA262]
+1)	LDB2:	SPEC[CLR-HALF] D[CONST 44] DEST[Q] SHORT $
+**** File 2) CFMAIN.C01[TMP,F2]/14P/99L
+2)		.PAIR	;Goes to second if not indexing or indirecting
+2)	ILDB3:	MAPF[NORM-RD] PUSHJ[BIIH] NORM $;HANDLE IDX-IND
+2)		MAPF[BYTE-ILD] ACSEL[MA] ALU[AC] DEST[FIXMAC-MAPF-RD]
+2)				JUMP[LDB2] CYLEN[FIXM] $
+2)			;Finish read of data word, then go extract byte
+2)		.USE[AREA262]
+2)		.PAIR	;Goes to second if not indexing or indirecting
+2)	LDB1:	MAPF[2] PUSHJ[BII] NORM $
+2)	LDB5:	FIXM1 $	;Also gets here from XBY13
+2)		D[AR] ROT[14] MASK[6] DEST[MASKR] SHORT $
+2)			;GET S FLD
+2)		SPEC[CLR-HALF] D[CONST 44] DEST[Q] SHORT $
+2)		D[AR] ROT[6] MASK[6] ALU[Q-D] DEST[Q ROTR] SHORT $
+2)			;SUB P FLD FROM 44
+2)		D[AR] ROT[12.] MASK[6] ALU[Q-D] COND[-OBUS<0] JUMP[LDB4] C550 $
+2)			;Also, subtract S field.  If result is positive, then byte
+2)			;of size S fits with at least P bits remaining in the right
+2)			;side of the word
+2)		ALU[Q] DEST[MASKR] JUMP[LDB4] NORM $
+2)			;Byte does not fit!!!  We want only the stuff to the left
+2)			;of postion P, which is 36.-P bits, coincidentally, the same
+2)			;size as the rotation
+2)	;S field is already set up.  Set up P field and extract data from word.
+2)	LDB2:	SPEC[CLR-HALF] D[CONST 44] DEST[Q] SHORT $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/14P/100L
+1)	IBT1:	D[MASK 36] ALU[D&Q] DEST[Q] SHORT $
+1)		D[CONST 44] ROT[36] ALU[D+Q+1] DEST[Q] POPJ NORM $
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 14,14
+
+1)			;NEW P FLD OF 44, ADD 1 TO ADR
+1)		.PAIR
+1)	LDB1:	MAPF[2] PUSHJ[BII] NORM $
+1)	LDB5:	FIXM1 $
+1)		D[AR] ROT[14] MASK[6] DEST[Q MASKR] JUMP[LDB2] NORM $
+1)			;GET S FLD
+1)		.PAIR
+1)	DPB1:	MAPF[2] PUSHJ[BII] NORM $
+1)	DPB5:
+1)	;;;	FIXM2 $	;Wrong thing for WAITS.
+1)		MAPF[BYTE-IDP] CYLEN[FIXM]
+1)				ACSEL[MA] ALU[AC] DEST[FIXMAC-MAPF-WRT] JUMP[LDB6] $
+1)			;KA/KL set half flag even on DPB.  They would also set read
+**** File 2) CFMAIN.C01[TMP,F2]/14P/129L
+2)		.PAIR
+2)	DPB1:	MAPF[2] PUSHJ[BII] NORM $
+2)	DPB5:		;Also gets here from XBY13
+2)	;;;	FIXM2 $	;Wrong thing for WAITS.
+2)		  MAPF[BYTE-IDP] CYLEN[FIXM]
+2)				ACSEL[MA] ALU[AC] DEST[FIXMAC-MAPF-WRT] JUMP[DPB7] $
+2)			;KA/KL set half flag even on DPB.  They would also set read
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/14P/118L
+1)		.USE[AREA266]
+1)	LDB6:	D[AR] ROT[14] MASK[6] DEST[MASKR] JUMP[DPB2] NORM $
+1)			;GET S FLD
+1)		.PAIR
+1)	IDPB3:	MAPF[2] PUSHJ[BIIH] NORM $;HANDLE IDX-IND
+1)		ACSEL[MA] ALU[AC] DEST[FIXMAC-MAPF-WRT] MAPF[BYTE-IDP] CYLEN[FIXM] $
+1)	DPB2:	SPEC[CLR-HALF] D[AR] ROT[6] MASK[6] DEST[Q ROTR] SHORT $
+**** File 2) CFMAIN.C01[TMP,F2]/14P/139L
+2)		.USE[NORMAL]
+2)	DPB7:	D[AR] ROT[12.] MASK[6] DEST[MASKR] SHORT $
+2)			;Fetch S field.
+2)		SPEC[CLR-HALF] D[AR] ROT[6] MASK[6] DEST[Q ROTR] SHORT $
+2)			;Fetch P field.
+2)		D[CONST 44] ALU[D-Q] DEST[Q] SHORT $
+2)			;Calculate 36-P, which is maximum number of bits in this byte
+2)		D[AR] ROT[12.] MASK[6] ALU[Q-D] COND[-OBUS<0] JUMP[DPB4] C550 $
+2)			;Does this byte fit?  I.e. 36-P-S is non-negative.  If so,
+2)			;use this mask field
+2)		ALU[Q] DEST[MASKR] JUMP[DPB4] NORM $
+2)			;Setup mask which is everything to the left of the position
+2)			;designated by P.
+2)		.USE[AREA266]
+2)		.PAIR
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 14,14
+
+2)	IDPB3:	MAPF[2] PUSHJ[BIIH] NORM $;HANDLE IDX-IND
+2)		MAPF[BYTE-IDP] CYLEN[FIXM]
+2)			ACSEL[MA] ALU[AC] DEST[FIXMAC-MAPF-WRT] $
+2)		D[AR] ROT[14] MASK[6] DEST[MASKR] SHORT $
+2)	DPB2:	SPEC[CLR-HALF] D[AR] ROT[6] MASK[6] DEST[Q ROTR] SHORT $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/14P/143L
+1)		.USE[AREA204]
+1)		debuguse = .	;See if it still happens
+1)	:2055	;$%@#$%@ SLOEXP didn't redefine AREA204 properly!! *$*$*$*
+1)	IBP1:	D[AR] ROT[14] MASK[6] DEST[AR] COND[BYTE-OVF] PUSHJ[IBT1] NORM $;GET S FLD, OVFL?
+1)		D[AR] ROT[36] ALU[Q-D] DEST[Q MEMSTO] MEMST $
+1)		.USE[NORMAL]
+1)	IMUL1:	ALU[0] DEST[AR O_AC] ACSEL[AC] PUSHJ[DOIMUL] NORM $	;0 TO AC,AC TO AR
+**** File 2) CFMAIN.C01[TMP,F2]/14P/178L
+2)		.USE[NORMAL]
+2)		.PAIR	;Skip if AC=0
+2)	IBP1:	UAOP1 $	;Non-zero AC implies ADJBP.  We don't, yet.
+2)		D[AR] ROT[14] MASK[6] DEST[AR] COND[BYTE-OVF] PUSHJ[IBT1] NORM $;GET S FLD, OVFL?
+2)			;Zero AC.  Do ordinary increment byte pointer.
+2)			;PUSHJ if we are about to overflow a word.
+2)		D[AR] ROT[36] ALU[Q-D] DEST[Q MEMSTO] MEMST $
+2)			;Finish updating byte position part of pointer
+2)	;Increment byte pointer which crosses a word boundary
+2)	IBT1:	D[MASK 36] ALU[D&Q] DEST[Q] SHORT $
+2)		D[CONST 44] ROT[36] ALU[D+Q+1] DEST[Q] POPJ NORM $
+2)			;NEW P FLD OF 44, ADD 1 TO ADR
+2)	;IMUL1 IMUL2 IMUL3 MUL1 MUL2 MUL3 DOIMUL MSETOV DOMMUL DOMUL DOMUL1 DOMUL4 IDIV1 IDIV2 IDIV3 DIV1 DIV2 DIV3 DODDIV DODIV DODIV1 DODIV3 DODIV2 STOVFQ DODIV4 DODIV6 DODIV5
+2)	IMUL1:	ALU[0] DEST[AR O_AC] ACSEL[AC] PUSHJ[DOIMUL] NORM $	;0 TO AC,AC TO AR
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/15P/24L
+1)		D[CONST 1] ROT[43] ALU[DORAC] DEST[CRYOV] NORM POPJ $; SET OV
+1)	DOMMUL:	D[AR] ALU[D#Q] COND[-OBUS=0] JUMP[DOMUL] CYLEN[C500] $; NO OV IF DIFF OPERS
+**** File 2) CFMAIN.C01[TMP,F2]/15P/25L
+2)	MSTOV1:	D[CONST 1] ROT[43] ALU[DORAC] DEST[CRYOV] NORM POPJ $; SET OV
+2)	DOMMUL:	D[AR] ALU[D#Q] COND[-OBUS=0] JUMP[DOMUL] CYLEN[C500] $; NO OV IF DIFF OPERS
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/15P/32L
+1)			LOOP[DOMUL1] NORM $ ;SHIFT, END-COND MUL; SOJGE, SH RT
+1)		D[AR] ACSEL[AC] ALU[MULAC+D] DEST[D4] MASK[3]
+1)			COND[-Q0-35] JUMP[. + 2] CYLEN[C450] $ ;J IF QUOT WAS +
+1)		D[AR] ACSEL[AC] ALU[MULAC-D] DEST[D7]
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 15,15
+
+1)			JUMP[. + 2] NORM $ ; DEST AC SH LFT, ALU=1, ALU S=0
+1)		ALU[SH-AC] ACSEL[AC] DEST[D7] NORM $ ;DEST AC SH LFT
+1)			;SINCE DEST IS >3, ALU[QORAC] IS ALU[AC]
+1)		ALU[AC] ACSEL[AC] COND[OBUS<0] LBJUMP[DOMUL4] CYLEN[C500] $
+1)		.PAIR
+1)	DOMUL4:	D[MASK 35.] ALU[D&Q] DEST[Q] POPJ NORM $
+1)		D[CONST 1] ROT[35.] ALU[DORQ] DEST[Q] POPJ NORM $
+1)	  CCC1	= SHORT $	;Apparently used as a NO-OP for macros below. TVR-Apr80
+1)	  MEMST1 = MEMST $	;Cause macro expansion now, rather than in macro call.
+1)	.DEFINE DMACFN [AA A2 D1 D2 OP1]
+**** File 2) CFMAIN.C01[TMP,F2]/15P/33L
+2)				LOOP[DOMUL1] NORM $ ;SHIFT, END-COND MUL; SOJGE, SH RT
+2)			;This shifts right, with the low order bit of the partial
+2)			;product being saved in Q.  At the same time, shift out of Q
+2)			;a bit of the multiplier (and somehow??? the hardware uses this
+2)			;to decide whether to add or not???)
+2)			;MASK field specifies what gets shifted into AC, in this case,
+2)			;(ALU OV) XOR (-OUT<0)
+2)		D[AR] ACSEL[AC] ALU[MULAC+D] DEST[D4] MASK[3]
+2)				COND[-Q0-35] JUMP[. + 2] CYLEN[C450] $ ;J IF QUOT WAS +
+2)			;Do last step of multiply. Jump on sign of multiplier(?)
+2)		D[AR] ACSEL[AC] ALU[MULAC-D] DEST[D7]
+2)				JUMP[. + 2] NORM $ ; DEST AC SH LFT, ALU=1, ALU S=0
+2)			;Multiplier was positive... ???: Shift left to make properly
+2)			;signed result, with low order bit coming from Q0 (i think???)
+2)		ALU[SH-AC] ACSEL[AC] DEST[D7] NORM $ ;DEST AC SH LFT
+2)			;SINCE DEST IS >3, ALU[QORAC] IS ALU[AC]
+2)			;Multiplier was negative... ???
+2)		ALU[AC] ACSEL[AC] COND[OBUS<0] LBJUMP[DOMUL4] CYLEN[C500] $
+2)			;Decide what sign should be in the low order result.
+2)		.PAIR
+2)	DOMUL4:	D[MASK 35.] ALU[D&Q] DEST[Q] POPJ NORM $
+2)			;Positive.  Turn off Q0, which was copied into AC35.
+2)		D[CONST 1] ROT[35.] ALU[DORQ] DEST[Q] POPJ NORM $
+2)			;Negative.  Set Q0 so the number is negative (Q0 was copied into
+2)			;AC35).
+2)	  CCC1	= SHORT $	;Apparently used as a NO-OP for macros below. TVR-Apr80
+2)	  MEMST1 = MEMST $	;Store to memory. (Cause macro expansion now, rather
+2)				;than in macro call.)
+2)	.DEFINE DMACFN [AA A2 D1 D2 OP1]
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/15P/57L
+1)	[	ALU[-1] DEST[AC] ACSEL[AC] JUMP[. + 2] NORM $
+1)		ALU[0] DEST[AC] ACSEL[AC] SHORT $
+**** File 2) CFMAIN.C01[TMP,F2]/15P/73L
+2)	[	.PAIR
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 15,15
+
+2)		ALU[-1] DEST[AC] ACSEL[AC] JUMP[. + 2] NORM $
+2)		ALU[0] DEST[AC] ACSEL[AC] SHORT $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/15P/77L
+1)	;*** This code does entirely the wrong thing on No-Divide (especially divide
+1)	;*** by zero).  I don't know how to fix it (and I wouldn't want to touch it
+1)	;*** with a 10 meter battle axe).  TVR-Apr80
+1)	DODDIV:	D[AR] ROT[1] MASK[1] DEST[IR-ADR] SHORT $
+**** File 2) CFMAIN.C01[TMP,F2]/15P/94L
+2)	DODDIV:	D[AR] ROT[1] MASK[1] DEST[IR-ADR] SHORT $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/15P/85L
+1)	DODIV:	D[MEM] COND[-OBUS<0] JUMP[. + 2] C550 $
+1)		D[MEM] ALU[0-D] DEST[HOLD] SHORT $
+1)		ALU[AC] ACSEL[AC] COND[-OBUS<0] JUMP[. + 4] CYLEN[C450] $
+1)		ALU[0-Q] DEST[Q] COND[OBUS=0] JUMP[. + 2] CYLEN[C500] $
+1)		ALU[NOTAC] ACSEL[AC] DEST[AC] JUMP[. + 2] NORM $
+1)		ALU[0-AC] ACSEL[AC] DEST[AC] NORM $
+1)	DODIV2:	D[CONST 44] LLOAD NORM $ ;LOOP 37 TIMES
+1)		JUMP[DODIV4] NORM $   ;CHECK FOR OVERFLOW HERE *****
+1)		;$*$*$* NORMAL area runs of space for now.  TVR-Apr80
+**** File 2) CFMAIN.C01[TMP,F2]/15P/99L
+2)	;------------------------------------------------------------------------------
+2)	;
+2)	;	Single Precision Divide (and continuation of double precision)
+2)	;
+2)	;	(Reminder: Quotient, Remainder = Dividend / Divisor)
+2)	;
+2)	;Where we get here:
+2)	;    MEM	36 bit signed divisor
+2)	;    AC		High order dividend (0 or -1 for single precision)
+2)	;    Q		Low order dividend
+2)	;    IR<35>	Sign of dividend XOR sign of divisor
+2)	;    AR		Sign of dividend and original contents of AC
+2)	;  
+2)	;------------------------------------------------------------------------------
+2)	DODIV:	D[MEM] COND[-OBUS<0] JUMP[DODIV1] C550 $
+2)			;Jump if divide by positive number
+2)		D[MEM] ALU[0-D] DEST[HOLD] SHORT $
+2)			;Take absolute value
+2)	DODIV1:	ALU[AC] ACSEL[AC] COND[-OBUS<0] JUMP[DODIV2] CYLEN[C450] $
+2)			;Check sign of high order word.  If positive, we're ready to go
+2)		ALU[0-Q] DEST[Q] COND[OBUS=0] JUMP[DODIV3] CYLEN[C500] $
+2)			;Double precision negate, low order word
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 15,15
+
+2)		ALU[NOTAC] ACSEL[AC] DEST[AC] JUMP[DODIV2] NORM $
+2)			;High order word, no carry
+2)	DODIV3:	ALU[0-AC] ACSEL[AC] DEST[AC] NORM $
+2)			;High order word, with carry
+2)	DODIV2:	D[CONST 44] LLOAD NORM $
+2)			;LOOP 37 TIMES
+2)	;Now have:
+2)	;   MEM		Absolute value of divisor
+2)	;   AC		Absolute value of high order dividend
+2)	;   Q		Absolute value of low order dividend
+2)	;   R		Repeat count for division
+2)		D[MEM] ALU[AC-D] COND[OBUS<0] JUMP[DODIV4] NORM $
+2)			;Jump if not no divide case
+2)		D[PC] DEST[AC] SHORT $
+2)			;Get ready to set flags
+2)		D[CONST 1] ROT[23.] ALU[DORAC] DEST[AC] PUSHJ[MSTOV1] NORM $
+2)			;Set no divide
+2)		D[AR] DEST[AC] POPJ NORM $
+2)			;Fix clobbered AC
+2)		;$*$*$* NORMAL area runs of space for now.  TVR-Apr80
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/15P/101L
+1)	DODIV6:	D[CONST 1] ROT[43] ALU[D#AC] ACSEL[AC] DEST[AC] COND[-OBUS<0] JUMP[DODIV5] C550 $ ;ADJUST REM SIGN, CHECK IT
+**** File 2) CFMAIN.C01[TMP,F2]/15P/148L
+2)	;end of .QUAD
+2)	DODIV6:	D[CONST 1] ROT[43] ALU[D#AC] ACSEL[AC] DEST[AC] COND[-OBUS<0] JUMP[DODIV5] C550 $ ;ADJUST REM SIGN, CHECK IT
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/15P/108L
+1)		.USE[NORMAL]
+1)	JFFO1:	ACSEL[AC+1] ALU[0] DEST[AC] JUMP[MAIN] NORM $
+**** File 2) CFMAIN.C01[TMP,F2]/15P/155L
+2)	;On completion:
+2)	;   MEM		Absolute value of divisor
+2)	;   AC		Remainder
+2)	;   Q		Quotient
+2)	;   AR<0>	Sign of dividend
+2)	;   IR<35>	Sign of dividend
+2)		.USE[NORMAL]
+2)	;JFFO1 JFFO2 JFFO3 JFFO5 JFFO4 ROTDO BIGLSH LSHPDO LSHDO LSHDO1 ASHDO1 BIGASH SETOV1 ASHDO ASHDOP BIGAS2 ASHC1 ASHC8 ASHC6 ASHC9 ASHC4 ASHC2 ASHC7 ROTC1 ROTC2 LSHC1 LSHC2 SJMAIN PUSH1 POP1 POPJ1 PUSHJ1
+2)	JFFO1:	ACSEL[AC+1] ALU[0] DEST[AC] JUMP[MAIN] NORM $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/17P/1L
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 17,17
+
+1)		.PAIR
+**** File 2) CFMAIN.C01[TMP,F2]/17P/1L
+2)	;BLTA2 BLT1 BLT7 BLT5 BLT3 BLT2 BLT9 BLT4 BLT6 BLT8 BLTA3 BLTL1 BLTA4 BLTA1 BLTAL2 BLTA10 BLTL2 BLTA12 ANDCA1 ANDCA2 ANDCA3 LOG2 LOG3 ORCM2 ORCM3
+2)		.PAIR
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/18P/2L
+1)		.ORG[2062]	;*$*$* No REAL reason for this
+**** File 2) CFMAIN.C01[TMP,F2]/18P/2L
+2)	;;;RESW1:
+2)		.ORG[2062]	;*$*$* No REAL reason for this
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/18P/47L
+1)	.REPEAT STANSW [;Mar80 TVR
+**** File 2) CFMAIN.C01[TMP,F2]/18P/48L
+2)	.REPEAT LPT [
+2)	.REPEAT STANSW [
+2)		D[CONST 15] DEST[DEV-ADR] PUSHJ[LPTRST] NORM $
+2)			;Hardware is trapping to wrong place!!!
+2)	];.REPEAT STANSW
+2)		D[CONST 35] DEST[DEV-ADR] PUSHJ[LPTRST] NORM $
+2)	];LPT
+2)	.REPEAT STANSW [;Mar80 TVR
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/18P/170L
+1)		.USE[AREA350]
+1)		.PAIR
+**** File 2) CFMAIN.C01[TMP,F2]/18P/178L
+2)		.USE[AREA352]
+2)		.PAIR
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/18P/184L
+1)		.PAIR
+**** File 2) CFMAIN.C01[TMP,F2]/18P/192L
+2)		.USE[AREA350]
+2)		.PAIR
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/18P/187L
+1)		.USE[AREA352]
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 18,18
+
+1)	JRST4:	D[IR] ROT[15] MASK[1] COND[-OBUS=0] JUMP[JRST3] C550 $
+**** File 2) CFMAIN.C01[TMP,F2]/18P/196L
+2)	JRST4:	D[IR] ROT[15] MASK[1] COND[-OBUS=0] JUMP[JRST3] C550 $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/19P/11L
+1)	;A-MEM Usage
+1)	;
+1)	CTY-DISP = 0		;Instruction and interrupt dispatch
+**** File 2) CFMAIN.C01[TMP,F2]/19P/11L
+2)	CTY-DISP = 0		;Instruction and interrupt dispatch
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/19P/46L
+1)	     .REPEAT 10 [ILGIOT $
+**** File 2) CFMAIN.C01[TMP,F2]/19P/44L
+2)	LPTDSP:
+2)	.REPEAT 1 - LPT [
+2)	     .REPEAT 10 [ILGIOT $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/19P/49L
+1)	AREA51:	;$*$*$ Start code from here for now.  This should go away
+**** File 2) CFMAIN.C01[TMP,F2]/19P/49L
+2)	];.REPEAT 1 - LPT
+2)	.REPEAT LPT [		;Allocate space for LPT dispatch
+2)	:. + 20
+2)	];.REPEAT LPT
+2)	AREA51:	;$*$*$ Start code from here for now.  This should go away
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/20P/5L
+1)	DSKRST:	ALU[0] DEST[IOD] SPEC[IOB-OUT] NORM $
+**** File 2) CFMAIN.C01[TMP,F2]/20P/4L
+2)	;      be moved to the end of regular disk stuff.  TVR-Apr80
+2)	DSKRST:	ALU[0] DEST[IOD] SPEC[IOB-OUT] NORM $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/20P/49L
+1)		 D[12] SPEC[A-MEM-APR] ROT[32] MASK[1] DEST[AR] $
+1)		  ;GET THE APR CONDITIONS WD.
+**** File 2) CFMAIN.C01[TMP,F2]/20P/49L
+2)		 D[10 + APRSTS] SPEC[A-MEM-APR] ROT[32] MASK[1] DEST[AR] $
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 20,20
+
+2)		  ;GET THE APR CONDITIONS WD.
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/20P/105L
+1)		MAPF[1] ALU[0] DEST[2] SPEC[A-MEM-APR&DEST-A-MEM] CYLEN[IOB-OUT] POPJ $
+1)	;$*$*$ This code should set up dispatch and interrupt vectors.  TVR-Apr80
+**** File 2) CFMAIN.C01[TMP,F2]/20P/105L
+2)		MAPF[1] ALU[0] DEST[APRSTS] SPEC[A-MEM-APR&DEST-A-MEM] CYLEN[IOB-OUT] POPJ $
+2)	;$*$*$ This code should set up dispatch and interrupt vectors.  TVR-Apr80
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/21P/12L
+1)	PI-GET-CHN:	;MAKE BINARY CHN. NO. FROM MASK IN AR.
+**** File 2) CFMAIN.C01[TMP,F2]/21P/11L
+2)	; 6	RQ COUNTS - 4-BIT FIELDS, CHN. 7 AT RIGHT END OF WORD.
+2)	;
+2)	;Other uses of APR AMEM are documented at the beginning 
+2)	PI-GET-CHN:	;MAKE BINARY CHN. NO. FROM MASK IN AR.
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/21P/27L
+1)	.REPEAT STANSW [
+1)		D[CONST PAN-UDEV] DEST[DEV-ADR] SHORT $
+1)			;Select PAN interface
+1)		D[CONST 3] ROT[36. - 5] DEST[IOD] SPEC[IOB-OUT] SHORT $
+1)			;Turn its micro-interrupts on.  There is no way in Hell you
+1)			;can count interrupts on a PAN's IO bus.
+1)		MAPF[PAN-INT-ENB] CYLEN[IOB-IN]
+1)		 D[15] SPEC[A-MEM-APR] ROT[18.] MASK[7] DEST[AR]
+**** File 2) CFMAIN.C01[TMP,F2]/21P/30L
+2)	.REPEAT STANSW [	;Determine which PI channels should be enabled for PAN
+2)		D[14] SPEC[A-MEM-APR] ROT[35. - 10.] DEST[Q] PUSHJ[PANIST] NORM $
+2)			;Select only those channels turned on and readyt to interrupt
+2)		MAPF[PAN-INT-ENB] CYLEN[IOB-OUT] 
+2)		 D[15] SPEC[A-MEM-APR] ROT[18.] MASK[7] DEST[AR]
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/25P/12L
+1)		.ORG[5200]	;$*$*$ This should be fixed
+**** File 2) CFMAIN.C01[TMP,F2]/25P/11L
+2)	;------------------------------------------------------------------------------
+2)		.ORG[5200]	;$*$*$ This should be fixed
+***************
+
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 25,25
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/25P/143L
+1)		D[PC] ALU[DORQ] DEST[CRYOV] POPJ NORM $;SET HALF
+1)	: 6150 ;12 -- BYTE-IDP
+**** File 2) CFMAIN.C01[TMP,F2]/25P/144L
+2)	QORCRY:	D[PC] ALU[DORQ] DEST[CRYOV] POPJ NORM $;SET HALF
+2)	: 6150 ;12 -- BYTE-IDP
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/25P/186L
+1)	: 5440	;$*$*$ I think someone was confused.  The APR dispatch ends at 5340.
+1)		;      There is no 5300 dispatch table!  Typical...   TVR-Apr80
+1)	;*$*$* Fudge area accounting
+1)	AREA54 = .
+1)		.USE[AREA54]
+1)	MAPCWT:	ALU[Q] LLOAD NORM $
+**** File 2) CFMAIN.C01[TMP,F2]/25P/187L
+2)	;;;: 5440	;$*$*$ I think someone was confused.  The APR dispatch ends at 5340.
+2)	;;;	;      There is no 5300 dispatch table!  Typical...   TVR-Apr80
+2)	: 5340		;$*$*$ This is immediately after the CTY dispatch
+2)	;*$*$* Fudge area accounting
+2)	;;;AREA54 = .
+2)	;;;	.USE[AREA54]
+2)	AREA53 = .
+2)		.USE[AREA53]
+2)	MAPCWT:	ALU[Q] LLOAD NORM $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/26P/7L
+1)	MAPCOA:	DEST[CLR-DEV-FROM-INTR] SPEC[IOB-IN] SHORT $
+**** File 2) CFMAIN.C01[TMP,F2]/26P/7L
+2)	;------------------------------------------------------------------------------
+2)	MAPCOA:	DEST[CLR-DEV-FROM-INTR] SPEC[IOB-IN] SHORT $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/26P/87L
+1)		D[IR] MASK[3] DEST-A-MEM DEST[7] MAPF[10] CYLEN[IOB-OUT] $; SAVE AR, ECC INT
+1)		D[MA] ROT[33] MASK[11] ALU[D+Q] DEST[MA HI-ABS-MA] NORM $; FETCH PAGE TABLE ENTRY
+**** File 2) CFMAIN.C01[TMP,F2]/26P/88L
+2)		D[IR] MASK[3] DEST-A-MEM DEST[APRENB] MAPF[10] CYLEN[IOB-OUT] $
+2)			;SAVE AR, ECC INT
+2)		D[MA] ROT[33] MASK[11] ALU[D+Q] DEST[MA HI-ABS-MA] NORM $; FETCH PAGE TABLE ENTRY
+***************
+
+
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 27,27
+
+**** File 1) CFMAIN.B01[TMP,F2]/27P/1L
+1)		D[MEM] MASK[13] DEST[Q] SHORT $; GET ABS PAGE #
+**** File 2) CFMAIN.C01[TMP,F2]/27P/1L
+2)	;MFA5 JSMFR MFTR1 MFTR10 MFB5 MFB4 MFC1 MFTR2 MTRPAL MFTR3 MFTR4 MFTR5 MFTR6 MFTR7 MFTR9 MFTR41 MAPRST MAPRSS MAPRSL
+2)		D[MEM] MASK[13] DEST[Q] SHORT $; GET ABS PAGE #
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/27P/42L
+1)		D[17] DEST[IOD] SPEC[IOB-OUT] NORM $; TURN MAP BACK ON, ETC.
+1)		D[AR] ROT[15] MASK[1] COND[-OBUS=0] JUMP[JSMFR] MAPF[10] CYLEN[MAX,IOB-OUT,C550] $; DO SPECIAL JSYS STUFF IF APPROPRIATE
+**** File 2) CFMAIN.C01[TMP,F2]/27P/43L
+2)		D[10 + APRENB] DEST[IOD] SPEC[IOB-OUT] NORM $; TURN MAP BACK ON, ETC.
+2)		D[AR] ROT[15] MASK[1] COND[-OBUS=0] JUMP[JSMFR] MAPF[10] CYLEN[MAX,IOB-OUT,C550] $; DO SPECIAL JSYS STUFF IF APPROPRIATE
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/27P/74L
+1)		D[17] DEST[IOD] SPEC[IOB-OUT] SHORT $; TURN ON MAP
+1)		D[PC] DEST[Q AR] MAPF[10] CYLEN[IOB-OUT] $
+**** File 2) CFMAIN.C01[TMP,F2]/27P/75L
+2)		D[10 + APRENB] DEST[IOD] SPEC[IOB-OUT] SHORT $; TURN ON MAP
+2)		D[PC] DEST[Q AR] MAPF[10] CYLEN[IOB-OUT] $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/28P/5L
+1)	JSYS1:	FIXM1 $
+**** File 2) CFMAIN.C01[TMP,F2]/28P/5L
+2)	;
+2)	;------------------------------------------------------------------------------
+2)	JSYS1:	FIXM1 $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/29P/1L
+1)	XFIXMA:	COND[MA-AC] JUMP[XCTAC] NORM $; J IF ADDRS IS AC
+**** File 2) CFMAIN.C01[TMP,F2]/29P/1L
+2)	;XFIXMA XCTBLT XBLTL XPUSH1 XPDLO2 XPOP1 XPOP2 XPOP3
+2)	XFIXMA:	COND[MA-AC] JUMP[XCTAC] NORM $; J IF ADDRS IS AC
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/29P/6L
+1)	XCTBLT:	D[MA] SPEC[PC+1] DEST[O_AC AR] NORM $; END ADR IN AC, AC IN AR
+**** File 2) CFMAIN.C01[TMP,F2]/29P/7L
+2)	;;;	.USE[OTHER]
+2)	XCTBLT:	D[MA] SPEC[PC+1] DEST[O_AC AR] NORM $; END ADR IN AC, AC IN AR
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 29,29
+
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/29P/19L
+1)		.USE[OTHER]
+1)	;Special case for PUSH.  Check for AC reference from stack pointer
+**** File 2) CFMAIN.C01[TMP,F2]/29P/21L
+2)	;Special case for PUSH.  Check for AC reference from stack pointer
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/30P/6L
+1)		.ORG[5300]	 ;APR & PI IOT DISP TABLE
+1)		ILGIOT $; BLKI APR
+1)		NOP $
+**** File 2) CFMAIN.C01[TMP,F2]/30P/6L
+2)	;------------------------------------------------------------------------------
+2)		.ORG[5300]	 ;APR & PI IOT DISP TABLE
+2)	APRDSP:	ILGIOT $; BLKI APR
+2)		NOP $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/30P/23L
+1)		.REPEAT 3[ ILGIOT $
+1)		NOP $
+**** File 2) CFMAIN.C01[TMP,F2]/30P/24L
+2)	PIDSP:	.REPEAT 3[ ILGIOT $
+2)		NOP $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/30P/38L
+1)	AREA53:	;$*$*$ Recover space from APR/PI table for now
+1)		.USE[NORMAL]
+**** File 2) CFMAIN.C01[TMP,F2]/30P/39L
+2)	;;;AREA53:	;$*$*$ Recover space from APR/PI table for now
+2)		.USE[NORMAL]
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/30P/44L
+1)		D[CONST 7] ALU[-D&Q] DEST[Q] SHORT $
+1)		D[12] SPEC[A-MEM-APR] ALU[D&Q] DEST[Q CLR-DEV-FROM-INTR] SHORT $; CLEAR INDICATED BITS
+1)		D[AR] ALU[DORQ] SPEC[A-MEM-APR&DEST-A-MEM] DEST[2 AR] NORM $; SET INDICATED BITS & CHAN
+1)		D[IR] ROT[41] MASK[1] COND[OBUS=0] JUMP[. + 2] C550 $; J IF NO CLR OVERFLOW BIT
+1)		D[PC] MASK[43] DEST[CRYOV] SHORT $; CLR OV
+1)		D[IR] ROT[36] MASK[1] COND[OBUS=0] JUMP[. + 3] C550 $; J IF NO CLR FLT OV
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 30,30
+
+1)		D[MASK 43] ROT[41] DEST[Q] SHORT $
+1)		D[PC] ALU[D&Q] DEST[CRYOV] SHORT $; CLR FLT OV
+1)		D[IR] ROT[33] MASK[1] COND[-OBUS=0] PUSHJ[CLKCLR] C550 $; CLR CLOCK FLAG IF INDICATED
+1)	APRCHK:	PUSHJ[APRCI] NORM $; GET CONI BITS IN AR & Q
+1)		D[AR] MASK[3] COND[OBUS=0] JUMP[MAIN] NORM $; DONE IF PI=0
+**** File 2) CFMAIN.C01[TMP,F2]/30P/45L
+2)			; GET CLR BITS
+2)		D[CONST 7] ALU[-D&Q] DEST[Q] SHORT $
+2)			; Remove PI assignment
+2)		D[10 + APRSTS] SPEC[A-MEM-APR] ALU[D&Q] DEST[Q CLR-DEV-FROM-INTR] SHORT $
+2)			; CLEAR INDICATED BITS
+2)		D[AR] ALU[DORQ] SPEC[A-MEM-APR&DEST-A-MEM] DEST[APRSTS AR] NORM $
+2)			; SET INDICATED BITS & CHAN
+2)		D[IR] ROT[41] MASK[1] COND[OBUS=0] JUMP[APRCO2] C550 $
+2)			; J IF NO CLR OVERFLOW BIT
+2)		D[PC] MASK[43] DEST[CRYOV] SHORT $; CLR OV
+2)			; Remove overflow bit from current PC flags
+2)	APRCO2:	D[IR] ROT[36] MASK[1] COND[OBUS=0] JUMP[APRCO3] C550 $
+2)			; J IF NO CLR FLT OV
+2)		D[MASK 43] ROT[41] DEST[Q] SHORT $
+2)			; Remove bit from current PC flags
+2)		D[PC] ALU[D&Q] DEST[CRYOV] SHORT $
+2)			; CLR FLT OV
+2)	APRCO3:	D[IR] ROT[33] MASK[1] COND[-OBUS=0] PUSHJ[CLKCLR] C550 $
+2)			; CLR CLOCK FLAG IF INDICATED
+2)	;	---
+2)	; TEMP **** APRCI:
+2)	APRIEN:	PUSHJ[APRCII] DEST[CLR-DEV-FROM-INTR] NORM $
+2)			; GET APR CONI BITS
+2)		D[CONST 1] DEST[DEV-ADR] SPEC[IOB-IN] NORM $
+2)			; Select and read MAP and ECC enablings
+2)		D[IOD] MAPF[4] MASK[3] DEST[Q] CYLEN[IOB-IN] $
+2)		ALU[0] DEST[DEV-ADR] SHORT $
+2)			; For some pecular reason, the thing we read from device 1 is
+2)			; written in device 0???
+2)		D[AR] MASK[3] COND[OBUS=0] JUMP[APRC1] C550 $
+2)			; Jump if no PI channel.  We don't want to enable arithmetic
+2)			; micro-interrupts in that case.
+2)		D[AR] ROT[40] MASK[1] COND[OBUS=0] JUMP[APRC1] C550 $
+2)			; J IF NO OV INT ENBL
+2)			; *** Don't both enables need to be checked???
+2)		D[CONST 2] ALU[DORQ] DEST[IOD] SPEC[IOB-OUT] JUMP[APRC2] NORM $; ENABLE OV INT
+2)			; Turn on arithmetic interrupts
+2)	APRC1:	D[CONST 2] ALU[-D&Q] DEST[IOD] SPEC[IOB-OUT] NORM $; CLR OV INT
+2)			; Turn off arithmetic interrupts
+2)	APRC2:	MAPF[10] CYLEN[IOB-OUT] D[AR] DEST[Q] JUMP[APRCK1] $
+2)			; Finish turning arithmetic interrupts off or on, and we're done
+2)	;Check for clock interrupts (and other things)
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 30,30
+
+2)	APRCHK:	PUSHJ[APRCI] NORM $; GET CONI BITS IN AR & Q
+2)	APRCK1:
+2)	.REPEAT 1 - WAITS [
+2)		D[AR] MASK[3] COND[OBUS=0] JUMP[MAIN] NORM $; DONE IF PI=0
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/30P/60L
+1)	APDINT:	D[AR] MASK[3] DEST[Q AR] JUMP[PIGEN] NORM $; GET CHAN #, CAUSE INTERRUPT
+1)	; TEMP **** APRCI:	PUSHJ[APRCII] DEST[CLR-DEV-FROM-INTR] NORM $; GET BITS
+1)		D[CONST 1] DEST[DEV-ADR] SPEC[IOB-IN] NORM $
+1)		D[IOD] MAPF[4] MASK[3] DEST[Q] CYLEN[IOB-IN] $
+1)		ALU[0] DEST[DEV-ADR] SHORT $
+1)		D[AR] MASK[3] COND[OBUS=0] JUMP[APRC1] C550 $; J IF NO PI
+1)		D[AR] ROT[40] MASK[1] COND[OBUS=0] JUMP[APRC1] C550 $; J IF NO OV INT ENBL
+1)		D[CONST 2] ALU[DORQ] DEST[IOD] SPEC[IOB-OUT] JUMP[APRC2] NORM $; ENABLE OV INT
+1)	APRC1:	D[CONST 2] ALU[-D&Q] DEST[IOD] SPEC[IOB-OUT] NORM $; CLR OV INT
+1)	APRC2:	MAPF[10] CYLEN[IOB-OUT] D[AR] DEST[Q] POPJ $
+1)	APRCI:	;TEMP -- LATER WE FIX OV
+**** File 2) CFMAIN.C01[TMP,F2]/30P/97L
+2)	;	\ /
+2)	];.REPEAT 1 - WAITS
+2)	.REPEAT WAITS [
+2)		D[AR] ROT[27.] COND[OBUS<0] SPEC[MA_PC] DEST[MA] JUMP[MAIN1] C550 $
+2)			;If no APR interrupt is not requested, don't interrupt.
+2)			;Otherwise, fall thru
+2)	];.REPEAT WAITS
+2)	;	\ /	(Falls thru from APRCK1)
+2)	APDINT:	D[AR] MASK[3] DEST[Q AR] JUMP[PIGEN] NORM $; GET CHAN #, CAUSE INTERRUPT
+2)	APRCI:	;TEMP -- LATER WE FIX OV
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/30P/83L
+1)		D[12] SPEC[A-MEM-APR] ALU[DORQ] DEST[Q AR] POPJ NORM $
+1)	APRDI:	MAPF[2] D[IOD] DEST[MEMSTO] COND[-MA-AC] LBJUMP[MSMAIN] CYLEN[IOB-IN] $
+**** File 2) CFMAIN.C01[TMP,F2]/30P/119L
+2)	.REPEAT 1 - WAITS [
+2)		D[10 + APRSTS] SPEC[A-MEM-APR] ALU[DORQ] DEST[Q AR] POPJ NORM $
+2)	];.REPEAT 1 - WAITS
+2)	.REPEAT WAITS [
+2)	;SAIL's KA-10 has a processor modification which sets bit 27 (400 bit) if the
+2)	;APR is NOT interrupting.  This feature is used in a CONSZ chain and would
+2)	;consume many instructions to simulate in a critical path in the system.
+2)		D[10 + APRSTS] SPEC[A-MEM-APR] ALU[DORQ] DEST[Q AR] NORM $
+2)			;Construct full status
+2)		D[AR] MASK[3] COND[OBUS=0] JUMP[APRCIN] NORM $
+2)			;Set 400 bit if interrupts disabled 
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 30,30
+
+2)			;(This may not be the same as SAIL)
+2)		D[AR] ROT[20] MASK[1] COND[-OBUS=0] POPJ C550 $
+2)			;If pushdown overflow, we will interrupt.
+2)		D[AR] ROT[43] ALU[D&Q] DEST[Q] SHORT $
+2)			;Combine flag with enable to see which interrupts
+2)		D[CONST 11] ROT[3] ALU[D&Q] COND[-OBUS=0] JUMP[APRCIY] C550 $
+2)			;Jump if overflow is causing an interrupt.
+2)		D[CONST 10] ROT[6] ALU[D&Q] COND[-OBUS=0] JUMP[APRCIY] C550 $
+2)			;Jump if clock is causing an interrupt.
+2)	APRCIN:	D[CONST 4] ROT[6] DEST[Q] SHORT $
+2)			;Not interrupting, set 400 bit in APR status
+2)	APRCIY:	D[AR] ALU[DORQ] DEST[AR Q] POPJ NORM $
+2)			;Turn on 400 bit if needed.
+2)			;Note, that since we ANDed something with Q, ORing in Q is
+2)			;a NO-OP if we didn't go thru APRCIN.
+2)	];.REPEAT WAITS
+2)	APRDI:	MAPF[2] D[IOD] DEST[MEMSTO] COND[-MA-AC] LBJUMP[MSMAIN] CYLEN[IOB-IN] $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/31P/1L
+1)	PDLO1:	PUSHJ[PDLO] NORM $ ;SET PDLO BIT
+**** File 2) CFMAIN.C01[TMP,F2]/31P/1L
+2)	;PDLO1 PDLO2 PDLO5 PDLO3 PDLO4 PDLO6 PDLMEM PDLOE PDLO SOED STOPS SOVRS SECCS SOEDOV
+2)	PDLO1:	PUSHJ[PDLO] NORM $ ;SET PDLO BIT
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/31P/18L
+1)	PDLOE:	MAPF[MASTO] D[12] MASK[3] DEST[AR] SPEC[A-MEM-APR]
+1)		JUMP[PIGEN] NORM $; CHAN # IN AR, TRY INTERRUPT
+1)	PDLO:	D[12] SPEC[A-MEM-APR] DEST[Q] NORM $; APR CONI WORD
+1)		D[CONST 1] ROT[20] ALU[DORQ] SPEC[A-MEM-APR&DEST-A-MEM] DEST[2] NORM POPJ $;SET PDLOV BIT
+1)	.REPEAT F3SW [
+**** File 2) CFMAIN.C01[TMP,F2]/31P/20L
+2)	PDLOE:	MAPF[MASTO] D[10 + APRSTS] MASK[3] DEST[AR] SPEC[A-MEM-APR]
+2)		JUMP[PIGEN] NORM $; CHAN # IN AR, TRY INTERRUPT
+2)	PDLO:	D[10 + APRSTS] SPEC[A-MEM-APR] DEST[Q] NORM $; APR CONI WORD
+2)		D[CONST 1] ROT[20] ALU[DORQ] SPEC[A-MEM-APR&DEST-A-MEM] DEST[APRSTS]
+2)				NORM POPJ $
+2)			;SET PDLOV BIT
+2)		.USE[AREA53]
+2)	.REPEAT F3SW [
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/31P/33L
+1)		D[13] SPEC[A-MEM-APR] MASK[4] DEST[Q] NORM $
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 31,31
+
+1)		D[MASK 8.] ROT[4] ALU[DORQ] DEST[AR CLR-DEV-FROM-INTR] 
+1)		  NORM SPEC[IOB-IN] $  ;;7760 IS NEW LOC. OF ERROR LOG.
+1)	  	MAPF[4] D[IOD] DEST[Q] CYLEN[IOB-IN] $
+**** File 2) CFMAIN.C01[TMP,F2]/31P/39L
+2)		D[10 + ECCSVP] SPEC[A-MEM-APR] MASK[4] DEST[Q] NORM $
+2)	.REPEAT 1 - MUM2 [
+2)		D[MASK 8.] ROT[4] ALU[DORQ] DEST[AR CLR-DEV-FROM-INTR] 
+2)		  NORM SPEC[IOB-IN] $  ;;7760 IS NEW LOC. OF ERROR LOG.
+2)	];.REPEAT 1 - MUM2
+2)	.REPEAT MUM2 [
+2)		D[MASK 9.] ROT[4] ALU[DORQ] DEST[AR CLR-DEV-FROM-INTR] 
+2)		  NORM SPEC[IOB-IN] $  ;;17760 IS NEW LOC. OF ERROR LOG.
+2)	];.REPEAT MUM2
+2)	  	MAPF[4] D[IOD] DEST[Q] CYLEN[IOB-IN] $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/31P/42L
+1)		D[AR] ALU[D+1] DEST[3] SPEC[A-MEM-APR&DEST-A-MEM] NORM $
+1)		SPEC[IOB-IN] D[CONST 1] DEST[DEV-ADR] NORM $
+**** File 2) CFMAIN.C01[TMP,F2]/31P/54L
+2)		D[AR] ALU[D+1] DEST[ECCSVP] SPEC[A-MEM-APR&DEST-A-MEM] NORM $
+2)		SPEC[IOB-IN] D[CONST 1] DEST[DEV-ADR] NORM $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/31P/63L
+1)	ECC-UNC:  ;SEE IF WE SHOULD GIVE INTERRUPT FOR HARD ECC ERR
+1)		  ;RETURN TO CALLER IF NOT, BUT STILL SET PAR ERR FLAG.
+1)		D[14] DEST[Q] NORM $
+1)		 ;FIRST, SET PAR ERR FLAG IN PI CONI BITS.
+1)		D[CONST 1] ROT[35. - 19.] ALU[DORQ] 
+1)			DEST[AR 4] DEST-A-MEM NORM $
+1)		D[AR] ROT[35. - 20.] C550 COND[-OBUS<0] POPJ $
+1)		 ;IF PAR ERR INTRPT ENABLE OFF, DO NO MORE.
+1)		D[12] MASK[3] DEST[Q AR] C550 COND[OBUS=0] POPJ $
+1)		 ;IF APR PI CHAN IS 0, DON'T GIVE INTRPT.
+1)		DEST[CLR-MI-ERR] NORM JPOP[PIGEN] $ 
+1)		 ;CLEAR ERR FF AND GIVE INTERRUPT ON APR CHANNEL.
+1)	 .REPEAT F2SW [ 
+1)	STOPS:	D[CONST 1] DEST[DEV-ADR] JUMP[DOHALT] NORM $
+1)	SOVRS:	D[PC] COND[-OBUS<0] SPEC[IOB-IN] JUMP[. + 3] C550 $; J IF NO OV
+1)		D[IOD] MAPF[4] DEST[Q CLR-DEV-FROM-INTR] CYLEN[IOB-IN] $
+**** File 2) CFMAIN.C01[TMP,F2]/31P/75L
+2)	;(ECC-UNC moved to bottom of page)
+2)	 .REPEAT F2SW [ 
+2)	STOPS:	D[CONST 1] DEST[DEV-ADR] JUMP[DOHALT] NORM $
+2)	SOVRS:	D[PC] COND[-OBUS<0] SPEC[IOB-IN] JUMP[. + 3] DEST[CLR-DEV-FROM-INTR] C550 $
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 31,31
+
+2)			; J IF NO OV
+2)		D[IOD] MAPF[4] DEST[Q CLR-DEV-FROM-INTR] CYLEN[IOB-IN] $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/31P/88L
+1)		D[13] SPEC[A-MEM-APR] MASK[4] DEST[Q] NORM $
+1)		D[MASK 8.] ROT[4] ALU[DORQ] DEST[AR CLR-DEV-FROM-INTR] 
+1)		  NORM SPEC[IOB-IN] $  ;;7760 IS NEW LOC. OF ERROR LOG.
+1)	  	MAPF[4] D[IOD] DEST[Q] CYLEN[IOB-IN] $
+**** File 2) CFMAIN.C01[TMP,F2]/31P/89L
+2)		D[10 + ECCSVP] SPEC[A-MEM-APR] MASK[4] DEST[Q] NORM $
+2)	.REPEAT 1 - MUM2 [
+2)		D[MASK 8.] ROT[4] ALU[DORQ] DEST[AR CLR-DEV-FROM-INTR] 
+2)		  NORM SPEC[IOB-IN] $  ;;7760 IS NEW LOC. OF ERROR LOG.
+2)	];.REPEAT 1 - MUM2
+2)	.REPEAT MUM2 [
+2)		D[MASK 9.] ROT[4] ALU[DORQ] DEST[AR CLR-DEV-FROM-INTR] 
+2)		  NORM SPEC[IOB-IN] $  ;;17760 IS NEW LOC. OF ERROR LOG.
+2)	];.REPEAT MUM2
+2)	  	MAPF[4] D[IOD] DEST[Q] CYLEN[IOB-IN] $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/31P/116L
+1)		.USE[OTHER]
+1)	SOEDOV:	ALU[0] DEST[DEV-ADR] NORM $
+**** File 2) CFMAIN.C01[TMP,F2]/31P/123L
+2)	SOEDOV:	ALU[0] DEST[DEV-ADR] NORM $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/32P/1L
+1)	;; 60 HZ CLOCK READING AND INTERRUPT ROUTINES
+**** File 2) CFMAIN.C01[TMP,F2]/31P/128L
+2)	ECC-UNC:  ;SEE IF WE SHOULD GIVE INTERRUPT FOR HARD ECC ERR
+2)		  ;RETURN TO CALLER IF NOT, BUT STILL SET PAR ERR FLAG.
+2)		D[14] DEST[Q] NORM $
+2)		 ;FIRST, SET PAR ERR FLAG IN PI CONI BITS.
+2)		D[CONST 1] ROT[35. - 19.] ALU[DORQ] 
+2)			DEST[AR 4] DEST-A-MEM NORM $
+2)		D[AR] ROT[35. - 20.] C550 COND[-OBUS<0] POPJ $
+2)		 ;IF PAR ERR INTRPT ENABLE OFF, DO NO MORE.
+2)		D[10 + APRSTS] MASK[3] DEST[Q AR] C550 COND[OBUS=0] POPJ $
+2)		 ;IF APR PI CHAN IS 0, DON'T GIVE INTRPT.
+2)		DEST[CLR-MI-ERR] NORM JPOP[PIGEN] $ 
+2)		 ;CLEAR ERR FF AND GIVE INTERRUPT ON APR CHANNEL.
+2)	;; 60 HZ CLOCK READING AND INTERRUPT ROUTINES
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 32,31
+
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/32P/13L
+1)		JUMP[APRCHK] NORM $ ;CAUSE INT. IF ENABLED.
+1)	;$*$*$*$ No space left in NORMAL by now...
+**** File 2) CFMAIN.C01[TMP,F2]/32P/13L
+2)		JUMP[APRCHK] NORM $ 	;CAUSE CLOCK INT. IF ENABLED.
+2)	;$*$*$*$ No space left in NORMAL by now...
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/39P/25L
+1)	FAOS1: FAOS5:
+1)		ACSEL[AC] ALU[AC] DEST[AR] PUSHJ[FADSUB] NORM $
+**** File 2) CFMAIN.C01[TMP,F2]/39P/29L
+2)	FAOS1:
+2)	FAOS5:
+2)		ACSEL[AC] ALU[AC] DEST[AR] PUSHJ[FADSUB] NORM $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/39P/37L
+1)	FMP1: FMP5:
+1)		ACSEL[AC] ALU[AC] DEST[AR] PUSHJ[FM] NORM $
+**** File 2) CFMAIN.C01[TMP,F2]/39P/42L
+2)	FMP1:
+2)	FMP5:
+2)		ACSEL[AC] ALU[AC] DEST[AR] PUSHJ[FM] NORM $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/39P/49L
+1)	.DEFINE DIVTST[] [D[MEM] MASK[27.] COND[OBUS=0] JUMP[FPNDIV] C550]
+1)	;;;FD5:	D[MA] ROT[18.] DEST[HOLD] SPEC[LEFT] NORM $	;Not needed.  TVR-Apr80
+1)	FD1:	DIVTST $
+1)		CFDS $
+**** File 2) CFMAIN.C01[TMP,F2]/39P/55L
+2)	;Macro to test for divide by zero
+2)	.DEFINE DIVTST[] [D[MEM] MASK[27.] COND[OBUS=0] JUMP[FPNDIV] C550]
+2)	;;;FD5:	D[MA] ROT[18.] DEST[HOLD] SPEC[LEFT] NORM $	;Not needed.  TVR-Apr80
+2)	;FDV,FDVR
+2)	FD1:	DIVTST $	;Check for divide by zero
+2)		CFDS $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/39P/55L
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 39,39
+
+1)	FD2:	DIVTST $
+**** File 2) CFMAIN.C01[TMP,F2]/39P/66L
+2)	;LONG MODE FLOATING DIVIDE.
+2)	;------------------------------------------------------------------------------
+2)	FD2:	DIVTST $
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/39P/107L
+1)		;A. RETURN IMMEDIATELY IF 0.
+1)	.DEFINE CNORM[] [D[AR] ACSEL[AC] DEST[AC] PUSHJ[NRMLIZ] NORM]
+1)	NRMLIZ:	ALU[QORAC] ACSEL[AC] DEST[AR] COND[OBUS=0] POPJ C550 $
+1)		;B. CHECK FOR MANTISSA OVERFLOW, MOVE EXPONENT TO AR.
+1)		ALU[AC] DEST[AR] ACSEL[AC] PUSHJ[NORMOV] NORM $
+1)		D[IR] MASK[18.] COND[-OBUS=0] POPJ C550 $
+1)		;C. LEFT SHIFT UNTIL NORMALIZED.
+1)		ALU[AC] ACSEL[AC] COND[OBUS<0] JUMP[NEGNOR] CYLEN[C450] $
+1)	POSNOR:	D[CONST 1] ROT[26.] ALU[D&AC] ACSEL[AC] COND[-OBUS=0] POPJ C550 $
+1)		D[AR] ALU[D-1] DEST[AR] SHORT $
+1)		ALU[SH-AC] ACSEL[AC] MASK[2] DEST[D6] JUMP[POSNOR] NORM $
+1)	NEGNOR:	D[CONST 1] ROT[26.] ALU[D&AC] ACSEL[AC] COND[OBUS=0] JUMP[NN1] C550 $
+1)		D[AR] ALU[D-1] DEST[AR] SHORT $
+1)		ALU[SH-AC] ACSEL[AC] MASK[2] DEST[D6] JUMP[NEGNOR] NORM $
+1)	NN1:	D[MASK 27.] ALU[D&AC] ACSEL[AC] COND[-OBUS=0] POPJ C550 $
+1)		D[CONST 1] ROT[26.] ALU[DORAC] ACSEL[AC] DEST[AC] SHORT $
+1)		D[AR] ALU[D+1] DEST[AR] POPJ NORM $
+1)	;CHECK FOR MANTISSA OVERFLOW INTO EXPONENT FIELD.  CALL WITH
+**** File 2) CFMAIN.C01[TMP,F2]/39P/121L
+2)	; IF NUMBER IS 0, LEAVE 0 IN AR,AC, AND Q.
+2)	;------------------------------------------------------------------------------
+2)	.DEFINE CNORM[] [D[AR] ACSEL[AC] DEST[AC] PUSHJ[NRMLIZ] NORM]
+2)	;A. Return immediately if 0.
+2)	NRMLIZ:	ALU[QORAC] ACSEL[AC] DEST[AR] COND[OBUS=0] POPJ C550 $
+2)	;B. Check for mantissa overflow, move exponent to AR.
+2)		ALU[AC] DEST[AR] ACSEL[AC] PUSHJ[NORMOV] NORM $
+2)			;Check mantissa and shift right if necessary
+2)		D[IR] MASK[18.] COND[-OBUS=0] POPJ C550 $
+2)			;If we adjusted right, then we definitely don't have to
+2)			;shift left.  We're done here.
+2)	;C. Left shift until normalized.
+2)		ALU[AC] ACSEL[AC] COND[OBUS<0] JUMP[NEGNOR] CYLEN[C450] $
+2)			;Separate into two cases, positive and negative
+2)	POSNOR:	D[CONST 1] ROT[26.] ALU[D&AC] ACSEL[AC] COND[-OBUS=0] POPJ C550 $
+2)			;If high order bit of mantissa is one, we're done
+2)		D[AR] ALU[D-1] DEST[AR] SHORT $
+2)			;Decrement the exponent
+2)		ALU[SH-AC] ACSEL[AC] MASK[2] DEST[D6] JUMP[POSNOR] NORM $
+2)			;Shift left and try again.
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 39,39
+
+2)	NEGNOR:	D[CONST 1] ROT[26.] ALU[D&AC] ACSEL[AC] COND[OBUS=0] JUMP[NN1] C550 $
+2)			;If high order bit of mantissa is zero, we're done
+2)		D[AR] ALU[D-1] DEST[AR] SHORT $
+2)			;Decrement the exponent
+2)		ALU[SH-AC] ACSEL[AC] MASK[2] DEST[D6] JUMP[NEGNOR] NORM $
+2)			;Shift left and try again.
+2)	NN1:	D[MASK 27.] ALU[D&AC] ACSEL[AC] COND[-OBUS=0] POPJ C550 $
+2)			;Check for case of exactly -(2^n).  If it isn't, we're done
+2)		D[CONST 1] ROT[26.] ALU[DORAC] ACSEL[AC] DEST[AC] SHORT $
+2)			;We went one too far, backup by simply OR'ing in the relevant
+2)			;bit in the same manner as shifting would. 
+2)			;(*** What about Q??  TVR-Jul80)
+2)		D[AR] ALU[D+1] DEST[AR] POPJ NORM $
+2)			;Increment exponent to account for simulated left shift.
+2)	;------------------------------------------------------------------------------
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/39P/129L
+1)	NORMOV:	;M.O.<=> [AR0<>AR8] OR [(AR8=1)AND(AR9-35=0)]
+1)		D[AR] ROT[8] ALU[D#AC] ACSEL[AC] COND[OBUS<0] JUMP[NOVYES] C550 $
+1)		D[MASK 27.] ALU[D&AC] ACSEL[AC] COND[-OBUS=0] JUMP[NOVNO] C550 $
+1)		D[CONST 1] ROT[27.] ALU[D&AC] ACSEL[AC] COND[OBUS=0] JUMP[NOVNO] C550 $
+1)	NOVYES:	ALU[SH-AC] ACSEL[AC] MASK[1] DEST[D4] SHORT $
+1)		D[IR] MASK[18.] ALU[D+1] DEST[AR IR-ADR] POPJ NORM $
+1)	NOVNO:	D[IR] MASK[18.] DEST[AR] SHORT $
+1)		ALU[0] DEST[IR-ADR] POPJ NORM $
+1)	;INSERT EXPONENT IN AR INTO WORD IN AC.
+**** File 2) CFMAIN.C01[TMP,F2]/39P/161L
+2)	; IF OVERFLOW, AND NORMALIZE.
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/39P/141L
+1)	INSEXP:	D[AR] ROT[27.] DEST[Q] NORM $
+1)	INSEX1:	D[MASK 8.] ROT[27.] ALU[D&Q] DEST[Q] SHORT $
+1)		ALU[Q#AC] ACSEL[AC] DEST[AC] SHORT $
+1)		D[AR] COND[OBUS18] JUMP[EXPUF] C550 $
+1)		D[AR] MASK[10.] ROT[28.] COND[OBUS=0] POPJ C550 $
+1)		D[PC] DEST[Q] SHORT $
+1)	SETFOV:	D[CONST 11] ROT[32.] ALU[DORQ] DEST[CRYOV] POPJ NORM $
+1)	EXPUF:	D[PC] DEST[Q] SHORT $
+1)		D[CONST 1] ROT[24.] ALU[DORQ] DEST[Q] JUMP[SETFOV] NORM$
+1)	;FLOATING ADD AC&AR TO MEM.  RESULT, NORMALIZED AND ROUNDED
+**** File 2) CFMAIN.C01[TMP,F2]/39P/164L
+2)	;------------------------------------------------------------------------------
+2)	NORMOV:	D[AR] ROT[8] ALU[D#AC] ACSEL[AC] COND[OBUS<0] JUMP[NOVYES] C550 $
+2)			;Check to make sure AR<0>=AR<8>.  If they don't, the mantissa
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 39,39
+
+2)			;clearly overlaps the exponent field.
+2)		D[MASK 27.] ALU[D&AC] ACSEL[AC] COND[-OBUS=0] JUMP[NOVNO] C550 $
+2)			;Check for AR<9:35> for zero.  If not zero, we're OK
+2)		D[CONST 1] ROT[27.] ALU[D&AC] ACSEL[AC] COND[OBUS=0] JUMP[NOVNO] C550 $
+2)			;Check AR<8>.  If zero, we're OK
+2)	;	\ /
+2)	;Mantissa has overflowed, adjust it.  Right by one should be enough.
+2)	NOVYES:	ALU[SH-AC] ACSEL[AC] MASK[1] DEST[D4] SHORT $
+2)			;Shift mantissa right (i think?)
+2)		D[IR] MASK[18.] ALU[D+1] DEST[AR IR-ADR] POPJ NORM $
+2)			;Increment mantissa and flag that we changed it by setting
+2)			;IR<18:35> to be non-zero.
+2)	;Mantissa has not overflowed.
+2)	NOVNO:	D[IR] MASK[18.] DEST[AR] SHORT $
+2)			;Save exponent in AR
+2)		ALU[0] DEST[IR-ADR] POPJ NORM $
+2)			;Zero IR<18:35> to signify success
+2)	;------------------------------------------------------------------------------
+2)	;INSERT EXPONENT IN AR INTO WORD IN AC.
+2)	;SET FLOV,FLUN,OVF FLAGS AS REQUIRED.
+2)	;PRESERVES AR, CLOBBERS Q.
+2)	;------------------------------------------------------------------------------
+2)	INSEXP:	D[AR] ROT[27.] DEST[Q] NORM $
+2)			;Move exponent into position
+2)	INSEX1:	D[MASK 8.] ROT[27.] ALU[D&Q] DEST[Q] SHORT $
+2)			;Flush stuff in mantissa area
+2)		ALU[Q#AC] ACSEL[AC] DEST[AC] SHORT $
+2)			;Fill in exponent
+2)		D[AR] COND[OBUS18] JUMP[EXPUF] C550 $
+2)			;Check for underflow (i.e. below range of exponent offset)
+2)		D[AR] MASK[10.] ROT[28.] COND[OBUS=0] POPJ C550 $
+2)			;Check for overflow (i.e. above range of exponent offset)
+2)		D[PC] DEST[Q] SHORT $
+2)			;Setup to set floating overflow
+2)	SETFOV:	D[CONST 11] ROT[32.] ALU[DORQ] DEST[CRYOV] POPJ NORM $
+2)			;Turn on overflow and floating overflow
+2)	EXPUF:	D[PC] DEST[Q] SHORT $
+2)			;Setup to set no divide and floating overflow
+2)		D[CONST 1] ROT[24.] ALU[DORQ] DEST[Q] JUMP[SETFOV] NORM$
+2)			;Turn on no divide, then do overflows
+2)	;------------------------------------------------------------------------------
+2)	;FLOATING ADD AC&AR TO MEM.  RESULT, NORMALIZED AND ROUNDED
+2)	; IF REQUIRED IN AC,Q.
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/39P/190L
+1)		;ENTER HERE WITH RESULT IN AR,Q, EXP IN IR-ADR.
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 39,39
+
+1)	FPNAR:	CNORM $				;NOPE, NORMALIZE
+1)		;G. ROUND IF NECESSARY, INSERT EXPONENT INTO
+1)		;   HIGH ORDER WORD OF RESULT.
+1)		ALU[Q] COND[-OBUS<0] DEST[HOLD] JUMP[NORND] CYLEN[C450] $
+1)		D[IR] DEST[Q] NORM $
+1)		D[CONST 1] ROT[35] ALU[D&Q] COND[OBUS=0] JUMP[NORND] C550 $
+1)		D[MEM] DEST[Q] SHORT $
+1)		D[MASK 43] ALU[D&Q] COND[-OBUS=0] JUMP[YESRND] C550 $
+1)		ALU[AC] ACSEL[AC] COND[OBUS<0] JUMP[INSEXP] CYLEN[C450] $
+1)	YESRND:	D[AR] DEST[IR-ADR] SHORT $
+1)		ALU[AC+1] ACSEL[AC] DEST[AC] PUSHJ[NRMLIZ] NORM $
+1)		JINSEXP $
+1)	NORND:	D[MEM] DEST[Q] JUMP[INSEXP] NORM $
+1)		;UFA NORMALIZATION -- ONLY ON MANTISSA OVERFLOW.
+1)	UFANOR:	D[AR] ALU[DORQ] ACSEL[AC] DEST[AC] COND[OBUS=0] POPJ C600 $
+1)		D[AR] ACSEL[AC] DEST[AC] PUSHJ[NORMOV] NORM $
+1)		JINSEXP $
+1)	;SETUP LOW ORDER FP RESULT, STORE BOTH IN AC,AC+1
+**** File 2) CFMAIN.C01[TMP,F2]/39P/252L
+2)	;------------------------------------------------------------------------------
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/39P/212L
+1)	FPLOW:	D[CONST 27.] ACSEL[AC+1] ALU[AC-D] DEST[AC AR] SHORT $
+1)		D[CONST 1] ROT[7] ACSEL[AC+1] ALU[D&AC] COND[-OBUS=0] JUMP[ZLOW] C550 $
+1)		D[MEM] ROT[27.] MASK[27.] DEST[Q] COND[OBUS=0] JUMP[ZLOW] C550 $
+1)		D[AR] ROT[27.] ACSEL[AC+1] DEST[AC] SHORT $
+1)		D[MASK 8] ROT[27.] ALU[D&AC] ACSEL[AC+1] DEST[AC] SHORT $
+1)		ACSEL[AC+1] ALU[QORAC] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+1)	ZLOW:	ACSEL[AC+1] ALU[0] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+1)	;FLOATING MULTIPLY.  AC&AR BY MEM.
+1)	FM:	;A. SUM OF + FORM EXPONENTS -128.+1 TO IR-ADR.  +1 BECAUSE 28
+1)		; STEPS ARE USED TO PROVIDE ONE GUARD DIGIT.
+1)		D[AR] MASK[9] ROT[9] DEST[Q AR] NORM$
+1)		D[CONST 1] ROT[8] ALU[D&Q] COND[OBUS=0] JUMP[FM1] C550 $
+1)		D[MASK 9] ALU[D#Q] DEST[AR] SHORT $
+1)	FM1:	D[MEM] MASK[9] ROT[9] DEST[Q] SHORT $
+1)		D[CONST 1] ROT[8] ALU[D&Q] COND[OBUS=0] JUMP[FM2] C550 $
+1)		D[MASK 9] ALU[D#Q] DEST[Q] SHORT $
+1)	FM2:	D[AR] ALU[D+Q] CARRY DEST[Q] SHORT $	;+1. FOR GUARD DIGIT.
+1)		D[CONST 1] ROT[7] ALU[Q-D] DEST[IR-ADR] SHORT $
+1)		;B. BLANK EXPONENTS.
+1)		BLEXPS[Q SHORT AR]
+1)		ALU[0] DEST[AC] ACSEL[AC] PUSHJ[TESMUL] NORM $ ;28. STEPS.
+1)		ALU[Q] DEST[AR] SHORT $	;FLUSH SIGN IN LO WD.
+1)		D[AR] ALU[D+Q] DEST[Q] SHORT $
+1)		ALU[AC] ACSEL[AC] DEST[AR] JUMP[FPNAR] NORM $
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 39,39
+
+1)	;28. STEP INTEGER MULTIPLY FOR USE BY FM.
+1)	TESMUL:	D[CONST 27.] LLOAD NORM $	;LOOP 28 TIMES
+1)		JUMP[DOMUL1] NORM $	;TEST.
+1)	;SHORT STYLE FLOATING DIVIDE AC BY MEM.
+1)	; XOR OF DIVISOR&DIVIDEND SIGNS IN AR BIT 0.
+1)	FDS:	D[MEM] ALU[D#AC] ACSEL[AC] DEST[AR] SHORT $
+1)	FDS1:	D[AR] MASK[1] ROT[1] DEST[IR-ADR] SHORT $
+1)		ALU[AC] ACSEL[AC] DEST[AR] COND[-OBUS<0] JUMP[. + 2] CYLEN[C450] $
+1)		ALU[0-AC] ACSEL[AC] DEST[AC] SHORT $
+1)		ALU[0] DEST[1] DEST-A-MEM NORM $
+1)		;FALLS THROUGH...
+1)	;DIVIDE, DIVIDEND HOW IN AC, LOW IN A-MEM[1]. DIVISOR IN MEM.
+**** File 2) CFMAIN.C01[TMP,F2]/39P/255L
+2)	FPNAR:	CNORM $				;NOPE, NORMALIZE
+2)	;(Calls NRMLIZ which changes register usage from above and adjusts various
+2)	;things.  "LEAVE EXPONENT IN AR, NORMALIZED NUMBER IN AC,Q.")
+2)	;G. ROUND IF NECESSARY, INSERT EXPONENT INTO HIGH ORDER WORD OF RESULT.
+2)		ALU[Q] COND[-OBUS<0] DEST[HOLD] JUMP[NORND] CYLEN[C450] $
+2)			;Save Q in HOLD (i.e. MEM)
+2)			;If Q<0> is zero, don't round
+2)		D[IR] DEST[Q] NORM $
+2)			;Get Q so we check bit meaning rounding (??? Can't this be
+2)			;done with D[IR] ROT[7] COND[OBUS<0]... ???)
+2)		D[CONST 1] ROT[35] ALU[D&Q] COND[OBUS=0] JUMP[NORND] C550 $
+2)			;Check opcode to see if rounding is requested.
+2)			;If not, we're done
+2)		D[MEM] DEST[Q] SHORT $
+2)			;Restore Q
+2)		D[MASK 43] ALU[D&Q] COND[-OBUS=0] JUMP[YESRND] C550 $
+2)			;Round if Q<1:35> is non-zero (? what does this signify???)
+2)		ALU[AC] ACSEL[AC] COND[OBUS<0] JUMP[INSEXP] CYLEN[C450] $
+2)			;If mantissa is negative, we don't round (???)
+2)	;	\ /
+2)	YESRND:	D[AR] DEST[IR-ADR] SHORT $
+2)			;Setup IR for NRMLIZ
+2)		ALU[AC+1] ACSEL[AC] DEST[AC] PUSHJ[NRMLIZ] NORM $
+2)			;Increment high order word and normalize once more (???)
+2)		JINSEXP $
+2)			;Now stick in exponent
+2)	;	---
+2)	NORND:	D[MEM] DEST[Q] JUMP[INSEXP] NORM $
+2)			;Restore Q and insert exponent(?)
+2)	;UFA NORMALIZATION -- ONLY ON MANTISSA OVERFLOW.
+2)	UFANOR:	D[AR] ALU[DORQ] ACSEL[AC] DEST[AC] COND[OBUS=0] POPJ C600 $
+2)		D[AR] ACSEL[AC] DEST[AC] PUSHJ[NORMOV] NORM $
+2)		JINSEXP $
+2)	;	---
+2)	;------------------------------------------------------------------------------
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 39,39
+
+2)	;SETUP LOW ORDER FP RESULT, STORE BOTH IN AC,AC+1
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/39P/253L
+1)	FD:	;A. PUT DIVISOR IN + FORM, GET DIVISOR EXPONENT.
+1)		;.1 SHUFFLE IR.35 INTO A-MEM.
+1)		D[IR] MASK[18.] DEST[4] DEST-A-MEM NORM $
+1)		D[MEM] DEST[Q] COND[-OBUS<0] JUMP[. + 2] C550 $
+1)		D[MEM] ALU[0-D] DEST[Q HOLD] NORM $
+1)		D[MEM] ROT[9] MASK[8] DEST[IR-ADR] NORM $
+1)		D[MASK 8] ROT[27.] ALU[-D&Q] DEST[HOLD] NORM $
+1)		;B. FETCH AND BLANK HOW DIVIDEND EXPONENT.
+1)		D[AR] ROT[9] MASK[8] DEST[Q] NORM $
+1)		D[AR] COND[-OBUS<0] JUMP[. + 2] C550 $
+1)		D[MASK 9] ALU[D#Q] DEST[Q] SHORT $
+1)		D[MASK 8] ROT[27.] ALU[-D&AC] ACSEL[AC] DEST[AC] SHORT $
+1)		;C. COMPUTE RESULTANT EXPONENT.
+1)		D[IR] MASK[18.] ALU[Q-D] DEST[Q] SHORT $
+1)		D[CONST 1] ROT[7] ALU[D+Q] DEST[IR-ADR] NORM $
+1)		;D. MOVE LOW DIVIDEND TO Q.
+1)		D[11] DEST[Q] SHORT $
+1)		;E. IF DIVISOR<=DIVIDEND,  SHIFT DIVIDEND RIGHT, INC
+1)		; RESULTANT EXPONENT.  SAVE DIFF. IN A-MEM[2] FOR LONG MODE.
+1)		D[MEM] ALU[AC-D] ACSEL[AC] DEST[2] DEST-A-MEM COND[-OBUS<0] JUMP[FDAD] C600 $
+1)		;F. SHIFT DIVIDEND RIGHT BY 8 SO RESULT WILL BE
+1)		; NORMALIZED AFTER ROUNDING.  28. STEP DIVIDE WILL
+1)		; FIX THIS.
+1)	FDSHFT:	D[CONST 7] LLOAD NORM $
+1)		ALU[SH-AC] ACSEL[AC] MASK[2] DEST[D4] LOOP[.] NORM $
+1)		;GET 1. EXP TO A-MEM[4], 2. SIGN XOR TO IR-ADR.
+1)		D[AR] DEST[5] DEST-A-MEM NORM $
+1)		D[IR] DEST[AR] SHORT $
+1)		D[14] DEST[IR-ADR] SHORT $
+1)		D[AR] DEST[4] DEST-A-MEM NORM $
+1)		D[15] DEST[AR] SHORT $
+1)		PUSHJ[DODIV2] NORM $	;36. STEP.  RESULT HAS SIGNS ADJUSTED.
+1)		;G. SAVE REMAINDER IN A-MEM[1], PUT QUOTIENT IN AC, 0 IN Q.
+1)		ALU[AC] ACSEL[AC] DEST[1] DEST-A-MEM NORM $
+1)		ALU[Q] ACSEL[AC] DEST[AC] SHORT $
+1)		ALU[0] DEST[Q] SHORT $
+1)		;H. PREPARE TO ROUND 29. BIT RESULT.
+1)		ALU[SH-AC] ACSEL[AC] MASK[1] DEST[D4] SHORT $
+1)		D[14] DEST[IR-ADR] SHORT $	;MOVE EXP FOR FPNAR.
+1)		ALU[AC] ACSEL[AC] DEST[AR] JUMP[FPNAR] NORM $
+1)	    ;HERE WHEN DIVIDEND IS >= DIVISOR.  SHIFT DIVIDEND RIGHT
+1)	    ; AND INCREMENT RESULTANT AC.  THIS WILL ALLOW DIVIDE TO
+1)	    ; SUCCEED IF BOTH DIVISOR & DIVIDEND WERE NORMALIZED
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 39,39
+
+1)	    ; AND DIVISOR <> 0.
+1)	FDAD:	ALU[SH-AC] ACSEL[AC] MASK[2] DEST[D4] SHORT $
+1)		D[IR] MASK[18.] ALU[D+1] DEST[IR-ADR] JUMP[FDSHFT] NORM $
+1)	;Strays from KI instructions
+**** File 2) CFMAIN.C01[TMP,F2]/39P/295L
+2)	;------------------------------------------------------------------------------
+2)	FPLOW:	D[CONST 27.] ACSEL[AC+1] ALU[AC-D] DEST[AC AR] SHORT $
+2)		D[CONST 1] ROT[7] ACSEL[AC+1] ALU[D&AC] COND[-OBUS=0] JUMP[ZLOW] C550 $
+2)		D[MEM] ROT[27.] MASK[27.] DEST[Q] COND[OBUS=0] JUMP[ZLOW] C550 $
+2)		D[AR] ROT[27.] ACSEL[AC+1] DEST[AC] SHORT $
+2)		D[MASK 8] ROT[27.] ALU[D&AC] ACSEL[AC+1] DEST[AC] SHORT $
+2)		ACSEL[AC+1] ALU[QORAC] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+2)	ZLOW:	ACSEL[AC+1] ALU[0] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+2)	;------------------------------------------------------------------------------
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/40P/4L
+1)	ADJSP1:	D[IR] MASK[22] ALU[D+AC] DEST[AR] NORM $
+1)			;Add right half
+1)		D[MASK 22] ALU[-D&Q] DEST[Q] SHORT $
+1)			;Isolate left half
+1)		D[AR] MASK[22] ALU[DORQ] DEST[O_AC AR] NORM $
+1)			;Merge halves and store
+1)		D[IR] COND[-OBUS18] SPEC[MA_PC] DEST[MA] JUMP[MAIN1] C550 $
+1)			;If E was positive, it wasn't an overflow (just a bad idea)
+1)			;Start fetching next instruction
+1)		D[AR] COND[OBUS<0] JUMP[MAIN] C550 $
+1)			;If original was negative, we're OK.  Start doing next
+1)			;instruction if no sign changed in left half
+1)		JUMP[PDLO6] NORM $
+1)			;ADJSP got a PDLOV
+1)	;ADJSP left result positive
+1)	ADJSP2:	D[MASK 22] ALU[-D&Q] DEST[Q] SHORT $
+1)			;Isolate left half
+1)		D[AR] MASK[22] ALU[DORQ] DEST[O_AC AR] $
+1)			;Merge halves and store
+1)		D[IR] COND[OBUS18] SPEC[MA_PC] DEST[MA] C550 $
+1)			;If E was negative, it wasn't an overflow (just a bad idea)
+1)			;Start fetching next instruction
+1)		D[AR] COND[-OBUS<0] JUMP[MAIN1] C550 $
+1)			;If original was positive, we're OK.  Start doing next
+1)			;instruction if no sign changed in left half
+1)		JUMP[PDLO6] NORM $
+1)			;ADJSP got a PDLOV
+1)	;(DMOVE continued)
+1)	DMOVE2:	D[MA] ALU[D+1] DEST[MA] NORM $	;Fetch second word
+1)		FIXM1 $			;Complete fetch
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 40,39
+
+1)		ACSEL[AC+1] D[MEM] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] CYLEN[FIXM+1] $
+1)			;Put it in the second AC and start next instruction
+1)	;(DMOVN continued)
+1)	DMOVN2:	D[MA] ALU[D+1] DEST[MA] NORM $	;Fetch second word
+1)		FIXM1 $	;Complete fetch
+1)		ACSEL[AC+1] D[MEM] ALU[0-D] DEST[AC MA] SPEC[MA_PC] CYLEN[FIXM+1] $
+1)			;Negate low order word and put it in the second AC
+**** File 2) CFMAIN.C01[TMP,F2]/39P/307L
+2)	;
+2)	;*** This code produces non-zero results if MEM=-1.0 and AC=0  !!!    TVR-Jun80
+2)	;------------------------------------------------------------------------------
+2)	;A. SUM OF + FORM EXPONENTS -128.+1 TO IR-ADR.  +1 BECAUSE 28
+2)	; STEPS ARE USED TO PROVIDE ONE GUARD DIGIT.
+2)	FM:	D[AR] MASK[9] ROT[9] DEST[Q AR] NORM$
+2)			;Extract the exponent from AC (which was copied into AR)
+2)		D[CONST 1] ROT[8] ALU[D&Q] COND[OBUS=0] JUMP[FM1] C550 $
+2)			;Check sign bit of number.  Nothing special if positive
+2)		D[MASK 9] ALU[D#Q] DEST[AR] SHORT $
+2)			;Sign is negative, we want the one-complement of the exponent
+2)			;field to get the actual exponent.
+2)	FM1:	D[MEM] MASK[9] ROT[9] DEST[Q] SHORT $
+2)			;Extract the exponent from MEM
+2)		D[CONST 1] ROT[8] ALU[D&Q] COND[OBUS=0] JUMP[FM2] C550 $
+2)			;Check sign bit of number.  Nothing special if positive
+2)		D[MASK 9] ALU[D#Q] DEST[Q] SHORT $
+2)			;Sign is negative, we want the one-complement of the exponent
+2)			;field to get the actual exponent.
+2)	FM2:	D[AR] ALU[D+Q] CARRY DEST[Q] SHORT $
+2)			;Add the two exponents
+2)			;+1. FOR GUARD DIGIT.
+2)		D[CONST 1] ROT[7] ALU[Q-D] DEST[IR-ADR] SHORT $
+2)			;Account for exponent bias.  Put exponent in a safe place.
+2)	;B. BLANK EXPONENTS.
+2)		BLEXPS[Q SHORT AR]
+2)			;Extend the sign to blank out the exponent field.  We will
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/40P/45L
+1)			;*** Is FIXM+1 really the right thing???
+1)		ACSEL[AC+1] D[MASK 1] ROT[35.] ALU[-D&AC] DEST[AC]
+1)				COND[-OBUS=0] JUMP[MAIN1] NORM $
+1)			;Clear stupid bit 0.
+1)			;If the low order part is non-zero, we're done
+1)		ACSEL[AC] ALU[AC+1] DEST[AC] SPEC[CRYOV] JUMP[MAIN1] C550 $
+1)			;Increment high order word and we're finally done.
+1)	;(DMOVEM continued)
+1)		.PAIR
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 40,39
+
+1)	DMOVM2:	CYLEN[MEMSTO] ACSEL[AC] D[MEM] DEST[AC] NORM $
+1)			;Write it also in the AC
+1)		CYLEN[MEMSTO] D[MA] ALU[D+1] DEST[MA] $
+1)			;Setup to write second word
+1)		ACSEL[AC+1] ALU[AC] DEST[MEMSTO] MEMST $
+1)			;Write secord word.
+1)	;(DMOVNM continued)
+1)	DMVNM2:	ACSEL[AC+1] ALU[0-AC] DEST[Q] SHORT $
+1)			;Negate low order word.
+1)		ACSEL[AC+1] D[MASK 1] ROT[35.] ALU[-D&Q] DEST[Q]
+1)				COND[-OBUS=0] JUMP[DMVNM4] NORM $
+1)			;Clear stupid bit 0.
+1)			;If the low order part is non-zero, no change needed to
+1)			;high order word.
+1)		D[AR] ALU[AC+1] DEST[AR STRT-WRT] SPEC[CRYOV]
+1)			COND[-MA-AC] JUMP[DMVNM5] NORM $
+1)			;Increment high order word and start first store
+1)	DMVNM3:	ACSEL[MA] D[MEM] DEST[AC] JUMP[DMVNM5] $
+1)			;Store is to an AC, write into 2901.
+1)	DMVNM4:	DEST[STRT-WRT] COND[-MA-AC] JUMP[DMVNM3] $
+1)			;Start first store.  Jump if to an AC
+1)	DMVNM5:	D[MA] ALU[D+1] DEST[MA] NORM $
+1)			;Finish write.  Note that due to FIXM2, we don't have to
+1)			;worry about map faults.
+1)			;Prepare for secord write
+1)		ALU[Q] DEST[MEMSTO] MEMST $
+1)			;Do final write (low order word into (E+1))
+**** File 2) CFMAIN.C01[TMP,F2]/39P/336L
+2)		ALU[0] DEST[AC] ACSEL[AC] PUSHJ[TESMUL] NORM $ ;28. STEPS.
+2)	;;;	ALU[Q] DEST[AR] SHORT $	;FLUSH SIGN IN LO WD.
+2)		D[MASK 7] ALU[-D&Q] DEST[Q AR] SHORT $	;FLUSH SIGN IN LO WD.
+2)			;Flush remenants of multiplier in low order part of
+2)			;word.  MASK field determined empirically (35-28???)
+2)		D[AR] ALU[D+Q] DEST[Q] SHORT $
+2)			;Make low order word unsigned.
+2)		ALU[AC] ACSEL[AC] DEST[AR] JUMP[FPNAR] NORM $
+2)	;28. STEP INTEGER MULTIPLY FOR USE BY FM.
+2)	TESMUL:	D[CONST 27.] LLOAD NORM $	;LOOP 28 TIMES
+2)		JUMP[DOMUL1] NORM $	;TEST.
+2)	;------------------------------------------------------------------------------
+2)	;SHORT STYLE FLOATING DIVIDE AC BY MEM.
+2)	; XOR OF DIVISOR&DIVIDEND SIGNS IN AR BIT 0.
+2)	;------------------------------------------------------------------------------
+2)	FDS:	D[MEM] ALU[D#AC] ACSEL[AC] DEST[AR] SHORT $
+2)	FDS1:	D[AR] MASK[1] ROT[1] DEST[IR-ADR] SHORT $
+2)		ALU[AC] ACSEL[AC] DEST[AR] COND[-OBUS<0] JUMP[. + 2] CYLEN[C450] $
+2)		ALU[0-AC] ACSEL[AC] DEST[AC] SHORT $
+2)		ALU[0] DEST[1] DEST-A-MEM NORM $
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 40,39
+
+2)		;FALLS THROUGH...
+2)	;------------------------------------------------------------------------------
+2)	;
+2)	;	Floating Divide
+2)	;
+2)	; DIVIDEND HIGH ORDER WORD IN AC, LOW IN A-MEM[1]. DIVISOR IN MEM.
+2)	; BOTH IN POSITIVE FORM.  IR.35=XOR(DIVIDEND SIGN,DIVISOR SIGN).
+2)	; HOW DIVIDEND IN AR IN ORIGINAL (MAY BE <0) FORM.
+2)	;------------------------------------------------------------------------------
+2)	FD:
+2)	;A. PUT DIVISOR IN + FORM, GET DIVISOR EXPONENT.
+2)	;.1 SHUFFLE IR.35 INTO A-MEM.
+2)		D[IR] MASK[18.] DEST[4] DEST-A-MEM NORM $
+2)			;Save IR-ADR in A-MEM
+2)		D[MEM] DEST[Q] COND[-OBUS<0] JUMP[. + 2] C550 $
+2)			;Check for negative divisor
+2)		D[MEM] ALU[0-D] DEST[Q HOLD] NORM $
+2)			;Negate divisor
+2)		D[MEM] ROT[9] MASK[8] DEST[IR-ADR] NORM $
+2)			;Extract exponent from divisor, store in IR<18:35>
+2)		D[MASK 8] ROT[27.] ALU[-D&Q] DEST[HOLD] NORM $
+2)			;Extract mantissa from divisor
+2)	;B. FETCH AND BLANK HOW DIVIDEND EXPONENT.
+2)		D[AR] ROT[9] MASK[8] DEST[Q] NORM $
+2)			;Extract dividend exponent
+2)		D[AR] COND[-OBUS<0] JUMP[. + 2] C550 $
+2)			;Check for negative dividend
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/40P/86L
+1)	KAFIXP:	D[IR] ROT[27.] MASK[9.] DEST[Q] COND[-OBUS=0] PUSHJ[FIXER] $
+1)			;Extract exponent adjustment factor and do fixing
+1)		ACSEL[AC] ALU[Q] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+1)			;Put result into AC and we're done
+1)	;Negative number to fix
+1)	KAFIXN:	D[IR] ROT[27.] MASK[9.] DEST[Q] COND[-OBUS=0] PUSHJ[FIXER] $
+1)			;Extract exponent adjustment factor and do fixing
+1)	;;;	ACSEL[AC] D[MASK R] ALU[D/#Q] DEST[AC MA]	;*** Assembler loses!
+1)		ACSEL[AC] D[2] MASK[R] ALU[D/#Q] DEST[AC MA]	;Sigh...
+1)				SPEC[MA_PC] JUMP[MAIN1] NORM $
+1)			;Put sign extended result into AC and we're done
+1)	;KIFIX continued
+1)	KIFIX1:	D[MEM] DEST[AR] COND[OBUS<0] JUMP[KIFIXN] C550 $
+1)			;Load up things for FIXER, check for positive mantissa
+1)		D[CONST 2] ROT[6] ALU[DORQ] DEST[Q] PUSHJ[FIXER] NORM $
+1)			;Finish making magic constant and do fix.
+1)		ACSEL[AC] ALU[Q] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 40,39
+
+1)			;Put result into AC and we're done
+1)	KIFIXN:	D[CONST 2] ROT[6] ALU[DORQ] DEST[Q] SHORT $
+1)			;Finish making magic constant
+1)		D[MEM] ALU[0-D] DEST[HOLD AR] PUSHJ[FIXER] NORM $
+1)			;ABS to both MEM and AR.  Fix the number
+1)		ACSEL[AC] ALU[0-Q] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+1)			;Negate it back again and start next instruction
+1)	;Fix a number (without sign extension) in MEM, AR=ABS(MEM), Q=magic number
+1)	;(233 for normal fix)
+1)	FIXER:	D[AR] ROT[9] MASK[9] ALU[D-Q] DEST[ROTR Q]
+1)				COND[OBUS<0] JUMP[FIXER2] C550 $
+1)			;Calculate number of positions to move
+1)			;Jump if we'll be shifting right (n<2^26)
+1)		D[CONST 27.] ALU[D+Q] DEST[MASKR] NORM $
+1)			;Construct appropriate mask
+1)		D[MEM] MASK[27.] DEST[HOLD] NORM $
+1)			;Flush exponent, our mask won't reach.
+1)		D[CONST 9.] ALU[Q-D] COND[OBUS<0] JUMP[FIXER1] C550 $
+1)			;Check for overflow
+1)	;;; Set overflow here.  What kind?  (We can live without it for KAFIX, since it
+1)	;;; never did check, but when KIFIX is done, this will have to be corrected.)
+1)		D[CONST 44] DEST[MASKR] NORM $
+1)			;For those losers who want to see some of the number...
+1)	;Now that we know how much to shift things, do it and return.
+1)	FIXER1:	D[MEM] ROT[R] MASK[R] DEST[Q] NORM POPJ $
+1)			;Gee, that was fast.
+1)	;Negative, shift count, the easy case.
+1)	FIXER2:	D[CONST 27.] ALU[D+Q] DEST[MASKR] COND[OBUS<0] JUMP[FIXER3] $
+1)			;Construct appropriate mask.  If !x!<1, return zero
+1)		D[CONST 36.] ALU[D+Q] DEST[ROTR] JUMP[FIXER1] NORM $
+1)			;Hardware doesn't believe in negative shift counts
+1)	;Number is fractional, i.e. shift would go off the end.  Return zero
+1)	FIXER3:	ALU[0] DEST[Q MASKR] SHORT POPJ $
+1)			;Just return zero.  Set mask just in case
+1)	.REPEAT TYMNET [.DEFINE FOOLIST[] [ LIST ] ]
+1)	FOOLIST
+1)	.REPEAT TYMNET [
+1)	;TYMNET INTERFACE.
+**** File 2) CFMAIN.C01[TMP,F2]/39P/388L
+2)		D[MASK 8] ALU[D#Q] DEST[Q] SHORT $
+2)			;Fixup dividend exponent
+2)		D[MASK 8] ROT[27.] ALU[-D&AC] ACSEL[AC] DEST[AC] SHORT $
+2)			;Extract mantissa from dividend
+2)	;C. COMPUTE RESULTANT EXPONENT.
+2)		D[IR] MASK[18.] ALU[Q-D] DEST[Q] SHORT $
+2)			;Subtract divisor exponent from dividend exponent
+2)		D[CONST 1] ROT[7] ALU[D+Q] DEST[IR-ADR] NORM $
+2)			;Include exponent offset
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 40,39
+
+2)	;D. MOVE LOW DIVIDEND TO Q.
+2)		D[11] DEST[Q] SHORT $
+2)	;E. IF DIVISOR<=DIVIDEND,  SHIFT DIVIDEND RIGHT, INC
+2)		; RESULTANT EXPONENT.  SAVE DIFF. IN A-MEM[2] FOR LONG MODE.
+2)		D[MEM] ALU[AC-D] ACSEL[AC] DEST[2] DEST-A-MEM COND[-OBUS<0] JUMP[FDAD] C600 $
+2)	;F. SHIFT DIVIDEND RIGHT BY 8 SO RESULT WILL BE
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/42P/10L
+1)	; 2: OUTPUT COROUTINE ADR (LO 6 BITS)
+**** File 2) CFMAIN.C01[TMP,F2]/39P/405L
+2)	FDSHFT:	D[CONST 7] LLOAD NORM $
+2)		ALU[SH-AC] ACSEL[AC] MASK[2] DEST[D4] LOOP[.] NORM $
+2)	;GET 1. EXP TO A-MEM[4], 2. SIGN XOR TO IR-ADR.
+2)		D[AR] DEST[5] DEST-A-MEM NORM $
+2)		D[IR] DEST[AR] SHORT $
+2)		D[14] DEST[IR-ADR] SHORT $
+2)		D[AR] DEST[4] DEST-A-MEM NORM $
+2)		D[15] DEST[AR] SHORT $
+2)		PUSHJ[DODIV2] NORM $	;36. STEP.  RESULT HAS SIGNS ADJUSTED.
+2)	;G. SAVE REMAINDER IN A-MEM[1], PUT QUOTIENT IN AC, 0 IN Q.
+2)		ALU[AC] ACSEL[AC] DEST[1] DEST-A-MEM NORM $
+2)		ALU[Q] ACSEL[AC] DEST[AC] SHORT $
+2)		ALU[0] DEST[Q] SHORT $
+2)	;H. PREPARE TO ROUND 29. BIT RESULT.
+2)		ALU[SH-AC] ACSEL[AC] MASK[1] DEST[D4] SHORT $
+2)		D[14] DEST[IR-ADR] SHORT $	;MOVE EXP FOR FPNAR.
+2)		ALU[AC] ACSEL[AC] DEST[AR] JUMP[FPNAR] NORM $
+2)	;------------------------------------------------------------------------------
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/42P/17L
+1)	;MAIN MEMORY LOCATIONS:
+**** File 2) CFMAIN.C01[TMP,F2]/39P/429L
+2)	FDAD:	ALU[SH-AC] ACSEL[AC] MASK[2] DEST[D4] SHORT $
+2)		D[IR] MASK[18.] ALU[D+1] DEST[IR-ADR] JUMP[FDSHFT] NORM $
+2)	;ADJSP1 ADJSP2 DMOVE2 DMOVN2 DMOVM2 DMVNM2 DMVNM3 DMVNM4 DMVNM5 KAFIXP KAFIXN FIXR1 KIFIX1 FIXRN KIFIXN FIXER FIXER1 FIXER2 FIXER3
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/42P/23L
+1)	; 2011/ HORP:  0	;HOST ORING PTR (PUTTER)
+**** File 2) CFMAIN.C01[TMP,F2]/40P/7L
+2)	ADJSP1:	D[IR] MASK[22] ALU[D+AC] DEST[AR] NORM $
+2)			;Add right half
+2)		D[MASK 22] ALU[-D&Q] DEST[Q] SHORT $
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 42,40
+
+2)			;Isolate left half
+2)		D[AR] MASK[22] ALU[DORQ] DEST[O_AC AR] NORM $
+2)			;Merge halves and store
+2)		D[IR] COND[-OBUS18] SPEC[MA_PC] DEST[MA] JUMP[MAIN1] C550 $
+2)			;If E was positive, it wasn't an overflow (just a bad idea)
+2)			;Start fetching next instruction
+2)		D[AR] COND[OBUS<0] JUMP[MAIN] C550 $
+2)			;If original was negative, we're OK.  Start doing next
+2)			;instruction if no sign changed in left half
+2)		JUMP[PDLO6] NORM $
+2)			;ADJSP got a PDLOV
+2)	;ADJSP left result positive
+2)	ADJSP2:	D[MASK 22] ALU[-D&Q] DEST[Q] SHORT $
+2)			;Isolate left half
+2)		D[AR] MASK[22] ALU[DORQ] DEST[O_AC AR] $
+2)			;Merge halves and store
+2)		D[IR] COND[OBUS18] SPEC[MA_PC] DEST[MA] C550 $
+2)			;If E was negative, it wasn't an overflow (just a bad idea)
+2)			;Start fetching next instruction
+2)		D[AR] COND[-OBUS<0] JUMP[MAIN1] C550 $
+2)			;If original was positive, we're OK.  Start doing next
+2)			;instruction if no sign changed in left half
+2)		JUMP[PDLO6] NORM $
+2)			;ADJSP got a PDLOV
+2)	;(DMOVE continued)
+2)	DMOVE2:	D[MA] ALU[D+1] DEST[MA] NORM $	;Fetch second word
+2)		FIXM1 $			;Complete fetch
+2)		ACSEL[AC+1] D[MEM] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] CYLEN[FIXM+1] $
+2)			;Put it in the second AC and start next instruction
+2)	;(DMOVN continued)
+2)	DMOVN2:	D[MA] ALU[D+1] DEST[MA] NORM $	;Fetch second word
+2)		FIXM1 $	;Complete fetch
+2)		ACSEL[AC+1] D[MEM] ALU[0-D] DEST[AC MA] SPEC[MA_PC] CYLEN[FIXM+1] $
+2)			;Negate low order word and put it in the second AC
+2)			;Start next instruction fetch (Note that DEST[MA] is
+2)			;really associated with SPEC[MA_PC])
+2)			;*** Is FIXM+1 really the right thing???
+2)		ACSEL[AC+1] D[MASK 1] ROT[35.] ALU[-D&AC] DEST[AC]
+2)				COND[-OBUS=0] JUMP[MAIN1] NORM $
+2)			;Clear stupid bit 0.
+2)			;If the low order part is non-zero, we're done
+2)		ACSEL[AC] ALU[AC+1] DEST[AC] SPEC[CRYOV] JUMP[MAIN1] C550 $
+2)			;Increment high order word and we're finally done.
+2)	;(DMOVEM continued)
+2)		.PAIR
+2)	DMOVM2:	CYLEN[MEMSTO] ACSEL[AC] D[MEM] DEST[AC] NORM $
+2)			;Write it also in the AC
+2)		CYLEN[MEMSTO] D[MA] ALU[D+1] DEST[MA] $
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 42,40
+
+2)			;Setup to write second word
+2)		ACSEL[AC+1] ALU[AC] DEST[MEMSTO] MEMST $
+2)			;Write secord word.
+2)	;(DMOVNM continued)
+2)	DMVNM2:	ACSEL[AC+1] ALU[0-AC] DEST[Q] SHORT $
+2)			;Negate low order word.
+2)		ACSEL[AC+1] D[MASK 1] ROT[35.] ALU[-D&Q] DEST[Q]
+2)				COND[-OBUS=0] JUMP[DMVNM4] NORM $
+2)			;Clear stupid bit 0.
+2)			;If the low order part is non-zero, no change needed to
+2)			;high order word.
+2)		D[AR] ALU[AC+1] DEST[AR STRT-WRT] SPEC[CRYOV]
+2)			COND[-MA-AC] JUMP[DMVNM5] NORM $
+2)			;Increment high order word and start first store
+2)	DMVNM3:	ACSEL[MA] D[MEM] DEST[AC] JUMP[DMVNM5] $
+2)			;Store is to an AC, write into 2901.
+2)	DMVNM4:	DEST[STRT-WRT] COND[MA-AC] JUMP[DMVNM3] $
+2)			;Start first store.  Jump if to an AC
+2)	DMVNM5:	D[MA] ALU[D+1] DEST[MA] NORM $
+2)			;Finish write.  Note that due to FIXM2, we don't have to
+2)			;worry about map faults.
+2)			;Prepare for secord write
+2)		ALU[Q] DEST[MEMSTO] MEMST $
+2)			;Do final write (low order word into (E+1))
+2)	;KAFIX (Opcode 247) continued
+2)	;Positive number to fix
+2)	KAFIXP:	D[IR] ROT[27.] MASK[9.] DEST[Q] COND[-OBUS=0] PUSHJ[FIXER] $
+2)			;Extract exponent adjustment factor and do fixing
+2)		ACSEL[AC] ALU[Q] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+2)			;Put result into AC and we're done
+2)	;Negative number to fix
+2)	KAFIXN:	D[IR] ROT[27.] MASK[9.] DEST[Q] COND[-OBUS=0] PUSHJ[FIXER] $
+2)			;Extract exponent adjustment factor and do fixing
+2)	;;;	ACSEL[AC] D[MASK R] ALU[D/#Q] DEST[AC MA]	;*** Assembler loses!
+2)		ACSEL[AC] D[2] MASK[R] ALU[D/#Q] DEST[AC MA]	;Sigh...
+2)				SPEC[MA_PC] JUMP[MAIN1] NORM $
+2)			;Put sign extended result into AC and we're done
+2)	;(FIXR continued)
+2)	FIXR1:	D[MEM] COND[OBUS<0] JUMP[FIXRN] C550 $
+2)			;Round different directions
+2)		D[CONST 20] ROT[30.] ALU[D+Q] DEST[AC AR] PUSHJ[FADSUB] NORM $
+2)			;Positive. Finish making constant 0.5 and add it
+2)		D[CONST 33] DEST[Q] SHORT $
+2)			;Start making magic constant
+2)		ALU[AC] DEST[AR HOLD] JUMP[FIXR2] NORM $
+2)			;Setup for FIXER.  Rest is same as KIFIX
+2)	;	---
+2)	FIXRN:	D[CONST 60] ROT[30.] ALU[D-Q] DEST[AC AR] PUSHJ[FADSUB] NORM $
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 42,40
+
+2)			;Negative. Finish making constant -0.5 and add it
+2)		D[CONST 33] DEST[Q] SHORT $
+2)			;Start making magic constant
+2)		D[CONST 2] ROT[6] ALU[DORQ] DEST[Q] SHORT $
+2)			;Finish making magic constant
+2)		ALU[0-AC] DEST[AR HOLD] PUSHJ[FIXER] NORM $
+2)			;Setup for FIXER
+2)		ACSEL[AC] ALU[0-Q] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+2)			;Negate it back again and start next instruction
+2)	;	---
+2)	;(KIFIX continued)
+2)	KIFIX1:	D[MEM] DEST[AR] COND[OBUS<0] JUMP[KIFIXN] C550 $
+2)			;Load up things for FIXER, check for positive mantissa
+2)	FIXR2:	D[CONST 2] ROT[6] ALU[DORQ] DEST[Q] PUSHJ[FIXER] NORM $
+2)			;Finish making magic constant and do fix.
+2)		ACSEL[AC] ALU[Q] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+2)			;Put result into AC and we're done
+2)	;	---
+2)	;	---
+2)	KIFIXN:	D[CONST 2] ROT[6] ALU[DORQ] DEST[Q] SHORT $
+2)			;Finish making magic constant
+2)		D[MEM] ALU[0-D] DEST[HOLD AR] PUSHJ[FIXER] NORM $
+2)			;ABS to both MEM and AR.  Fix the number
+2)		ACSEL[AC] ALU[0-Q] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+2)			;Negate it back again and start next instruction
+2)	;Fix a number (without sign extension) in MEM, AR=ABS(MEM), Q=magic number
+2)	;(233 for normal fix)
+2)	FIXER:	D[AR] ROT[9] MASK[9] ALU[D-Q] DEST[ROTR Q]
+2)				COND[OBUS<0] JUMP[FIXER2] C550 $
+2)			;Calculate number of positions to move
+2)			;Jump if we'll be shifting right (n<2^26)
+2)		D[CONST 27.] ALU[D+Q] DEST[MASKR] NORM $
+2)			;Construct appropriate mask
+2)		D[MEM] MASK[27.] DEST[HOLD] NORM $
+2)			;Flush exponent, our mask won't reach.
+2)		D[CONST 9.] ALU[Q-D] COND[OBUS<0] JUMP[FIXER1] C550 $
+2)			;Check for overflow
+2)	;;; Set overflow here.  What kind?  (We can live without it for KAFIX, since it
+2)	;;; never did check, but when KIFIX is done, this will have to be corrected.)
+2)		D[CONST 1] ROT[35.] ALU[Q] PUSHJ[QORCRY] NORM $
+2)			;Set overflow flag.
+2)		D[CONST 44] DEST[MASKR] NORM $
+2)			;For those losers who want to see some of the number...
+2)	;Now that we know how much to shift things, do it and return.
+2)	FIXER1:	D[MEM] ROT[R] MASK[R] DEST[Q] NORM POPJ $
+2)			;Gee, that was fast.
+2)	;Negative, shift count, the easy case.
+2)	FIXER2:	D[CONST 27.] ALU[D+Q] DEST[MASKR] COND[OBUS<0] JUMP[FIXER3] $
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 42,40
+
+2)			;Construct appropriate mask.  If !x!<1, return zero
+2)		D[CONST 36.] ALU[D+Q] DEST[ROTR] JUMP[FIXER1] NORM $
+2)			;Hardware doesn't believe in negative shift counts
+2)	;Number is fractional, i.e. shift would go off the end.  Return zero
+2)	FIXER3:	ALU[0] DEST[Q MASKR] SHORT POPJ $
+2)			;Just return zero.  Set mask just in case
+2)	;FLTR, continued
+2)	FLTR1:	D[CONST 33] DEST[Q] SHORT $
+2)		D[CONST 2] ROT[6] ALU[DORQ] DEST[IR-ADR] NORM $
+2)			;Make magic constant for exponent
+2)		ALU[0] DEST[Q] PUSHJ[FPNAR] $
+2)			;Clear low order word
+2)			;Normalize and round (happens to have same bit on as FxxR)
+2)			;Result goes to AC
+2)		SPEC[MA_PC] DEST[MA] JUMP[MAIN1] NORM $
+2)			;Start next instruction fetch
+2)	.REPEAT TYMNET [.DEFINE FOOLIST[] [ LIST ] ]
+2)	FOOLIST
+2)	.REPEAT TYMNET [
+2)	;TYMNET INTERFACE.
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/42P/37L
+1)	.DEFINE TNOCEC[] [ ;SEND 0 BYTE IF ESCAPE WORD (-1) JUST SENT.
+**** File 2) CFMAIN.C01[TMP,F2]/42P/20L
+2)	; 2200/	IRING: BLOCK 200	;INPUT (TO HOST) RING
+2)	; 2400/ ORING: BLOCK 400	;OUTPUT (FROM HOST) RING
+2)	; 2005/ HIRP:  0	;HOST IRING PTR (TAKER)
+2)	; 2006/ BIRP:  0	;BASE IRING PTR (PUTTER)
+2)	; 2011/ HORP:  0	;HOST ORING PTR (PUTTER)
+2)	; 2012/ BORP:  0	;BASE ORING PTR (TAKER)
+2)	;DR11C FLAG NAMES.  (FIELD VALUES).
+2)	;THE ACTUAL DEFINITIONS ARE IN CFDEF.SLO
+2)	;TNODIBN=2	;OUTPUT DONE ROTATE AMOUNT (INPUT) = REQ B.
+2)	;TNODIFS=2	;OUTPUT DONE INTERRUPT FF SUBSEL = REQ B.
+2)	;TNIRIBN=3	;INPUT READY ROTATE AMOUNT (INPUT) = REQ A.
+2)	;TNIRIFS=4	;INPUT READY INTERRUPT FF SUBSEL = REQ A.
+2)	;TNODOBN=6	;OUTPUT DONE ROTATE AMOUNT (OUTPUT) = CSR1.
+2)	;TNODOBNPO=7
+2)	;TNIROBN=7	;INPUT READY ROTATE AMOUNT (OUTPUT) = CSR0.
+2)	;TNIROBNPO=10
+2)	.DEFINE TNOCEC[] [ ;SEND 0 BYTE IF ESCAPE WORD (-1) JUST SENT.
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/42P/69L
+1)		D[CONST 71] ROT[6] DEST[Q] SPEC[IOB-OUT] CYLEN[IOB-OUT] $
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 42,42
+
+1)		D[12] ALU[DORQ] COND[OBUS<0] JUMP[. + 2] MAPF[TNODIFS] C550 $	;OUTPUT DONE.
+**** File 2) CFMAIN.C01[TMP,F2]/42P/70L
+2)		D[CONST 72] ROT[6] DEST[Q] SPEC[IOB-OUT] CYLEN[IOB-OUT] $
+2)		D[12] ALU[DORQ] COND[OBUS<0] JUMP[. + 2] MAPF[TNODIFS] C550 $	;OUTPUT DONE.
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/42P/75L
+1)		D[CONST 71] ROT[6] DEST[Q] SPEC[IOB-OUT] CYLEN[IOB-OUT] $
+1)		D[13] ALU[DORQ] COND[OBUS<0] JUMP[. + 2] MAPF[TNIRIFS] CYLEN[C500] $	;INPUT READY.
+**** File 2) CFMAIN.C01[TMP,F2]/42P/76L
+2)		D[CONST 72] ROT[6] DEST[Q] SPEC[IOB-OUT] CYLEN[IOB-OUT] $
+2)		D[13] ALU[DORQ] COND[OBUS<0] JUMP[. + 2] MAPF[TNIRIFS] CYLEN[C500] $	;INPUT READY.
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/42P/129L
+1)		.ORG[7100]	;$*$*$* Dispatch mechanism is a real loser here.  We
+1)				;	won't be able to flush this one until
+**** File 2) CFMAIN.C01[TMP,F2]/42P/130L
+2)		.ORG[7200]	;$*$*$* Dispatch mechanism is a real loser here.  We
+2)				;	won't be able to flush this one until
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/42P/292L
+1)		.RELOC
+1)	.REPEAT 1 - TYMNET [
+**** File 2) CFMAIN.C01[TMP,F2]/42P/293L
+2)	;;;	.RELOC
+2)		.USE[OTHER]	;$%#&@&## SLOEXP didn't redefine TYMAREA properly!!!
+2)	.REPEAT 1 - TYMNET [
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/43P/64L
+1)	TCNi1:	d[11] MASK[4] dest[q ar] norm $ ;get intrpt flag and pi chn
+1)		d[ir] alu[d&q] dest[q] norm popj $ ;this is for conso, z
+**** File 2) CFMAIN.C01[TMP,F2]/43P/64L
+2)	TCNI1:	d[11] MASK[4] dest[q ar] norm $ ;get intrpt flag and pi chn
+2)		d[ir] alu[d&q] dest[q] norm popj $ ;this is for conso, z
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/44P/2L
+1)	.REPEAT IMP [
+**** File 2) CFMAIN.C01[TMP,F2]/44P/2L
+2)	;------------------------------------------------------------------------------
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 44,44
+
+2)	;
+2)	;	Packet Switching Network Interface (IMP)
+2)	;
+2)	;------------------------------------------------------------------------------
+2)	.REPEAT IMP [
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/44P/8L
+1)	.REPEAT STANSW [
+1)	.INSERT PAN.SLO		;Panofsky-Samson Interface
+1)	.INSERT TMPGRN.SLO	;Temporary Grinnell Interface
+1)	];.REPEAT STANSW
+1)	.REPEAT DLS [
+1)	.DEFINE ASRC[ X ] [D[10 + X]]
+1)	.DEFINE ADEST[ X ] [DEST[X] DEST-A-MEM]
+1)	.INSERT DLS.SLO
+1)	.REPEAT DLSDEB [
+1)	.INSERT DLSDEB.SLO
+1)	];DLSDEB
+1)	];DLS			9 JAN 80  BO
+**** File 2) CFMAIN.C01[TMP,F2]/44P/14L
+2)	;------------------------------------------------------------------------------
+2)	;
+2)	;	Panofsky-Samson Interface
+2)	;
+2)	;------------------------------------------------------------------------------
+2)	.REPEAT STANSW [
+2)	.INSERT PAN.SLO
+2)	.INSERT TMPGRN.SLO	;Temporary Grinnell Interface
+2)	];.REPEAT STANSW
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/45P/8L
+1)		.OPCODE[740]	;disk pseudo-iot dispatch table entries.
+**** File 2) CFMAIN.C01[TMP,F2]/44P/31L
+2)	.REPEAT DLS [
+2)	.DEFINE ASRC[ X ] [D[10 + X]]
+2)	.DEFINE ADEST[ X ] [DEST[X] DEST-A-MEM]
+2)	.INSERT DLS.SLO
+2)	.REPEAT DLSDEB [
+2)	.INSERT DLSDEB.SLO
+2)	];DLSDEB
+2)	];DLS			9 JAN 80  BO
+2)	;------------------------------------------------------------------------------
+2)	;
+2)	;	Line Printer Interface (LPT)
+  1) CFMAIN.B01[TMP,F2] and 2) CFMAIN.C01[TMP,F2]	9-24-80 16:36	pages 45,44
+
+2)	;
+2)	;------------------------------------------------------------------------------
+2)	.REPEAT LPT [
+2)	.INSERT LPTX.SLO	
+2)	];LPT
+2)	; dsk stuff
+2)	;a-mem useage:
+2)	;	0	dispatch addr for interrupts
+2)	;	1	pi chn (33: 35) and intrpt waiting flag (32)
+2)	;	2	copy of last cmd sent to controller (by opcode 721)
+2)		.OPCODE[740]	;disk pseudo-iot dispatch table entries.
+***************
+
+
+**** File 1) CFMAIN.B01[TMP,F2]/46P/5L
+1)	: 7760
+1)	 .REPEAT 20 [NOP $
+**** File 2) CFMAIN.C01[TMP,F2]/46P/4L
+2)	;
+2)	;ECC logging area
+2)	;
+2)	.REPEAT 1 - MUM2 [
+2)	: 7760
+2)	];.REPEAT 1 - MUM2
+2)	.REPEAT MUM2 [
+2)	: 17760
+2)	];.REPEAT MUM2
+2)	 .REPEAT 20 [NOP $
+***************
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               

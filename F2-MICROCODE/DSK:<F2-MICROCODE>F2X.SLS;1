@@ -1,0 +1,986 @@
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 231-1
+
+00100	SLOE   Jan ***, 1859 00:00:03  file DSK:CFNEW.SLO  --  of -- f2x
+00200	
+00300	45m0164                               	;       IMP,VID,PAN,GRN,DLS,LPT,VC etc.
+00400	45m0164                               	;-----------------------------------------------------------------------
+-------
+00500	45m0164                               	;
+00600	45m0164                               	;       Packet Switching Network Interface (IMP)
+00700	45m0164                               	;
+00800	45m0164                               	;-----------------------------------------------------------------------
+-------
+00900	45m0164                               	.REPEAT IMP [
+01000	45m0164                               	
+01100	45m0164                               	;Insert main code body here
+01200	45m0164                               	.INSERT IMP.SLO
+01300	45m0164                               	
+01400	45m0164                               	];IMP
+01500	45m0164                               	;-----------------------------------------------------------------------
+-------
+01600	45m0164                               	;
+01700	45m0164                               	;       Panofsky-Samson Interface
+01800	45m0164                               	;
+01900	45m0164                               	;-----------------------------------------------------------------------
+-------
+02000	45m0164                               	.REPEAT STANSW [
+02100	45m0164                               	
+02200	45m0164                               	.INSERT PAN.SLO
+02300	45m0164                               	.INSERT TMPGRN.SLO      ;Temporary Grinnell Interface
+02400	45m0164                               	
+02500	45m0164                               	];.REPEAT STANSW
+02600	45m0164                               	
+02700	45m0164                               	;-----------------------------------------------------------------------
+-------
+02800	45m0164                               	;
+02900	45m0164                               	;       Data Line Scanner (TTY scanner)
+03000	45m0164                               	;
+03100	45m0164                               	;-----------------------------------------------------------------------
+-------
+03200	45m0164                               	.REPEAT DLS [
+03300	45m0164                               	
+03400	45m0164                               	.DEFINE ASRC[ X ] [D[10 + X]]
+03500	45m0164                               	.DEFINE ADEST[ X ] [DEST[X] DEST-A-MEM]
+03600	45m0164                               	
+03700	45m0164                               	.REPEAT DLS2 [
+03800	45m0164                               	.INSERT DLS.SLO
+03900	45m0164                               	
+04000	45m0164                               	.REPEAT DLSDEB [
+04100	45m0164                               	.INSERT DLSDEB.SLO
+04200	45m0164                               	];DLSDEB
+04300	45m0164                               	] ;DLS2
+04400	45m0164                               	.REPEAT 1 - DLS2 [
+04500	45m0164                               	.INSERT ODLS.SLO
+04600	45m0164                               	.REPEAT DLSDEB [
+04700	45m0164                               	.INSERT ODLSDE.SLO
+04800	45m0164                               	] ;DLSDEB
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 231-2
+
+04900	45m0164                               	] ;1 - DLS2
+05000	45m0164                               	
+05100	45m0164                               	];[
+05200	45m0164                               	
+05300	45m0164                               	.DEFINE ASRC[ X ] [D[10 + X]]
+05400	45m0164                               	.DEFINE ADEST[ X ] [DEST[X] DEST-A-MEM]
+05500	45m0164                               	
+05600	45m0164                               	.REPEAT DLS2 [
+05700	45m0164                               	.INSERT DLS.SLO
+05800	45m0164                               	
+05900	45m0164                               	.REPEAT DLSDEB [
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 232-1
+
+00100	SLOE   Jan ***, 1859 00:00:03  file STRING:  --  of -- f2x
+00200	
+00300	45m0164                               	.INSERT DLSDEB.SLO
+00400	45m0164                               	];DLSDEB
+00500	45m0164                               	] [
+00600	45m0164                               	.INSERT DLS.SLO
+00700	
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 233-1
+
+00100	SLOE   Jan ***, 1859 00:00:03  file DSK:DLS.SLO  --  of -- f2x
+00200	
+00300	01m0001                               	;#####################################################################
+00400	01m0001                               	;   Let's make the dls be macro device 370;  so the
+00500	01m0001                               	;   iot's will have opcode 737, dispatch table
+00600	01m0001                               	;   entry loc. 3676
+00700	01m0001                               	;#######################################################################
+##
+00800	01m0001                               	
+00900	01m0001                               	;-----------------------------------------------------------------------
+01000	01m0001                               	;DLS definitions
+01100	01m0001                               	;-----------------------------------------------------------------------
+01200	01m0001       37	DLS = 37        ;MACRODEVICE CODE 370
+01300	01m0001       6762	DLSORG = .  ;; DWP 1/27/80 %%% DLSORG = 7000    ;UCODE ORIGIN
+01400	01m0001       2137	DLSVECTOR = 2137        ;Interrupt dispatch address
+01500	01m0001                               	
+01600	01m0001                               	.REPEAT DLS2 [DLSWEBIT = 16.    ;ASTRO write enable bit
+01700	01m0001                               	DLSNLINES = 37  ;Highest line number
+01800	01m0001                               	DLSLNSIZE = 5   ;Number of bits in line-number field
+01900	01m0001                               	.DEFINE DLSIRQ [] [ROT[9.] COND[-OBUS<0]]
+02000	01m0001                               	.DEFINE DLSNOIRQ [] [ROT[9.] COND[OBUS<0]]]
+02100	01m0001       20	[DLSWEBIT = 16. ;ASTRO write enable bit
+02200	01m0001       37	DLSNLINES = 37  ;Highest line number
+02300	01m0001       5	DLSLNSIZE = 5   ;Number of bits in line-number field
+02400	01m0001                               	.DEFINE DLSIRQ [] [ROT[9.] COND[-OBUS<0]]
+02500	01m0001                               	.DEFINE DLSNOIRQ [] [ROT[9.] COND[OBUS<0]]].REPEAT 1 - DLS2 [DLSWEBIT = 
+10.
+02600	01m0001                               	DLSNLINES = 17
+02700	01m0001                               	DLSLNSIZE = 4
+02800	01m0001                               	.DEFINE DLSIRQ [] [ROT[9.] COND[OBUS<0]]
+02900	01m0001                               	.DEFINE DLSNOIRQ [] [ROT[9.] COND[-OBUS<0]]]
+03000	01m0001                               	
+03100	01m0001                               	;
+03200	01m0001                               	;A-MEM definitions
+03300	01m0001                               	;
+03400	01m0001       0	DLSINTAD = 0    ;Interrupt service routine
+03500	01m0001       1	DLSPICHN = 1    ;PI channel for DLS
+03600	01m0001       2	DLSLINE = 2     ;Line number which the scanner is simulated to have
+03700	01m0001                               	                ;stopped on
+03800	01m0001       3	DLSACT = 3      ;Active line flags
+03900	01m0001                               	                ;   DLSCNI1
+04000	01m0001       4	DLSTMP = 4      ;SCRATCH
+04100	01m0001                               	;
+04200	01m0001                               	;MAPF fields (IO SUBSEL)
+04300	01m0001                               	;
+04400	01m0001       0	DLSCR1 = 0      ;ASTRA CR1 (Control Register 1)
+04500	01m0001                               	;               Async                   Sync
+04600	01m0001                               	;       Bit 28          Normal mode (NOT looped)
+04700	01m0001                               	;       Bit 29  Send break              Xmit transparent
+04800	01m0001                               	;       Bit 30  Single stop bit         Transmit parity
+04900	01m0001                               	;                 if xmit enabled         if bit 29 is zero
+05000	01m0001                               	;         else  Not MISC OUT = 0        Force DLE
+05100	01m0001                               	;       Bit 31  Auto-echo (1/2 duplex)  Not MISC OUT = 0 (bit 29=0)
+05200	01m0001                               	;                                       DLE stripping (bit 29=1)
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 233-2
+
+05300	01m0001                               	;       Bit 32  Parity enable           Recieve parity enable
+05400	01m0001                               	;       Bit 33          Reciever enabled
+05500	01m0001                               	;       Bit 34          not RTS OUT = 0
+05600	01m0001                               	;       Bit 35          not DTR OUT = 0
+05700	01m0001                               	;
+05800	01m0001       1	DLSCR2 = 1      ;ASTRA CR2 (Control Register 2)
+05900	01m0001                               	;   Bits 28:29          Character length
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 234-1
+
+00100	SLOE   Jan ***, 1859 00:00:03  file DSK:DLS.SLO  --  of -- f2x
+00200	
+00300	01m0001                               	;               00  8 bits      10  6 Bits
+00400	01m0001                               	;               01  7 bits      11  5 Bits
+00500	01m0001                               	;       Bit 30  0  Asynchronous         1  Synchronous
+00600	01m0001                               	;       Bit 31  0  Odd parity           1  Even parity
+00700	01m0001                               	;       Bit 32  Rcv clk = xmt clk       SYN strip (CR1 bit 29=0)
+00800	01m0001                               	;               else Rcv clk = Rate 1   DEL-SYN strip (CR1 bit 29=1)
+00900	01m0001                               	;   Bits 33:35  Transmit clock select
+01000	01m0001                               	;       000     Ext. clock (EIA pins:  Xmt=15, Rcv=17 [???])
+01100	01m0001                               	;       001     Rate 1          150 baud
+01200	01m0001                               	;       010     Rate 2          300 baud
+01300	01m0001                               	;       011     Rate 3          109.9 baud      *** 1200 baud Temp.
+01400	01m0001                               	;       100     Rate 4          9600 baud
+01500	01m0001                               	;       101     Rate 4 / 2      4800 baud
+01600	01m0001                               	;       110     Rate 4 / 4      2400 baud
+01700	01m0001                               	;       111     Rate 4 / 8      1200 baud
+01800	01m0001                               	;
+01900	01m0001       2	DLSSTAT = 2     ;ASTRA Status register
+02000	01m0001                               	;       Bit 28  Data Set Change (DSR or CD changed while DTR=1, or RI
+02100	01m0001                               	;                 changed while DTR=0)
+02200	01m0001                               	;       Bit 29  DSR (Data Set Ready)
+02300	01m0001                               	;       Bit 30  CD (Carrier Detect)
+02400	01m0001                               	;       Bit 31  Framing error or SYN detect
+02500	01m0001                               	;       Bit 32  Parity error [Async, too???] or DLE detect
+02600	01m0001                               	;       Bit 33  Overrun error
+02700	01m0001                               	;       Bit 34  Data recieved
+02800	01m0001                               	;       Bit 35  Transmit holding register empty  (Note: this does NOT
+02900	01m0001                               	;                 necessarily mean the transmitter is off)
+03000	01m0001                               	;On write, this sets the SYN register, and if immediately followed by
+03100	01m0001                               	;another write, that write sets the DLE register.
+03200	01m0001       3	DLSHOLD = 3     ;ASTRA xmt/rcv Hold register
+03300	01m0001       10	DLSCSR = 10     ;Interface Command/Status Register
+03400	01m0001       4	DLSIACK = 4     ;Interrupt acknowledge (also, interrupting line)
+03500	01m0001       14	DLSNOSEL = 14   ;Don't select anything
+03600	01m0001                               	
+03700	01m0001                               	;Macros for reading ASTRA registers.  They are macros because the
+03800	01m0001                               	;control logic on the prototype didn't have the timing correct for the
+03900	01m0001                               	;ASTRA and the problem was pushed onto the microcode.
+04000	01m0001                               	
+04100	01m0001                               	.DEFINE DLSREAD[ XXX DST WID ]
+04200	01m0001                               	[       D[CONST 1] ROT[26.] ALU[DORQ] DEST[Q IOD] $
+04300	01m0001                               	                ;Set TTY number  -- FBUS 9
+04400	01m0001                               	        D[CONST 1] ROT[20.] ALU[DORQ] DEST[Q IOD] SPEC[IOB-OUT] $
+04500	01m0001                               	                ;Assert CS
+04600	01m0001                               	        MAPF[XXX] CYLEN[IOB-OUT] $ ;TIME FOR CHIP TO SELECT
+04700	01m0001                               	        MAPF[XXX] D[CONST 1] ROT[26.] DEST[Q IOD] SPEC[IOB-IN] $
+04800	01m0001                               	                ;Setup to drop CS, start read
+04900	01m0001                               	        MAPF[XXX + DLSNOSEL] D[IOD] MASK[WID] ALU[D] DEST[DST] SPEC[IOB-
+OUT] $
+05000	01m0001                               	                ;Finish read, drop CS
+05100	01m0001                               	        MAPF[XXX + DLSNOSEL] $
+05200	01m0001                               	        MAPF[XXX + DLSNOSEL]  ];.DEFINE
+05300	01m0001                               	
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 234-2
+
+05400	01m0001                               	.DEFINE DLSWRITE[ XXX ]
+05500	01m0001                               	[       D[CONST 1] ROT[26.] ALU[DORQ] DEST[Q] $
+05600	01m0001                               	                ;Set TTY number
+05700	01m0001                               	        D[CONST 1] ROT[20.] ALU[DORQ] DEST[IOD] SPEC[IOB-OUT] $
+05800	01m0001                               	                ;SET CS
+05900	01m0001                               	        MAPF[XXX] D[CONST 1] ROT[35. - DLSWEBIT] ALU[DORQ] DEST[IOD] SPE
+C[IOB-OUT] $
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 235-1
+
+00100	SLOE   Jan ***, 1859 00:00:03  file DSK:DLS.SLO  --  of -- f2x
+00200	
+00300	01m0001                               	                ;DROP CS, SET WE
+00400	01m0001                               	        MAPF[XXX] ALU[Q] DEST[IOD] SPEC[IOB-OUT] $
+00500	01m0001                               	                ;DROP WE.
+00600	01m0001                               	        MAPF[XXX + DLSNOSEL] SPEC[IOB-OUT] $
+00700	01m0001                               	        MAPF[XXX + DLSNOSEL]            ;Finish the last IOB-OUT
+00800	01m0001                               	];DEFINE DLSWRITE
+00900	01m0001                               	
+01000	01m0001                               	.DEFINE DLSRINT[] [
+01100	01m0001                               	        MAPF[DLSNOSEL] SPEC[IOB-OUT]
+01200	01m0001                               	                ALU[Q+1] DEST[IOD] NORM $
+01300	01m0001                               	        MAPF[DLSIACK] CYLEN[IOB-OUT] SPEC[IOB-OUT] 
+01400	01m0001                               	                D[CONST 1] ROT[20.] ALU[D+Q+1] DEST[IOD] $
+01500	01m0001                               	        MAPF[DLSIACK] SPEC[IOB-OUT] ALU[Q] DEST[IOD] LONG $
+01600	01m0001                               	        MAPF[DLSIACK] SPEC[IOB-IN] LONG $
+01700	01m0001                               	        MAPF[DLSIACK] D[IOD] DEST[DLSTMP] DEST-A-MEM C800 $
+01800	01m0001                               	        D[10 + DLSTMP] ];DEFINE DLSRINT
+01900	01m0001                               	
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 236-1
+
+00100	SLOE   Jan ***, 1859 00:00:03  file DSK:DLS.SLO  --  of -- f2x
+00200	
+00300	02m0001                               	;-----------------------------------------------------------------------
+00400	02m0001                               	;Default configuration.  Lines are reset to this on initialization.
+00500	02m0001                               	;See DLS definition page for meaning of this bits.  Three groups of
+00600	02m0001                               	;lines may be initialized, allowing for local terminal, 300 buad modems
+00700	02m0001                               	;and split speed modems.
+00800	02m0001                               	
+00900	02m0001                               	;Caution:  Only lower 6 bits are permissible here.  This means you
+01000	02m0001                               	;          can't start out with looped, in break mode, or with character
+01100	02m0001                               	;          length other than 8.  You must use macro code to set those.
+01200	02m0001                               	;
+01300	02m0001                               	;Note:  Groups can be omitted by setting DLSGRPxN to zero.
+01400	02m0001                               	;-----------------------------------------------------------------------
+01500	02m0001                               	;*****  THIS SHOULD BE IN THE SITE DEPENDENT FILE  *****
+01600	02m0001                               	.DEFINE DLSINI [] [
+01700	02m0001                               	DLSGRP[0 0 247 32]      ;Line 0 300 baud
+01800	02m0001                               	DLSGRP[1 3 247 23]      ;Lines 1-3 150/1200     *** Temp.
+01900	02m0001                               	DLSGRP[4 DLSNLINES 247 34]      ;Lines 4-LAST 9600
+02000	02m0001                               	] ;DLSINI
+02100	02m0001                               	
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 237-1
+
+00100	SLOE   Jan ***, 1859 00:00:03  file DSK:DLS.SLO  --  of -- f2x
+00200	
+00300	03m0001                               	;-----------------------------------------------------------------------
+00400	03m0001                               	; DLS Dispatch
+00500	03m0001                               	;-----------------------------------------------------------------------
+00600	03m0001       3676	DLSDISP = 3600 + DLS + DLS      ;Dispatch for DLS instructions
+00700	03m0001                               	:DLSDISP
+00800	03m0001 03676 640141614571000200003677	        D[CONST DLSDEV] DEST[DEV-ADR] JUMP[. + 1] NORM $
+00900	03m0001 03677 640140014171014670000000	        D[CONST DLSORG / 100] ROT[6] DEST[Q] JUMP[DLSIOT] NORM $
+01000	03m0001                               	:DLSORG         ;DISPATCH ON DLS IOT CODES
+01100	03m0001                               	
+01200	03m0001                               	DLSDISP2:
+01300	03m0001                               	.REPEAT DLSDEB [
+01400	03m0001                               	:DLSDISP2 + 40
+01500	03m0001                               	]
+01600	03m0001                               	[
+01700	03m0001                               	:DLSDISP2 + 40
+01800	03m0001                               	].REPEAT 1 - DLSDEB [
+01900	03m0001                               	:DLSDISP2 + 20  ;Space will be used as needed for first DLS
+02000	03m0001                               	;Other half is unused.  It would be a second DLS
+02100	03m0001                               	.REPEAT 10 [
+02200	03m0001                               	        ILGIOT $
+02300	03m0001                               	        NOP $
+02400	03m0001                               	];REPEAT
+02500	03m0001                               	];DLSDEB
+02600	03m0001                               	
+02700	03m0001       62	DLSLOW = DLSORG \ 100
+02800	03m0001                               	DLSIOT:
+02900	03m0001                               	
+03000	03m0001 07022 640700014175000620000000	                D[CONST DLSLOW] ALU[DORQ] DEST[Q] NORM $
+03100	03m0001 07023 640700034035032040000000	        D[IR] ROT[13.] MASK[4] ALU[D+Q] DEST[Q] NORM $
+03200	03m0001 07024 500540034435032040000000	        D[IR] ROT[13.] MASK[4] ALU[D+Q] SDISP CYLEN[C550] $
+03300	03m0001                               	
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 238-1
+
+00100	SLOE   Jan ***, 1859 00:00:03  file DSK:DLS.SLO  --  of -- f2x
+00200	
+00300	04m0001                               	;-----------------------------------------------------------------------
+00400	04m0001                               	;BLKI DLS,
+00500	04m0001                               	DLSBLKI:
+00600	04m0001                               	.REPEAT 1 - DLSDEB [
+00700	04m0001                               	:DLSDISP2 + 0
+00800	04m0001                               	        ;Unimplemented
+00900	04m0001                               	        ILGIOT $
+01000	04m0001                               	        NOP $
+01100	04m0001                               	:DLSBLKI
+01200	04m0001                               	];DLSDEB
+01300	04m0001                               	;-----------------------------------------------------------------------
+01400	04m0001                               	;DATAI DLS,
+01500	04m0001                               	;
+01600	04m0001                               	;       Bit 12  This is a modem control line
+01700	04m0001                               	;   Bits 13:17  Line number
+01800	04m0001                               	;       Bit 27  Interrupt from reciever (always true for modem control)
+01900	04m0001                               	;   Bits 28:35  Character (Note: 5 bit characters do NOT use bit 27 for
+02000	04m0001                               	;                          flag.  Use TRNN x,777 to test for rcv. int.)
+02100	04m0001                               	;Modem control use of bits 28:35
+02200	04m0001                               	;       Bit 28  Unused
+02300	04m0001                               	;       Bit 29  DTR (Data Terminal Ready)
+02400	04m0001                               	;   Bits 30:32  ACU bits (unimplemented - no auto-dialer)
+02500	04m0001                               	;       Bit 33  CD (Carrier Detect)
+02600	04m0001                               	;       Bit 34  RI (Ring Indicator)
+02700	04m0001                               	;       Bit 35  Unused
+02800	04m0001                               	;
+02900	04m0001                               	;-----------------------------------------------------------------------
+03000	04m0001                               	DLSDI1: ;Prepare to insert into dispatch table
+03100	04m0001                               	:DLSDISP2 + 2           ;Two instructions here and the rest elsewhere
+03200	04m0001 06764 640150050171000440006765	        ASRC[DLSLINE]  [D[10 + DLSLINE]]DEST[AR Q] JUMP[. + 1] NORM $
+03300	04m0001 06765 640140414675020013007025	        D[CONST 1] ROT[8.] ALU[-D&Q] ADEST[DLSLINE]  [DEST[DLSLINE]
+03400	04m0001                               	 DEST-A-MEM]JUMP[DLSDI1] NORM $
+03500	04m0001                               	:DLSDI1
+03600	04m0001 07025 510140014635020010000000	        D[CONST 1] ROT[8.] ALU[D&Q] COND[OBUS=0] JUMP[DLSDI2] C550 $
+03700	04m0001                               	                ;Did scanner stop on a receiver?
+03800	04m0001 07026 640702214571066013600000	        D[CONST 1] ROT[27.] DEST[IOD] SPEC[IOB-OUT] NORM $
+03900	04m0001                               	                ;Yes.  Enable interrupt
+04000	04m0001 07027 440700044171000440100000	        MAPF[DLSCSR] CYLEN[IOB-OUT] ASRC[DLSPICHN]  [D[10 + DLSPICHN]]DE
+ST[Q] $
+04100	04m0001                               	                ;Clear RCVR flag.
+04200	04m0001 07030 640700214675006013000000	        D[CONST 1] ROT[3] ALU[-D&Q] ADEST[DLSPICHN]  [DEST[DLSPICHN] DES
+T-A-MEM]NORM $
+04300	04m0001 07031 662104200571000440002032	DLSDI2: D[AR] DEST[MEMSTO] MEMST  [COND[-MA-AC] LBJUMP[MSMAIN] NORM ]$
+04400	04m0001                               	
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 239-1
+
+00100	SLOE   Jan ***, 1859 00:00:03  file DSK:DLS.SLO  --  of -- f2x
+00200	
+00300	05m0001                               	
+00400	05m0001                               	;-----------------------------------------------------------------------
+00500	05m0001                               	;BLKO DLS,
+00600	05m0001                               	DLSBLKO:
+00700	05m0001                               	.REPEAT 1 - DLSDEB [
+00800	05m0001                               	:DLSDISP2 + 4
+00900	05m0001                               	                ;Unimplemented
+01000	05m0001                               	        ILGIOT $
+01100	05m0001                               	        NOP $
+01200	05m0001                               	:DLSBLKO
+01300	05m0001                               	];DLSDEB
+01400	05m0001                               	;-----------------------------------------------------------------------
+01500	05m0001                               	;DATAO DLS,
+01600	05m0001                               	;
+01700	05m0001                               	;       Bit 11  Use this line
+01800	05m0001                               	;   Bits 12:17  Line number if bit 11 is on (else interrupting line)
+01900	05m0001                               	;       Bit 27  Turn off transmitter (if this bit is on, then scanner is
+02000	05m0001                               	;                 restarted, but termination of transmission is not
+02100	05m0001                               	;                 implemented.)  Note: bit 30 is NOT used as alternative
+02200	05m0001                               	;                 to bit 27 in 5-bit character mode.)
+02300	05m0001                               	;Modem Control usage for bits 27:35
+02400	05m0001                               	;       Bit 27  Unused
+02500	05m0001                               	;       Bit 28  Set Status Flag (request interrupt).  Not implemented;
+02600	05m0001                               	;                  causes bug trap.
+02700	05m0001                               	;       Bit 29  DTR (Data Terminal Ready)
+02800	05m0001                               	;   Bits 30:35  ACU bits (Not implemented - no auto-dialer)
+02900	05m0001                               	;DC10 escape - Bit 0 = 1
+03000	05m0001                               	;   Bits 20:27  ASTRA Control Register 1
+03100	05m0001                               	;   Bits 28:31  ASTRA Control Register 2
+03200	05m0001                               	;
+03300	05m0001                               	;-----------------------------------------------------------------------
+03400	05m0001                               	DLSDO1: ;Prepare to insert into dispatch table
+03500	05m0001                               	:DLSDISP2 + 6           ;Two instructions here and the rest elsewhere
+03600	05m0001 06770 640706000550400440020000	          FIXM1 $       ;Fetch operand
+03700	05m0001 06771 000140000571000440007032	        JUMP[DLSDO1] $
+03800	05m0001                               	:DLSDO1
+03900	05m0001 07032 531140004571026440000000	        D[MEM] ROT[11.] COND[-OBUS<0] JUMP[DLSNTHIS] C550 $
+04000	05m0001                               	                ;Is "use this line" on?
+04100	05m0001 07033 531140044571076440000000	        ASRC[DLSPICHN]  [D[10 + DLSPICHN]]ROT[31.] COND[-OBUS<0] JUMP[DL
+STHIS] C550 $
+04200	05m0001                               	                ;Yes.  Use it if scanner not stopped on xmitter.
+04300	05m0001 07034 640700004171044050000000	        D[MEM] ROT[18.] MASK[DLSLNSIZE] DEST[Q] NORM $
+04400	05m0001                               	                ;It has stopped...
+04500	05m0001 07035 510140050735044050000000	        ASRC[DLSLINE]  [D[10 + DLSLINE]]ROT[18.] MASK[DLSLNSIZE] ALU[D#Q
+] COND[OBUS=0]
+04600	05m0001                               	 JUMP[DLSSCNR] C550 $
+04700	05m0001                               	                ;If it stopped on the line to use, ignore the "use this"
+04800	05m0001 07036 640150004171044050000000	DLSTHIS:        D[MEM] ROT[18.] MASK[DLSLNSIZE] DEST[AR Q] JUMP[DLSOUT] 
+NORM $
+04900	05m0001                               	                ;Set line # from data.
+05000	05m0001 07037 531140044571076440002026	DLSNTHIS:       ASRC[DLSPICHN]  [D[10 + DLSPICHN]]ROT[31.] COND[-OBUS<0]
+ JUMP[MAIN] C550
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 239-2
+
+05100	05m0001                               	 $
+05200	05m0001                               	                ;No "use this" - NOP if scanner not stopped.
+05300	05m0001 07040 640700044171000030000000	DLSSCNR:        ASRC[DLSPICHN]  [D[10 + DLSPICHN]]MASK[3] DEST[Q] NORM $
+05400	05m0001 07041 640700214575006043000000	        D[CONST 4] ROT[3] ALU[DORQ] ADEST[DLSPICHN]  [DEST[DLSPICHN] DES
+T-A-MEM]NORM $
+05500	05m0001                               	                ;Clear XMIT flag.
+05600	05m0001 07042 640702214571066013600000	        D[CONST 1] ROT[27.] DEST[IOD] SPEC[IOB-OUT] NORM $
+05700	05m0001                               	                ;Enable interrupt.
+05800	05m0001 07043 440710050171044050100000	        MAPF[DLSCSR] CYLEN[IOB-OUT] ASRC[DLSLINE]  [D[10 + DLSLINE]]ROT[
+18.]
+05900	05m0001                               	 MASK[DLSLNSIZE] DEST[AR Q] $
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 240-1
+
+00100	SLOE   Jan ***, 1859 00:00:03  file DSK:DLS.SLO  --  of -- f2x
+00200	
+00300	05m0001                               	                ;Use line # from scanner.
+00400	05m0001 07044 640701214537000430000000	DLSOUT: D[CONST 35.] ALU[D-Q] DEST[ROTR] NORM $
+00500	05m0001 07045 640700054171000440000000	        ASRC[DLSACT]  [D[10 + DLSACT]]DEST[Q] NORM $    ;Prepare to twid
+dle active bit
+00600	05m0001 07046 511140004571066440000000	        D[MEM] ROT[27.] COND[OBUS<0] JUMP[DLSOFF] C550 $
+00700	05m0001                               	                ;"turn off transmitter"?
+00800	05m0001 07047 640700614575200013000000	        D[CONST 1] ROT[R] ALU[DORQ] ADEST[DLSACT]  [DEST[DLSACT] DEST-A-
+MEM]NORM $
+00900	05m0001                               	                ;No.  Turn it on.
+01000	05m0001 07050 640700004171000100000000	        D[MEM] MASK[8] DEST[Q] NORM $
+01100	05m0001 07051 640700000175052440000000	        D[AR] ROT[21.] ALU[DORQ] DEST[Q] NORM $
+01200	05m0001                               	        DLSWRITE[DLSHOLD] 
+01300	05m0001 07052 000700014175064010000000	[       D[CONST 1] ROT[26.] ALU[DORQ] DEST[Q] $
+01400	05m0001                               	                ;Set TTY number
+01500	05m0001 07053 000702214575050013600000	        D[CONST 1] ROT[20.] ALU[DORQ] DEST[IOD] SPEC[IOB-OUT] $
+01600	05m0001                               	                ;SET CS
+01700	05m0001 07054 000702214575046013630000	        MAPF[DLSHOLD] D[CONST 1] ROT[35. - DLSWEBIT] ALU[DORQ] DEST[IOD]
+ SPEC[IOB-OUT] $
+01800	05m0001                               	
+01900	05m0001                               	                ;DROP CS, SET WE
+02000	05m0001 07055 000702200555000443630000	        MAPF[DLSHOLD] ALU[Q] DEST[IOD] SPEC[IOB-OUT] $
+02100	05m0001                               	                ;DROP WE.
+02200	05m0001 07056 000700000571000443770000	        MAPF[DLSHOLD + DLSNOSEL] SPEC[IOB-OUT] $
+02300	05m0001                               	        MAPF[DLSHOLD + DLSNOSEL]                ;Finish the last IOB-OUT
+02400	05m0001 07057 640140000571000440172026	]JUMP[MAIN] NORM $
+02500	05m0001 07060 640140614675200013002026	DLSOFF: D[CONST 1] ROT[R] ALU[-D&Q] ADEST[DLSACT]  [DEST[DLSACT] DEST-A-
+MEM]JUMP[MAIN]
+02600	05m0001                               	 NORM $
+02700	05m0001                               	
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 241-1
+
+00100	SLOE   Jan ***, 1859 00:00:03  file DSK:DLS.SLO  --  of -- f2x
+00200	
+00300	06m0001                               	;-----------------------------------------------------------------------
+00400	06m0001                               	;CONO DLS,
+00500	06m0001                               	
+00600	06m0001                               	;
+00700	06m0001                               	;       Bit 30  Clear DC10
+00800	06m0001                               	;       Bit 31  Ready Hold (Not implemented, DTR switch is simulated as
+00900	06m0001                               	;                       being on.)
+01000	06m0001                               	;       Bit 32  Reset Scanner (more accurately, restart scanner. Allows
+01100	06m0001                               	;                        interrupts)
+01200	06m0001                               	;   Bits 33:35  PI channel
+01300	06m0001                               	;
+01400	06m0001                               	;-----------------------------------------------------------------------
+01500	06m0001                               	DLSCNO1:
+01600	06m0001                               	:DLSDISP2 + 10
+01700	06m0001 06772 511040034571074440000000	        D[IR] ROT[30.] COND[OBUS<0] PUSHJ[DLSRST] C550 $
+01800	06m0001 06773 640140014171000700007061	        D[CONST 70] DEST[Q] JUMP[DLSCNO1] NORM $
+01900	06m0001                               	:DLSCNO1
+02000	06m0001 07061 640700044235000440000000	        ASRC[DLSPICHN]  [D[10 + DLSPICHN]]ALU[D&Q] DEST[Q] NORM $
+02100	06m0001 07062 640140234575000033002026	        D[IR] MASK[3] ALU[DORQ] ADEST[DLSPICHN]  [DEST[DLSPICHN] DEST-A-
+MEM]JUMP[MAIN]
+02200	06m0001                               	 NORM $
+02300	06m0001                               	;-----------------------------------------------------------------------
+02400	06m0001                               	;CONI DLS,
+02500	06m0001                               	;
+02600	06m0001                               	;    Bits 0:7   ASTRA Control Register 1
+02700	06m0001                               	;    Bits 8:13  ASTRA Control Register 2
+02800	06m0001                               	;    Bits 14:20 ASTRA Status Register
+02900	06m0001                               	;       Bit 30  DTR Distend (Simulated as always on)
+03000	06m0001                               	;       Bit 31  Transmit interrupt
+03100	06m0001                               	;       Bit 32  Recieve interrupt
+03200	06m0001                               	;               (Both bits 31 and 32 will not be on at the same time.
+03300	06m0001                               	;                Recieve will take priority.)
+03400	06m0001                               	;   Bits 33:35  PI channel
+03500	06m0001                               	;
+03600	06m0001                               	;-----------------------------------------------------------------------
+03700	06m0001                               	DLSCNISV:
+03800	06m0001                               	:DLSDISP2 + 12
+03900	06m0001                               	                ;Get CONI information
+04000	06m0001 06774 662104244571000440002032	        ASRC[DLSPICHN]  [D[10 + DLSPICHN]]DEST[MEMSTO] MEMST  [COND[-MA-
+AC]
+04100	06m0001                               	 LBJUMP[MSMAIN] NORM ]$
+04200	06m0001 06775 000700000571000440000000	        NOP $
+04300	06m0001                               	                ;Store and fetch next instruction
+04400	06m0001                               	;-----------------------------------------------------------------------
+04500	06m0001                               	;CONSZ DLS,
+04600	06m0001                               	;-----------------------------------------------------------------------
+04700	06m0001 06776 640710044571000440000000	        ASRC[DLSPICHN]  [D[10 + DLSPICHN]]DEST[AR] NORM $
+04800	06m0001 06777 640140034171000220004470	        D[IR] MASK[18.] DEST[Q] JUMP[CTYCZ] NORM $
+04900	06m0001                               	                ;Do standard skip off AR and IR
+05000	06m0001                               	;-----------------------------------------------------------------------
+05100	06m0001                               	;CONSO DLS,
+05200	06m0001                               	;-----------------------------------------------------------------------
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 241-2
+
+05300	06m0001 07000 640710044571000440000000	        ASRC[DLSPICHN]  [D[10 + DLSPICHN]]DEST[AR] NORM $
+05400	06m0001 07001 640140034171000220004472	        D[IR] MASK[18.] DEST[Q] JUMP[CTYCS] NORM $
+05500	06m0001                               	                ;Do standard skip off AR and IR
+05600	06m0001                               	:DLSCNISV
+05700	06m0001                               	
+05800	06m0001 07063 000144620531000440004365	DLSBAD: d[pc] alu[d-1] dest[pc] jump[dohalt] $
+05900	06m0001                               	                ;Halt macro machine on this lossage...
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 242-1
+
+00100	SLOE   Jan ***, 1859 00:00:03  file DSK:DLS.SLO  --  of -- f2x
+00200	
+00300	06m0001                               	
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 243-1
+
+00100	SLOE   Jan ***, 1859 00:00:03  file DSK:DLS.SLO  --  of -- f2x
+00200	
+00300	07m0001                               	;-----------------------------------------------------------------------
+00400	07m0001                               	;Reset DLS
+00500	07m0001                               	;
+00600	07m0001                               	;Clear PI assignment and A-MEM registers.
+00700	07m0001                               	;Turn off interrupts
+00800	07m0001                               	;Setup defaults for lines 0:7, 8:5
+00900	07m0001                               	;
+01000	07m0001                               	;-----------------------------------------------------------------------
+01100	07m0001                               	.DEFINE DLSGRP[L0 L1 CR1 CR2] [
+01200	07m0001                               	        D[CONST L1 - L0] LLOAD $
+01300	07m0001                               	        D[CONST CR2] DEST[Q] PUSHJ[DLSSCR2] NORM $
+01400	07m0001                               	        D[CONST CR1 / 100] ROT[6] DEST[Q] NORM $
+01500	07m0001                               	        D[CONST CR1 & 77] ALU[DORQ] DEST[Q] PUSHJ[DLSSCR1] NORM $
+01600	07m0001                               	        D[AR] ALU[D+1] DEST[AR] LOOP[. - 3] NORM $
+01700	07m0001                               	] ;DLSGRP
+01800	07m0001                               	DLSRST:
+01900	07m0001 07064 640702214571060013600000	        D[CONST 1] ROT[24.] DEST[IOD] SPEC[IOB-OUT] NORM $
+02000	07m0001                               	                ;Hit MASTER RESET on all ASTRAs
+02100	07m0001 07065 000700214571000403100000	        MAPF[DLSCSR] LONG D[CONST 40] ADEST[DLSPICHN]  [DEST[DLSPICHN] D
+EST-A-MEM]$
+02200	07m0001                               	 ;Clear PIA
+02300	07m0001 07066 000700400615000443000000	        ALU[0] ADEST[DLSLINE]  [DEST[DLSLINE] DEST-A-MEM]LONG $ ;Clear r
+eceiver flag
+02400	07m0001 07067 000700600615000443000000	        ALU[0] ADEST[DLSACT]  [DEST[DLSACT] DEST-A-MEM]LONG $ ;All trans
+mitters off
+02500	07m0001 07070 000712200615000443600000	        ALU[0] DEST[IOD AR] SPEC[IOB-OUT] LONG $ ;Let go of MR
+02600	07m0001                               	        MAPF[DLSCSR] LONG
+02700	07m0001                               	DLSINI
+02800	07m0001                               	 [
+02900	07m0001                               	DLSGRP[0 0 247 32]       [
+03000	07m0001 07071 000740014571000000100000	        D[CONST 0 - 0] LLOAD $
+03100	07m0001 07072 640040014171000320000000	        D[CONST 32] DEST[Q] PUSHJ[DLSSCR2] NORM $
+03200	07m0001 07073 640700014171014020000000	        D[CONST 247 / 100] ROT[6] DEST[Q] NORM $
+03300	07m0001 07074 640040014175000470000000	        D[CONST 247 & 77] ALU[DORQ] DEST[Q] PUSHJ[DLSSCR1] NORM $
+03400	07m0001 07075 640250000433000440007072	        D[AR] ALU[D+1] DEST[AR] LOOP[. - 3] NORM $
+03500	07m0001                               	];Line 0 300 baud
+03600	07m0001                               	DLSGRP[1 3 247 23]       [
+03700	07m0001 07076 000740014571000020000000	        D[CONST 3 - 1] LLOAD $
+03800	07m0001 07077 640040014171000230000000	        D[CONST 23] DEST[Q] PUSHJ[DLSSCR2] NORM $
+03900	07m0001 07100 640700014171014020000000	        D[CONST 247 / 100] ROT[6] DEST[Q] NORM $
+04000	07m0001 07101 640040014175000470000000	        D[CONST 247 & 77] ALU[DORQ] DEST[Q] PUSHJ[DLSSCR1] NORM $
+04100	07m0001 07102 640250000433000440007077	        D[AR] ALU[D+1] DEST[AR] LOOP[. - 3] NORM $
+04200	07m0001                               	];Lines 1-3 150/1200    *** Temp.
+04300	07m0001                               	DLSGRP[4 DLSNLINES 247 34]       [
+04400	07m0001 07103 000740014571000330000000	        D[CONST DLSNLINES - 4] LLOAD $
+04500	07m0001 07104 640040014171000340000000	        D[CONST 34] DEST[Q] PUSHJ[DLSSCR2] NORM $
+04600	07m0001 07105 640700014171014020000000	        D[CONST 247 / 100] ROT[6] DEST[Q] NORM $
+04700	07m0001 07106 640040014175000470000000	        D[CONST 247 & 77] ALU[DORQ] DEST[Q] PUSHJ[DLSSCR1] NORM $
+04800	07m0001 07107 640250000433000440007104	        D[AR] ALU[D+1] DEST[AR] LOOP[. - 3] NORM $
+04900	07m0001                               	];Lines 4-LAST 9600
+05000	07m0002 07110 640040014171000000000000	]       D[CONST 0] DEST[Q] PUSHJ[DLSCINT] NORM $
+05100	07m0002                               	.REPEAT DLS2 [
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 243-2
+
+05200	07m0002                               	        D[CONST 20] ROT[21.] DEST[Q] PUSHJ[DLSCINT] NORM $
+05300	07m0002                               	] [
+05400	07m0002 07111 640040014171052200000000	        D[CONST 20] ROT[21.] DEST[Q] PUSHJ[DLSCINT] NORM $
+05500	07m0002                               	];DLS2
+05600	07m0002 07112 640702214571066013600000	        D[CONST 1] ROT[27.] DEST[IOD] SPEC[IOB-OUT] NORM $
+05700	07m0002 07113 440300000571000440100000	        MAPF[DLSCSR] CYLEN[IOB-OUT] POPJ $
+05800	07m0002                               	DLSCINT:
+05900	07m0002                               	.REPEAT DLS2 [
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 244-1
+
+00100	SLOE   Jan ***, 1859 00:00:03  file DSK:DLS.SLO  --  of -- f2x
+00200	
+00300	07m0002                               	        D[CONST 1] ROT[26.] ALU[DORQ] DEST[IOD Q] SPEC[IOB-OUT]
+00400	07m0002                               	                        NORM $
+00500	07m0002                               	        MAPF[DLSNOSEL] SPEC[IOB-IN] CYLEN[IOB-OUT] $
+00600	07m0002                               	        MAPF[DLSNOSEL] D[IOD] DEST[DLSTMP] DEST-A-MEM $
+00700	07m0002                               	        D[10 + DLSTMP] DLSNOIRQ POPJ LONG $
+00800	07m0002                               	] [
+00900	07m0002                               	        D[CONST 1] ROT[26.] ALU[DORQ] DEST[IOD Q] SPEC[IOB-OUT]
+01000	07m0002 07114 640702214175064013600000	                        NORM $
+01100	07m0002 07115 440700000571000443540000	        MAPF[DLSNOSEL] SPEC[IOB-IN] CYLEN[IOB-OUT] $
+01200	07m0002 07116 000701030571000443140000	        MAPF[DLSNOSEL] D[IOD] DEST[DLSTMP] DEST-A-MEM $
+01300	07m0002 07117 011300060571022440000000	        D[10 + DLSTMP] DLSNOIRQ  [ROT[9.] COND[OBUS<0]]POPJ LONG $
+01400	07m0002                               	];DLS2
+01500	07m0002                               	DLSCINT1:       DLSRINT  [
+01600	07m0002                               	        MAPF[DLSNOSEL] SPEC[IOB-OUT]
+01700	07m0002 07120 640702200417000443740000	                ALU[Q+1] DEST[IOD] NORM $
+01800	07m0002                               	        MAPF[DLSIACK] CYLEN[IOB-OUT] SPEC[IOB-OUT] 
+01900	07m0002 07121 440702214437050013640000	                D[CONST 1] ROT[20.] ALU[D+Q+1] DEST[IOD] $
+02000	07m0002 07122 000702200555000443640000	        MAPF[DLSIACK] SPEC[IOB-OUT] ALU[Q] DEST[IOD] LONG $
+02100	07m0002 07123 000700000571000443440000	        MAPF[DLSIACK] SPEC[IOB-IN] LONG $
+02200	07m0002 07124 240701030571000443040000	        MAPF[DLSIACK] D[IOD] DEST[DLSTMP] DEST-A-MEM C800 $
+02300	07m0002 07125 011300060571022440000000	        D[10 + DLSTMP] ]DLSNOIRQ  [ROT[9.] COND[OBUS<0]]POPJ $
+02400	07m0002 07126 000700000571000440000000	        NOP LONG $
+02500	07m0002 07127 000140000571000440007120	        JUMP[DLSCINT1] $
+02600	07m0002 07130 640700000175052440000000	DLSSCR1:        D[AR] ROT[21.] ALU[DORQ] DEST[Q] NORM $
+02700	07m0002                               	        DLSWRITE[DLSCR1] 
+02800	07m0002 07131 000700014175064010000000	[       D[CONST 1] ROT[26.] ALU[DORQ] DEST[Q] $
+02900	07m0002                               	                ;Set TTY number
+03000	07m0002 07132 000702214575050013600000	        D[CONST 1] ROT[20.] ALU[DORQ] DEST[IOD] SPEC[IOB-OUT] $
+03100	07m0002                               	                ;SET CS
+03200	07m0002 07133 000702214575046013600000	        MAPF[DLSCR1] D[CONST 1] ROT[35. - DLSWEBIT] ALU[DORQ] DEST[IOD] 
+SPEC[IOB-OUT] $
+03300	07m0002                               	                ;DROP CS, SET WE
+03400	07m0002 07134 000702200555000443600000	        MAPF[DLSCR1] ALU[Q] DEST[IOD] SPEC[IOB-OUT] $
+03500	07m0002                               	                ;DROP WE.
+03600	07m0002 07135 000700000571000443740000	        MAPF[DLSCR1 + DLSNOSEL] SPEC[IOB-OUT] $
+03700	07m0002                               	        MAPF[DLSCR1 + DLSNOSEL]                 ;Finish the last IOB-OUT
+03800	07m0002 07136 640300000571000440140000	]POPJ NORM $
+03900	07m0002 07137 640700000175052440000000	DLSSCR2:        D[AR] ROT[21.] ALU[DORQ] DEST[Q] NORM $
+04000	07m0002                               	        DLSWRITE[DLSCR2] 
+04100	07m0002 07140 000700014175064010000000	[       D[CONST 1] ROT[26.] ALU[DORQ] DEST[Q] $
+04200	07m0002                               	                ;Set TTY number
+04300	07m0002 07141 000702214575050013600000	        D[CONST 1] ROT[20.] ALU[DORQ] DEST[IOD] SPEC[IOB-OUT] $
+04400	07m0002                               	                ;SET CS
+04500	07m0002 07142 000702214575046013610000	        MAPF[DLSCR2] D[CONST 1] ROT[35. - DLSWEBIT] ALU[DORQ] DEST[IOD] 
+SPEC[IOB-OUT] $
+04600	07m0002                               	                ;DROP CS, SET WE
+04700	07m0002 07143 000702200555000443610000	        MAPF[DLSCR2] ALU[Q] DEST[IOD] SPEC[IOB-OUT] $
+04800	07m0002                               	                ;DROP WE.
+04900	07m0002 07144 000700000571000443750000	        MAPF[DLSCR2 + DLSNOSEL] SPEC[IOB-OUT] $
+05000	07m0002                               	        MAPF[DLSCR2 + DLSNOSEL]                 ;Finish the last IOB-OUT
+05100	07m0002 07145 640300000571000440150000	]POPJ NORM $
+05200	07m0002                               	
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 244-2
+
+05300	07m0002                               	;-----------------------------------------------------------------------
+05400	07m0002                               	;DLS interrupts are fairly straight-forward.  The micro-interrrupt
+05500	07m0002                               	;is turned off, the status of the line is obtained, and if enabled, a
+05600	07m0002                               	;macro interrupt is requested.  The macro interrupt is responsible for
+05700	07m0002                               	;executing some CONO,DATAI,DATAO which restarts the scanner by enabling
+05800	07m0002                               	;micro interrupts again.
+05900	07m0002                               	;-----------------------------------------------------------------------
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 245-1
+
+00100	SLOE   Jan ***, 1859 00:00:03  file DSK:DLS.SLO  --  of -- f2x
+00200	
+00300	07m0002                               	DLSINT:
+00400	07m0002                               	: DLSVECTOR     ;Entry to interrupt
+00500	07m0002 02137 640142200615000443607146	        ALU[0] DEST[IOD] SPEC[IOB-OUT] JUMP[DLSINT] NORM $ ;Disable int.
+00600	07m0002                               	: DLSINT
+00700	07m0002                               	.REPEAT DLS2 [
+00800	07m0002                               	        MAPF[DLSCSR] D[CONST 3] ROT[25.] DEST[Q IOD] SPEC[IOB-OUT]
+00900	07m0002                               	                        CYLEN[IOB-OUT] $
+01000	07m0002                               	        MAPF[DLSNOSEL] SPEC[IOB-IN] CYLEN[IOB-OUT] $
+01100	07m0002                               	        MAPF[DLSNOSEL] D[IOD] DEST[DLSTMP] DEST-A-MEM C800 $
+01200	07m0002                               	        D[10 + DLSTMP] DLSIRQ JUMP[DLSINT1] $
+01300	07m0002                               	        D[CONST 2] ROT[25.] DEST[Q IOD] SPEC[IOB-OUT] NORM $
+01400	07m0002                               	        MAPF[DLSNOSEL] SPEC[IOB-IN] CYLEN[IOB-OUT] $
+01500	07m0002                               	        MAPF[DLSNOSEL] D[IOD] DEST[DLSTMP] DEST-A-MEM C800 $
+01600	07m0002                               	        D[10 + DLSTMP] C550 DLSNOIRQ JUMP[DLSIGNORE] $
+01700	07m0002                               	] [
+01800	07m0002                               	        MAPF[DLSCSR] D[CONST 3] ROT[25.] DEST[Q IOD] SPEC[IOB-OUT]
+01900	07m0002 07146 440702214171062033700000	                        CYLEN[IOB-OUT] $
+02000	07m0002 07147 440700000571000443540000	        MAPF[DLSNOSEL] SPEC[IOB-IN] CYLEN[IOB-OUT] $
+02100	07m0002 07150 240701030571000443140000	        MAPF[DLSNOSEL] D[IOD] DEST[DLSTMP] DEST-A-MEM C800 $
+02200	07m0002 07151 031140060571022440000000	        D[10 + DLSTMP] DLSIRQ  [ROT[9.] COND[-OBUS<0]]JUMP[DLSINT1] $
+02300	07m0002 07152 640702214171062023600000	        D[CONST 2] ROT[25.] DEST[Q IOD] SPEC[IOB-OUT] NORM $
+02400	07m0002 07153 440700000571000443540000	        MAPF[DLSNOSEL] SPEC[IOB-IN] CYLEN[IOB-OUT] $
+02500	07m0002 07154 240701030571000443140000	        MAPF[DLSNOSEL] D[IOD] DEST[DLSTMP] DEST-A-MEM C800 $
+02600	07m0002 07155 511140060571022440000000	        D[10 + DLSTMP] C550 DLSNOIRQ  [ROT[9.] COND[OBUS<0]]JUMP[DLSIGNO
+RE] $
+02700	07m0002                               	];DLS2
+02800	07m0002                               	DLSINT1:        DLSRINT  [
+02900	07m0002                               	        MAPF[DLSNOSEL] SPEC[IOB-OUT]
+03000	07m0002 07156 640702200417000443740000	                ALU[Q+1] DEST[IOD] NORM $
+03100	07m0002                               	        MAPF[DLSIACK] CYLEN[IOB-OUT] SPEC[IOB-OUT] 
+03200	07m0002 07157 440702214437050013640000	                D[CONST 1] ROT[20.] ALU[D+Q+1] DEST[IOD] $
+03300	07m0002 07160 000702200555000443640000	        MAPF[DLSIACK] SPEC[IOB-OUT] ALU[Q] DEST[IOD] LONG $
+03400	07m0002 07161 000700000571000443440000	        MAPF[DLSIACK] SPEC[IOB-IN] LONG $
+03500	07m0002 07162 240701030571000443040000	        MAPF[DLSIACK] D[IOD] DEST[DLSTMP] DEST-A-MEM C800 $
+03600	07m0002 07163 000704460571000440000000	        D[10 + DLSTMP] ]DEST[HOLD] $
+03700	07m0002                               	.REPEAT 1 - DLS2 [
+03800	07m0002                               	        D[MEM] DLSNOIRQ JUMP[DLSIGNORE] C550 $
+03900	07m0002                               	]
+04000	07m0002 07164 640710004571102040000000	        D[MEM] ROT[33.] MASK[4] DEST[AR] NORM $
+04100	07m0002 07165 640710000575052440000000	        D[AR] ROT[21.] ALU[DORQ] DEST[AR] NORM $
+04200	07m0002 07166 640711200571036050000000	        D[AR] ROT[15.] MASK[DLSLNSIZE] DEST[AR ROTR] NORM $
+04300	07m0002 07167 640710000571044440000000	        D[AR] ROT[18.] DEST[AR] NORM $
+04400	07m0002 07170 511140004571102440000000	        D[MEM] ROT[33.] COND[OBUS<0] JUMP[DLSRCVINT] C550 $
+04500	07m0002 07171 531140054571200440000000	        ASRC[DLSACT]  [D[10 + DLSACT]]ROT[R] COND[-OBUS<0] JUMP[DLSIGNOR
+E] C550 $
+04600	07m0002 07172 640700400571000443000000	        D[AR] ADEST[DLSLINE]  [DEST[DLSLINE] DEST-A-MEM]NORM $
+04700	07m0002 07173 650150044171000440000000	        ASRC[DLSPICHN]  [D[10 + DLSPICHN]]DEST[AR Q] COND[OBUS=0] JUMP[D
+LSCH0] NORM $
+04800	07m0002 07174 640140214575006063004562	        D[CONST 6] ROT[3] ALU[DORQ] ADEST[DLSPICHN]  [DEST[DLSPICHN]
+04900	07m0002                               	 DEST-A-MEM]JUMP[PIGEN] NORM $
+05000	07m0002 07175 640140214575006063002026	DLSCH0: D[CONST 6] ROT[3] ALU[DORQ] ADEST[DLSPICHN]  [DEST[DLSPICHN]
+05100	07m0002                               	 DEST-A-MEM]JUMP[MAIN] NORM $
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 245-2
+
+05200	07m0002 07176 640700000171006440000000	DLSRCVINT:      D[AR] ROT[3] DEST[Q] NORM $
+05300	07m0002                               	        DLSREAD[DLSSTAT HOLD 8.] 
+05400	07m0002 07177 000702214175064010000000	[       D[CONST 1] ROT[26.] ALU[DORQ] DEST[Q IOD] $
+05500	07m0002                               	                ;Set TTY number  -- FBUS 9
+05600	07m0002 07200 000702214175050013600000	        D[CONST 1] ROT[20.] ALU[DORQ] DEST[Q IOD] SPEC[IOB-OUT] $
+05700	07m0002                               	                ;Assert CS
+05800	07m0002 07201 440700000571000440020000	        MAPF[DLSSTAT] CYLEN[IOB-OUT] $ ;TIME FOR CHIP TO SELECT
+05900	07m0002 07202 000702214171064013420000	        MAPF[DLSSTAT] D[CONST 1] ROT[26.] DEST[Q IOD] SPEC[IOB-IN] $
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 246-1
+
+00100	SLOE   Jan ***, 1859 00:00:03  file STRING:  --  of -- f2x
+00200	
+00300	07m0002                               	                ;Setup to drop CS, start read
+00400	07m0002 07203 000704430571000103760000	        MAPF[DLSSTAT + DLSNOSEL] D[IOD] MASK[8.] ALU[D] DEST[HOLD] SPEC[
+IOB-OUT] $
+00500	07m0002                               	                ;Finish read, drop CS
+00600	07m0002 07204 000700000571000440160000	        MAPF[DLSSTAT + DLSNOSEL] $
+00700	07m0002                               	        MAPF[DLSSTAT + DLSNOSEL]  ]D[MEM] ROT[34.]
+00800	07m0002 07205 531140004571104440160000	                COND[-OBUS<0] JUMP[DLSIGNORE] C550 $
+00900	07m0002 07206 640700000171006440000000	        D[AR] ROT[3] DEST[Q] NORM $
+01000	07m0002                               	        DLSREAD[DLSHOLD Q 8.] 
+01100	07m0002 07207 000702214175064010000000	[       D[CONST 1] ROT[26.] ALU[DORQ] DEST[Q IOD] $
+01200	07m0002                               	                ;Set TTY number  -- FBUS 9
+01300	07m0002 07210 000702214175050013600000	        D[CONST 1] ROT[20.] ALU[DORQ] DEST[Q IOD] SPEC[IOB-OUT] $
+01400	07m0002                               	                ;Assert CS
+01500	07m0002 07211 440700000571000440030000	        MAPF[DLSHOLD] CYLEN[IOB-OUT] $ ;TIME FOR CHIP TO SELECT
+01600	07m0002 07212 000702214171064013430000	        MAPF[DLSHOLD] D[CONST 1] ROT[26.] DEST[Q IOD] SPEC[IOB-IN] $
+01700	07m0002                               	                ;Setup to drop CS, start read
+01800	07m0002 07213 000700030171000103770000	        MAPF[DLSHOLD + DLSNOSEL] D[IOD] MASK[8.] ALU[D] DEST[Q] SPEC[IOB
+-OUT] $
+01900	07m0002                               	                ;Finish read, drop CS
+02000	07m0002 07214 000700000571000440170000	        MAPF[DLSHOLD + DLSNOSEL] $
+02100	07m0002 07215 640704400433070440170000	        MAPF[DLSHOLD + DLSNOSEL]  ]D[AR] ROT[28.] ALU[D+1] DEST[HOLD] NO
+RM $
+02200	07m0002 07216 640700404575020443000000	        D[MEM] ROT[8.] ALU[DORQ] ADEST[DLSLINE]  [DEST[DLSLINE] DEST-A-M
+EM]NORM $
+02300	07m0002 07217 650150044171000030000000	        ASRC[DLSPICHN]  [D[10 + DLSPICHN]]MASK[3] DEST[AR Q] COND[OBUS=0
+] JUMP[DLSRCVIGN]
+02400	07m0002                               	 NORM $
+02500	07m0002 07220 640140214575006053004562	        D[CONST 5] ROT[3] ALU[DORQ] ADEST[DLSPICHN]  [DEST[DLSPICHN]
+02600	07m0002                               	 DEST-A-MEM]JUMP[PIGEN] NORM $
+02700	07m0002 07221 640140214575006053002026	DLSRCVIGN:      D[CONST 5] ROT[3] ALU[DORQ] ADEST[DLSPICHN]  [DEST[DLSPI
+CHN]
+02800	07m0002                               	 DEST-A-MEM]JUMP[MAIN] NORM $
+02900	07m0002 07222 640702214571066013600000	DLSIGNORE:      D[CONST 1] ROT[27.] DEST[IOD] SPEC[IOB-OUT] NORM $
+03000	07m0002 07223 440150000215000440102026	        MAPF[DLSCSR] CYLEN[IOB-OUT] ALU[0] DEST[AR Q] JUMP[MAIN] $
+03100	07m0002                               	
+03200	
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 247-1
+
+00100	SLOE   Jan ***, 1859 00:00:03  file STRING:  --  of -- f2x
+00200	
+00300	45m0164                               	
+00400	45m0164                               	.REPEAT DLSDEB [
+00500	45m0164                               	.INSERT DLSDEB.SLO
+00600	45m0164                               	];[
+00700	45m0164                               	.INSERT DLSDEB.SLO
+00800	
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 248-1
+
+00100	SLOE   Jan ***, 1859 00:00:03  file DSK:DLSDEB.SLO  --  of -- f2x
+00200	
+00300	01m0001                               	;DLS DEBUGGING IOTS
+00400	01m0001                               	
+00500	01m0001                               	.DEFINE SETLIN [ ] [D[MASK[8.]] DEST[Q] PUSHJ[DLS.SETLIN] NORM]
+00600	01m0001                               	
+00700	01m0001                               	.DEFINE MJUMP[X] [D[AR] ALU[DORQ] DEST[Q] JUMP[X] NORM]
+00800	01m0001                               	
+00900	01m0001                               	;;;;;  DWP 1/27/80:7600
+01000	01m0001                               	DLS.DEB:
+01100	01m0001                               	:DLSDISP2 + 20          ;IOT DISPATCH FOR DEVICE 374
+01200	01m0001                               	
+01300	01m0001 07002 640040010171000100000000	SETLIN  [D[MASK[8.]] DEST[Q] PUSHJ[DLS.SETLIN] NORM]$                   
+;BLKI 374 = READ
+01400	01m0001                               	 CR1
+01500	01m0001 07003 640140000571000440000000	JUMP[DLS.RCR1] NORM $
+01600	01m0001                               	
+01700	01m0001 07004 640040010171000100000000	SETLIN  [D[MASK[8.]] DEST[Q] PUSHJ[DLS.SETLIN] NORM]$                   
+;DATAI 374 = READ
+01800	01m0001                               	 CR2
+01900	01m0001 07005 640140000571000440000000	JUMP[DLS.RCR2] NORM $
+02000	01m0001                               	
+02100	01m0001 07006 640040010171000100000000	SETLIN  [D[MASK[8.]] DEST[Q] PUSHJ[DLS.SETLIN] NORM]$                   
+;BLKO 374 = READ
+02200	01m0001                               	 STAT
+02300	01m0001 07007 640140000571000440000000	JUMP[DLS.RSTAT] NORM $
+02400	01m0001                               	
+02500	01m0001 07010 640040010171000100000000	SETLIN  [D[MASK[8.]] DEST[Q] PUSHJ[DLS.SETLIN] NORM]$                   
+;DATAO 374 = READ
+02600	01m0001                               	 HOLD
+02700	01m0001 07011 640140000571000440000000	JUMP[DLS.RHOLD] NORM $
+02800	01m0001                               	
+02900	01m0001 07012 640040010171000100000000	SETLIN  [D[MASK[8.]] DEST[Q] PUSHJ[DLS.SETLIN] NORM]$                   
+;CONO 374 = WRITE
+03000	01m0001                               	 CR1
+03100	01m0001 07013 640140000175000440000000	MJUMP[DLS.WCR1]  [D[AR] ALU[DORQ] DEST[Q] JUMP[DLS.WCR1] NORM]$
+03200	01m0001                               	
+03300	01m0001 07014 640040010171000100000000	SETLIN  [D[MASK[8.]] DEST[Q] PUSHJ[DLS.SETLIN] NORM]$                   
+;CONI 374 = WRITE
+03400	01m0001                               	 CR2
+03500	01m0001 07015 640140000175000440000000	MJUMP[DLS.WCR2]  [D[AR] ALU[DORQ] DEST[Q] JUMP[DLS.WCR2] NORM]$
+03600	01m0001                               	
+03700	01m0001 07016 640040010171000100000000	SETLIN  [D[MASK[8.]] DEST[Q] PUSHJ[DLS.SETLIN] NORM]$                   
+;CONSZ 374 =
+03800	01m0001                               	 WRITE STAT (SYN,DLE)
+03900	01m0001 07017 640140000175000440000000	MJUMP[DLS.WSTAT]  [D[AR] ALU[DORQ] DEST[Q] JUMP[DLS.WSTAT] NORM]$
+04000	01m0001                               	
+04100	01m0001 07020 640040010171000100000000	SETLIN  [D[MASK[8.]] DEST[Q] PUSHJ[DLS.SETLIN] NORM]$                   
+;CONSO 374 =
+04200	01m0001                               	 WRITE HOLD
+04300	01m0001 07021 640140000175000440000000	MJUMP[DLS.WHOLD]  [D[AR] ALU[DORQ] DEST[Q] JUMP[DLS.WHOLD] NORM]$
+04400	01m0001                               	
+04500	01m0001                               	:DLS.DEB
+04600	01m0001                               	
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 248-2
+
+04700	01m0001 07224 640706000550400440020000	DLS.SETLIN:     FIXM1 $                 ;SETUP LINE # IN Q
+04800	01m0001 07225 640710004635000440000000	        D[MEM] ALU[D&Q] DEST[AR] NORM $
+04900	01m0001 07226 640700010171052050000000	        D[MASK[DLSLNSIZE]] ROT[21.] DEST[Q] NORM $
+05000	01m0001 07227 640300004235006440000000	        D[MEM] ROT[3] ALU[D&Q] DEST[Q] POPJ NORM $
+05100	01m0001                               	
+05200	01m0001                               	DLS.RCR1:       DLSREAD[DLSCR1 AR 8.] 
+05300	01m0001 07230 000702214175064010000000	[       D[CONST 1] ROT[26.] ALU[DORQ] DEST[Q IOD] $
+05400	01m0001                               	                ;Set TTY number  -- FBUS 9
+05500	01m0001 07231 000702214175050013600000	        D[CONST 1] ROT[20.] ALU[DORQ] DEST[Q IOD] SPEC[IOB-OUT] $
+05600	01m0001                               	                ;Assert CS
+05700	01m0001 07232 440700000571000440000000	        MAPF[DLSCR1] CYLEN[IOB-OUT] $ ;TIME FOR CHIP TO SELECT
+05800	01m0001 07233 000702214171064013400000	        MAPF[DLSCR1] D[CONST 1] ROT[26.] DEST[Q IOD] SPEC[IOB-IN] $
+05900	01m0001                               	                ;Setup to drop CS, start read
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 249-1
+
+00100	SLOE   Jan ***, 1859 00:00:03  file STRING:  --  of -- f2x
+00200	
+00300	01m0001 07234 000710030571000103740000	        MAPF[DLSCR1 + DLSNOSEL] D[IOD] MASK[8.] ALU[D] DEST[AR] SPEC[IOB
+-OUT] $
+00400	01m0001                               	                ;Finish read, drop CS
+00500	01m0001 07235 000700000571000440140000	        MAPF[DLSCR1 + DLSNOSEL] $
+00600	01m0001 07236 000140000571000440140000	        MAPF[DLSCR1 + DLSNOSEL]  ]JUMP[DLS.READ] $
+00700	01m0001                               	
+00800	01m0001                               	DLS.RCR2:       DLSREAD[DLSCR2 AR 8.] 
+00900	01m0001 07237 000702214175064010000000	[       D[CONST 1] ROT[26.] ALU[DORQ] DEST[Q IOD] $
+01000	01m0001                               	                ;Set TTY number  -- FBUS 9
+01100	01m0001 07240 000702214175050013600000	        D[CONST 1] ROT[20.] ALU[DORQ] DEST[Q IOD] SPEC[IOB-OUT] $
+01200	01m0001                               	                ;Assert CS
+01300	01m0001 07241 440700000571000440010000	        MAPF[DLSCR2] CYLEN[IOB-OUT] $ ;TIME FOR CHIP TO SELECT
+01400	01m0001 07242 000702214171064013410000	        MAPF[DLSCR2] D[CONST 1] ROT[26.] DEST[Q IOD] SPEC[IOB-IN] $
+01500	01m0001                               	                ;Setup to drop CS, start read
+01600	01m0001 07243 000710030571000103750000	        MAPF[DLSCR2 + DLSNOSEL] D[IOD] MASK[8.] ALU[D] DEST[AR] SPEC[IOB
+-OUT] $
+01700	01m0001                               	                ;Finish read, drop CS
+01800	01m0001 07244 000700000571000440150000	        MAPF[DLSCR2 + DLSNOSEL] $
+01900	01m0001 07245 000140000571000440150000	        MAPF[DLSCR2 + DLSNOSEL]  ]JUMP[DLS.READ] $
+02000	01m0001                               	
+02100	01m0001                               	DLS.RSTAT:      DLSREAD[DLSSTAT AR 8.] 
+02200	01m0001 07246 000702214175064010000000	[       D[CONST 1] ROT[26.] ALU[DORQ] DEST[Q IOD] $
+02300	01m0001                               	                ;Set TTY number  -- FBUS 9
+02400	01m0001 07247 000702214175050013600000	        D[CONST 1] ROT[20.] ALU[DORQ] DEST[Q IOD] SPEC[IOB-OUT] $
+02500	01m0001                               	                ;Assert CS
+02600	01m0001 07250 440700000571000440020000	        MAPF[DLSSTAT] CYLEN[IOB-OUT] $ ;TIME FOR CHIP TO SELECT
+02700	01m0001 07251 000702214171064013420000	        MAPF[DLSSTAT] D[CONST 1] ROT[26.] DEST[Q IOD] SPEC[IOB-IN] $
+02800	01m0001                               	                ;Setup to drop CS, start read
+02900	01m0001 07252 000710030571000103760000	        MAPF[DLSSTAT + DLSNOSEL] D[IOD] MASK[8.] ALU[D] DEST[AR] SPEC[IO
+B-OUT] $
+03000	01m0001                               	                ;Finish read, drop CS
+03100	01m0001 07253 000700000571000440160000	        MAPF[DLSSTAT + DLSNOSEL] $
+03200	01m0001 07254 000140000571000440160000	        MAPF[DLSSTAT + DLSNOSEL]  ]JUMP[DLS.READ] $
+03300	01m0001                               	
+03400	01m0001                               	DLS.RHOLD:      DLSREAD[DLSHOLD AR 8.] 
+03500	01m0001 07255 000702214175064010000000	[       D[CONST 1] ROT[26.] ALU[DORQ] DEST[Q IOD] $
+03600	01m0001                               	                ;Set TTY number  -- FBUS 9
+03700	01m0001 07256 000702214175050013600000	        D[CONST 1] ROT[20.] ALU[DORQ] DEST[Q IOD] SPEC[IOB-OUT] $
+03800	01m0001                               	                ;Assert CS
+03900	01m0001 07257 440700000571000440030000	        MAPF[DLSHOLD] CYLEN[IOB-OUT] $ ;TIME FOR CHIP TO SELECT
+04000	01m0001 07260 000702214171064013430000	        MAPF[DLSHOLD] D[CONST 1] ROT[26.] DEST[Q IOD] SPEC[IOB-IN] $
+04100	01m0001                               	                ;Setup to drop CS, start read
+04200	01m0001 07261 000710030571000103770000	        MAPF[DLSHOLD + DLSNOSEL] D[IOD] MASK[8.] ALU[D] DEST[AR] SPEC[IO
+B-OUT] $
+04300	01m0001                               	                ;Finish read, drop CS
+04400	01m0001 07262 000700000571000440170000	        MAPF[DLSHOLD + DLSNOSEL] $
+04500	01m0001 07263 000140000571000440170000	        MAPF[DLSHOLD + DLSNOSEL]  ]JUMP[DLS.READ] $
+04600	01m0001                               	
+04700	01m0001 07264 640700010171000100000000	DLS.READ:       D[MASK[8.]] DEST[Q] NORM $
+04800	01m0001 07265 640700000235000440000000	        D[AR] ALU[D&Q] DEST[Q] NORM $
+04900	01m0001 07266 662104204575000000202032	        D[MEM] SPEC[LEFT] ALU[DORQ] DEST[MEMSTO] MEMST  [COND[-MA-AC] LB
+JUMP[MSMAIN] NORM
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 249-2
+
+05000	01m0001                               	 ]$
+05100	01m0001                               	
+05200	01m0001                               	DLS.WCR1:       DLSWRITE[DLSCR1] 
+05300	01m0001 07267 000700014175064010000000	[       D[CONST 1] ROT[26.] ALU[DORQ] DEST[Q] $
+05400	01m0001                               	                ;Set TTY number
+05500	01m0001 07270 000702214575050013600000	        D[CONST 1] ROT[20.] ALU[DORQ] DEST[IOD] SPEC[IOB-OUT] $
+05600	01m0001                               	                ;SET CS
+05700	01m0001 07271 000702214575046013600000	        MAPF[DLSCR1] D[CONST 1] ROT[35. - DLSWEBIT] ALU[DORQ] DEST[IOD] 
+SPEC[IOB-OUT] $
+05800	01m0001                               	                ;DROP CS, SET WE
+05900	01m0001 07272 000702200555000443600000	        MAPF[DLSCR1] ALU[Q] DEST[IOD] SPEC[IOB-OUT] $
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 250-1
+
+00100	SLOE   Jan ***, 1859 00:00:03  file STRING:  --  of -- f2x
+00200	
+00300	01m0001                               	                ;DROP WE.
+00400	01m0001 07273 000700000571000443740000	        MAPF[DLSCR1 + DLSNOSEL] SPEC[IOB-OUT] $
+00500	01m0001                               	        MAPF[DLSCR1 + DLSNOSEL]                 ;Finish the last IOB-OUT
+00600	01m0001 07274 000140000571000440142026	]JUMP[MAIN] $
+00700	01m0001                               	
+00800	01m0001                               	DLS.WCR2:       DLSWRITE[DLSCR2] 
+00900	01m0001 07275 000700014175064010000000	[       D[CONST 1] ROT[26.] ALU[DORQ] DEST[Q] $
+01000	01m0001                               	                ;Set TTY number
+01100	01m0001 07276 000702214575050013600000	        D[CONST 1] ROT[20.] ALU[DORQ] DEST[IOD] SPEC[IOB-OUT] $
+01200	01m0001                               	                ;SET CS
+01300	01m0001 07277 000702214575046013610000	        MAPF[DLSCR2] D[CONST 1] ROT[35. - DLSWEBIT] ALU[DORQ] DEST[IOD] 
+SPEC[IOB-OUT] $
+01400	01m0001                               	                ;DROP CS, SET WE
+01500	01m0001 07300 000702200555000443610000	        MAPF[DLSCR2] ALU[Q] DEST[IOD] SPEC[IOB-OUT] $
+01600	01m0001                               	                ;DROP WE.
+01700	01m0001 07301 000700000571000443750000	        MAPF[DLSCR2 + DLSNOSEL] SPEC[IOB-OUT] $
+01800	01m0001                               	        MAPF[DLSCR2 + DLSNOSEL]                 ;Finish the last IOB-OUT
+01900	01m0001 07302 000140000571000440152026	]JUMP[MAIN] $
+02000	01m0001                               	
+02100	01m0001                               	DLS.WSTAT:      DLSWRITE[DLSSTAT] 
+02200	01m0001 07303 000700014175064010000000	[       D[CONST 1] ROT[26.] ALU[DORQ] DEST[Q] $
+02300	01m0001                               	                ;Set TTY number
+02400	01m0001 07304 000702214575050013600000	        D[CONST 1] ROT[20.] ALU[DORQ] DEST[IOD] SPEC[IOB-OUT] $
+02500	01m0001                               	                ;SET CS
+02600	01m0001 07305 000702214575046013620000	        MAPF[DLSSTAT] D[CONST 1] ROT[35. - DLSWEBIT] ALU[DORQ] DEST[IOD]
+ SPEC[IOB-OUT] $
+02700	01m0001                               	
+02800	01m0001                               	                ;DROP CS, SET WE
+02900	01m0001 07306 000702200555000443620000	        MAPF[DLSSTAT] ALU[Q] DEST[IOD] SPEC[IOB-OUT] $
+03000	01m0001                               	                ;DROP WE.
+03100	01m0001 07307 000700000571000443760000	        MAPF[DLSSTAT + DLSNOSEL] SPEC[IOB-OUT] $
+03200	01m0001                               	        MAPF[DLSSTAT + DLSNOSEL]                ;Finish the last IOB-OUT
+03300	01m0001 07310 000140000571000440162026	]JUMP[MAIN] $
+03400	01m0001                               	
+03500	01m0001                               	DLS.WHOLD:      DLSWRITE[DLSHOLD] 
+03600	01m0001 07311 000700014175064010000000	[       D[CONST 1] ROT[26.] ALU[DORQ] DEST[Q] $
+03700	01m0001                               	                ;Set TTY number
+03800	01m0001 07312 000702214575050013600000	        D[CONST 1] ROT[20.] ALU[DORQ] DEST[IOD] SPEC[IOB-OUT] $
+03900	01m0001                               	                ;SET CS
+04000	01m0001 07313 000702214575046013630000	        MAPF[DLSHOLD] D[CONST 1] ROT[35. - DLSWEBIT] ALU[DORQ] DEST[IOD]
+ SPEC[IOB-OUT] $
+04100	01m0001                               	
+04200	01m0001                               	                ;DROP CS, SET WE
+04300	01m0001 07314 000702200555000443630000	        MAPF[DLSHOLD] ALU[Q] DEST[IOD] SPEC[IOB-OUT] $
+04400	01m0001                               	                ;DROP WE.
+04500	01m0001 07315 000700000571000443770000	        MAPF[DLSHOLD + DLSNOSEL] SPEC[IOB-OUT] $
+04600	01m0001                               	        MAPF[DLSHOLD + DLSNOSEL]                ;Finish the last IOB-OUT
+04700	01m0001 07316 000140000571000440172026	]JUMP[MAIN] $
+04800	01m0001                               	
+04900	01m0001 07317 000140000571000440007317	DLS.INT:        JUMP[.] $
+05000	01m0001 07320 000140000571000440007321	        JUMP[. + 1] $
+05100	01m0001 07321 640702200615000443600000	        ALU[0] DEST[IOD] SPEC[IOB-OUT] NORM $
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 250-2
+
+05200	01m0001 07322 440700000571000440100000	        MAPF[DLSCSR] CYLEN[IOB-OUT] $
+05300	01m0001 07323 000142400571000440002026	        DEST[CLR-DEV-FROM-INTR] JUMP[MAIN] $
+05400	01m0001                               	
+05500	01m0001                               	DLS.RINT:
+05600	01m0001                               	: DLSDISP2 + 0  ;BLKI 370 - GET INTERRUPT STATUS
+05700	01m0001 06762 000140000571000440006762	        JUMP[.] $
+05800	01m0001 06763 000140000571000440007324	        JUMP[DLS.RINT] $
+05900	01m0001                               	: DLS.RINT
+<F2-MICROCODE>F2X.LST;13;P775200       Thu Jan- 8-81 11:24PM          Page 251-1
+
+00100	SLOE   Jan ***, 1859 00:00:03  file DSK:DLSDEB.SLO  --  of -- f2x
+00200	
+00300	01m0001 07324 640700014171064010000000	        D[CONST 1] ROT[26.] DEST[Q] NORM $
+00400	01m0001                               	        MAPF[DLSNOSEL] SPEC[IOB-OUT] D[CONST 1] ROT[20.]
+00500	01m0001 07325 640702214437050013740000	                ALU[D+Q+1] DEST[IOD] NORM $
+00600	01m0001 07326 440700000571000440140000	        MAPF[DLSNOSEL] CYLEN[IOB-OUT] $
+00700	01m0001 07327 000700000571000440040000	        MAPF[DLSIACK] LONG $
+00800	01m0001 07330 000700000571000440040000	        MAPF[DLSIACK] LONG $
+00900	01m0001 07331 000700000571000440040000	        MAPF[DLSIACK] LONG $
+01000	01m0001 07332 000700000571000440040000	        MAPF[DLSIACK] LONG $
+01100	01m0001 07333 000702200555000443640000	        MAPF[DLSIACK] SPEC[IOB-OUT] ALU[Q] DEST[IOD] LONG $
+01200	01m0001 07334 000700000571000443440000	        MAPF[DLSIACK] SPEC[IOB-IN] LONG $
+01300	01m0001 07335 140700030171000440040000	        MAPF[DLSIACK] CYLEN[IOB-IN] D[IOD] DEST[Q] $
+01400	01m0001 07336 662104200555000440002032	        ALU[Q] DEST[MEMSTO] MEMST  [COND[-MA-AC] LBJUMP[MSMAIN] NORM ]$
+01500	01m0001                               	
+01600	01m0001                               	DLS.EINT:
+01700	01m0001                               	: DLSDISP2 + 4  ;BLKO 370 - ENABLE INTERRUPT
+01800	01m0001 06766 000140000571000440006766	        JUMP[.] $
+01900	01m0001 06767 000140000571000440007337	        JUMP[DLS.EINT] $
+02000	01m0001                               	:DLS.EINT
+02100	01m0001 07337 640702214571066013600000	        D[CONST 1] ROT[27.] DEST[IOD] SPEC[IOB-OUT] NORM $
+02200	01m0001 07340 440140000571000440102026	        MAPF[DLSCSR] CYLEN[IOB-OUT] JUMP[MAIN] $
+02300	
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             

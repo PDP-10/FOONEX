@@ -1,0 +1,1779 @@
+;DSK:<PEFWRK>DT.FAI;2 27-May-80 12:52:12, Edit by FRENCH
+;START MODS FOR NEW DISK STUFF (BATS ETC.)
+;DSK:<LOWE>DT.FAI;71 12-May-80 03:34:56, Edit by LOWE
+;	BUG FIXES
+;DSK:<LOWE>DT.FAI;65 11-May-80 17:32:35, Edit by LOWE
+;	Continue cleanup, fix some bugs, start adding some write protection
+;DSK:<LOWE>DT.FAI;38 23-Apr-80 02:37:03, Edit by LOWE
+;	help cosmetics
+;DSK:<LOWE>DT.FAI;33 23-Apr-80 02:21:56, Edit by LOWE
+;	TAKE OVER OFFICAL MAINTENANCE ROLE, START TO CLEAN UP
+
+	TITLE DT	;DISK TEST STUFF
+
+;NEEDED FIXES:
+
+;	MAKE TEST6 UNDERSTAND MIN...
+
+;	CONTINUE TO EXPAND HELP DESCRIPTIONS AND FEATURES
+;		UP pointers
+;		Table of Contents
+;		Full Manual
+
+;	ADD MORE WRITE PROTECT
+
+
+;FROM DDT, SAY TESTn$G TO EXECUTE THE SPECIFIED TEST...
+
+;TEST1:		; GO THROUGH WHOLE DISK AND DATA TEST EACH
+		; SECTOR
+		; RESPECTS BAT BLOCKS AND DOES NOT SCRIBBLE ON THEM
+
+;TEST2:		; DATA TEST OF CURRENT ADDRESS ONLY
+		; MANUALLY SET DISK ADDRESS PARAMETERS.
+		;*** WILL SCRIBBLE ON BAT BLOCKS IF ASKED TO ***
+
+;TEST3:		; THIS TEST WRITES THE (ENCODED FORM OF)
+		; DISK ADDRESS INTO THE FIRST WORD OF EACH
+		; SECTOR, SEQUENTIALLY, AND THEN TRIES TO READ
+		; THEM BACK IN A SCREWY ORDER.
+		; RESPECTS BAT BLOCKS AND DOES NOT SCRIBBLE ON THEM
+
+;TEST4:		; CALL WRCOM INDEFINITELY.
+		; MANUALLY SET DA PARAMS AND MASK,ROTA
+		;*** WILL SCRIBBLE ON BAT BLOCKS IF ASKED TO ***
+
+;TEST5:		; CALL WRCOM ONCE, WITH WHATEVER THE CURRENT
+		; DATA PATTERNS ARE, AT THE CURRENT ADDRESS
+		;*** WILL SCRIBBLE ON BAT BLOCKS IF ASKED TO ***
+
+;TEST6:		;RANDOM SEEKS INDEFINITELY
+
+;OTHER ENTRY POINTS
+
+;FMT:		;FORMAT DISK
+
+;CDC160:	;SET UP PARAMETERS FOR CDC 160 MEG DISKS
+
+;AMPEX8:	;SET UP PARAMETERS FOR AMPEX 80 MEG DISKS
+
+;STATUS:	;PRINTS STATUS OF CURRENT UNIT
+
+;PAKCPY:	;COPY FROM "FROM" UNIT TO "TO" UNIT
+		;*** DOES NOT WORK PROPERLY FOR PACKS WITH BAT BLOCKS ***
+
+;CURRENTLY NOT IMPLEMETNTED:
+
+;getbat:	; read in BAT blocks
+
+;putbat:	; write out the current image of BAT blocks
+
+;addbat:	; add entries in BADADR table to BAT blocks
+
+;gethom:	; read in home blocks
+
+;puthom:	; write out home blocks
+
+
+
+;DEFS. OF TEMP. IOTS
+
+OPDEF LA[723000,,0]
+OPDEF RA[717000,,0]
+OPDEF LC[721000,,0]
+OPDEF RC[715000,,0]
+OPDEF LE[724000,,0]
+OPDEF LM[722000,,0]
+OPDEF RM[716000,,0]
+OPDEF DCONO[740000,,0]
+OPDEF DCONI[741000,,0]
+OPDEF DCONSO[742000,,0]
+OPDEF DCONSZ[743000,,0]
+
+TTY__120
+
+; TAPE IOTS:
+OPDEF TOP[726000,,0]		; TAPE OPERATION
+OPDEF RTS[727000,,0]		; READ TAPE STATUS
+OPDEF RTR[730000,,0]		; READ TAPE RECORD
+OPDEF WTR[731000,,0]		; WRITE TAPE RECORD
+
+OPDEF CALL[PUSHJ 17,]
+OPDEF RET[POPJ 17,]
+
+
+PI_4		; DISK'S PRIORITY INTERRUPT CHANNEL
+
+R_16
+P_17
+
+
+WBUF_100000
+
+RBUF_46000			;TO BE SAME AS SYSTEM
+FBUF_150000
+
+F_FBUF
+G_FBUF+777			;THESE DEFS FOR EASY $N SEARCH WITH DDT
+
+
+DDT__00140
+EXTERNAL DDTEND
+
+INTCHN_4			; DISK INTERRUPT CHANNEL
+INTLOC_40+<2*INTCHN>		;INTERRUPT LOCATION
+
+LOC INTLOC
+	JSR INTROU		;JSR TO THE INTERUPT ROUTINE
+
+LOC 14000
+BEGPRG__.	;LEAVE THIS POINTING TO 1ST LOC IN PROGRAM
+
+PDLSIZ__1000
+PDL:	BLOCK PDLSIZ
+
+;	definition of status bits returned by controller
+
+define	statbt(name,value,descrp),<
+	name__value
+	value
+	[asciz/descrp/]>
+
+stbtab:
+	statbt	S.SERR,1b0,<SelectErr>
+	statbt	S.WRLK,1b1,<WriteLocked>
+	statbt	S.NRDY,1b2,<NotReady>
+	statbt	S.ONCY,1b3,<OnCyl>
+	statbt	S.SEEK,1b4,<SeekErr>
+	statbt	S.DFLT,1b5,<DrvFlt>
+	statbt	S.ATTN,1b6,<Attn>
+	statbt	S.HCER,1b7,<HdCompErr>
+	statbt	S.NBSY,1b8,<NBusy>
+	statbt	S.ROVR,1b11,<ReadOverun>
+	statbt	S.WOVR,1b12,<WritOverun>
+	statbt	S.SOVR,1b13,<SectOverun>
+	statbt	S.SPAR,1b14,<IntPar>
+	statbt	S.ANY,1b28,<AnyErr&ECC>
+	statbt	S.OCMP,1b31,<Complete>
+	0
+	0
+
+
+; COMMAND BITS
+
+C.FCLR__400000			;FAULT CLEAR
+C.CMEM__10000			;COMMAND FROM MEMORY (WRITES USE THIS)
+C.32B__400			;32 BIT MODE
+C.INTA__40			;ENABLE INTERRUPT ON ANY ATTENTION
+C.INTD__10			;ENABLE INTERRUPT WHEN DONE
+
+;	Routines to configure drive dependent parameters
+
+;	Drive dependent parameters are:
+
+;	MINCYL  --  Minimum cylinder to use
+;	MINHED  --  Minimum head to use
+;	MINSEC  --  Minimum sector to use
+
+;	MAXCYL  --  Maximum cylinder to use
+;	MAXHED  --  Maximum head to use
+;	MAXSEC  --  Maximum sector to use
+
+;	MINSAF  --  Lowest cylinder to write on without complaint
+;	MAXSAF  --  Highest cylinder to write on without complaint
+
+define	setloc(name,value),<
+	movei	1,value
+	movem	1,name>
+
+define	drvcfg(mncyl,mnhed,mnsec,mxcyl,mxhed,mxsec,mnsaf,mxsaf),<
+
+	setloc	mincyl,mncyl
+	setloc	minhed,mnhed
+	setloc	minsec,mnsec
+	setloc	maxcyl,mxcyl
+	setloc	maxhed,mxhed
+	setloc	maxsec,mxsec
+	setloc	minsaf,mnsaf
+	setloc	maxsaf,mxsaf
+	>				;FALL INTO NEXT INSTRUCTION
+
+
+;DEFINE LOCATION OF PRIMARY AND SECONDARY BAT BLOCKS
+;-1 ENTRY IS TAKEN AS NON-EXISTANT IN ROUTINES
+
+;BAT1CY - PRIMARY BAT BLOCK CYLINDER
+;BAT1HD - PRIMARY BAT BLOCK HEAD OR LOGICAL SURFACE
+;BAT1SC - PRIMARY BAT BLOCK SECTOR
+;BAT2CY - SECONDARY BAT BLOCK CYLINDER
+;BAT2HD - SECONDARY BAT BLOCK HEAD OR LOGICAL SURFACE
+;BAT2SC - SECONDARY BAT BLOCK SECTOR
+
+DEFINE BATCFG (BAT1C,BAT1H,BAT1S,BAT2C,BAT2H,BAT2S),<
+
+	SETLOC	BAT1CY,BAT1C		;KNOW BAT BLOCKS FOR DRIVE
+	SETLOC	BAT1HD,BAT1H
+	SETLOC	BAT1SC,BAT1S
+	SETLOC	BAT2CY,BAT2C
+	SETLOC	BAT2HD,BAT2H
+	SETLOC	BAT2SC,BAT2S
+	>				;FALL INTO NEXT INSTRUCTION
+
+
+
+;	define configuration for known drives
+
+CDC160:	drvcfg	0,0,0,=822,=9,=7,=820,=822
+	BATCFG	0,0,4,0,1,4
+	JRST DTEXIT
+
+AMPEX8:	drvcfg	0,0,0,=822,=4,=7,=820,=822
+	BATCFG	-1,-1,-1,-1,-1,-1
+	JRST DTEXIT
+
+
+
+WA:	MOVE P,[-10,,PDL-1]
+	MOVE 1,[13400,,FBUF]	;WRITE ALL COMMAND, POINTER TO
+	MOVEI 4,13400	;CMD
+	PUSHJ P,DOOP		;  FORMAT INFO BUFFER.
+WAX:	JRST dtexit
+
+
+REPEAT 0,<
+
+FILLWB:	;LOAD THE WBUF
+	MOVEI 1,777
+	MOVNM 1,WBUF(1)
+	SOJGE 1,.-1
+	JRST dtexit
+
+
+FILLLC:	;SET ALL OF LOWER MEM TO A GOOD CONSTANT.
+	MOVEI 252525
+	MOVE 1,[-<400000-20>,,20]
+	MOVEM (1)
+	AOBJN 1,.-1
+	JRST dtexit
+
+
+CHKRB:	;CHECK THE RBUF
+	MOVEI 1,777
+	MOVN 2,1
+	CAMN 2,RBUF(1)
+	SOJGE 1,.-2
+	JUMPGE 1,dtexit
+CPOPJ:	POPJ P,
+
+CHKLC:	MOVSI 1,-<RBUF-20>	;CHECK LOW MEM FOR 252525, SKIPPING RBUF
+	MOVEI 252525
+	CAME 20(1)
+LCE:	JRST dtexit
+	AOBJN 1,.-2
+	MOVE 1,[-<400000+1000-RBUF>,,RBUF+1000]
+	CAME (1)
+	JRST LCE
+	AOBJN 1,.-2
+	JRST dtexit
+>;END REPEAT 0
+
+WR:	MOVE P,[-10,,PDL-1]
+	MOVE 1,[11000,,WBUF]	;WRITE, WORD MODE.
+	MOVEI 4,11000
+	PUSHJ P,DOOP
+WRX:	JRST dtexit
+
+WRSUB:	;Write subroutine
+	MOVE 1,[11000,,WBUF]	;WRITE, WORD MODE.
+	MOVEI 4,11000
+	PUSHJ P,DOOP
+WRXSUB:	POPJ P,
+
+RD:	MOVE P,[-10,,PDL-1]
+	MOVEI 1,777	;CLEAR RBUF BEFORE READING.
+	SETOM RBUF(1)
+	SOJGE 1,.-1
+	MOVE 1,[00000,,RBUF]
+	MOVEI 4,0
+	PUSHJ P,DOOP
+RDX:	JRST dtexit
+	JRST dtexit
+
+RDSUB:	;Read subroutine
+	MOVEI 1,777	;CLEAR RBUF BEFORE READING.
+	SETOM RBUF(1)
+	SOJGE 1,.-1
+	MOVE 1,[00000,,RBUF]
+	MOVEI 4,0
+	PUSHJ P,DOOP
+RDXSUB:	POPJ P,
+	POPJ P,
+
+RCAL:	LE RST			;RESET CTRLR
+	LC [1404000]		;SEND A RECALIBRATE TO THE DRIVE.
+	PUSHJ P,GO
+	POPJ	P,
+
+
+RECAL:	MOVE	P,[-10,,PDL-1]	;CALL RCAL FROM DDT LEVEL
+	PUSHJ	P,RCAL
+	JRST	dtexit
+
+RCX:	JRST dtexit
+
+
+SK:	MOVE 1,[5000,,0]
+	MOVEI 4,5000
+	PUSHJ P,DOOP
+SKX:	JRST dtexit
+
+SKSUB:	MOVE 1,[5000,,0]	;Seek subroutine
+	MOVEI 4,5000
+	PUSHJ P,DOOP
+SKXSUB:	POPJ P,
+
+DOOP:	MOVEM 1,MA		;RECORD THE DATA ADDRESS.
+	MOVEM 4,CMD		;ALSO THE COMMAND.
+	LE [RST: 2]		;RESET CTRL
+	PUSHJ P,SETDA
+	LA 1			;DESELECT OLD DRIVE AND LOAD NEW DSK ADDR.
+	TLO 1,2000		;OR IN THE SELECT ENABLE BIT.
+	LA 1			;SELECT DRIVE 
+	RC 0			;READ STATUS BITS.
+	TLNE (S.SERR)		;SELECT ERROR ?
+B.SERR:	JSP R,B.ERR
+	LC [RCMD: 404000]	;FAULT CLEAR
+	PUSHJ P,GO
+	LC CMD			;LOAD CMD REGISTER.
+	LM MA			;LOAD DISK MA REG.
+	RC 0
+	TRNE S.ANY
+B.ANY:	JSP R,B.ERR
+	PUSHJ P,GO
+DOOPX:	POPJ P,
+	
+SETDA:	MOVE 1,UNIT
+	DPB 1,[POINT 3,DA,6]
+	MOVE 1,CYL
+	DPB 1,[POINT 12,DA,19]
+	MOVE 1,HEAD
+	DPB 1,[POINT 8,DA,27]
+	MOVE 1,SECTOR
+	DPB 1,[POINT 8,DA,35]
+	MOVE 1,DA
+	POPJ P,
+
+
+
+INTROU:;			;INTERRUPT ROUTINE
+	0			;FOR RETURN ADDR
+	AOS	INTCNT#		;KEEP COUNT OF ACTUAL INTERRUPTS
+	DCONSO	10		;MAKE SURE DSK INT REQ BIT IS ON
+B.INTR:	JSP	R,B.ERR		;NO, THIS AINT RIGHT
+	
+	DCONO	0		;TAKE DSK OFF INT CHN
+	JRST	12,@INTROU	;RETURN FROM INTERRUPT
+	
+USEINT:	0			;0 MEANS DON'T USE INTERRUPT MODE
+USEMEM:	0			;0 MEANS DON'T USE MEMORY WHILE DISK IS
+				;TRANSFERRING; NONZERO MEANS USE IT.
+
+Juke:	0			; 0 means don't move heads away and back
+				;   when in DWRCOM
+writok:	0			; write lock
+
+BLTAC:	RBUF+1000,,RBUF+1000	; BLT PTRS FOR GO LOOP MEM USE
+BLTEND:	RBUF+2000
+
+TIMOUT:	60000			;TIMOUT COUNTER FOR GO LOOP
+
+GOHOOK:	MOVEI	2,[ASCIZ /
+DISK TESTER:
+
+This program contains functions which may destroy the contents of the
+disk being tested.  Make sure you know what you are doing before proceeding.
+
+Type HELP$G for help
+
+/ ]
+	PUSHJ P,STROUT
+	MOVE	1,[JFCL]
+	MOVEM	1,GO		; CLOBBER THE STARTUP DIALOGUE
+	JRST dtexit
+
+
+
+GO:	JRST	GOHOOK		; MAKE SURE USER UNDERSTANDS WORLD FIRST
+
+	CONO	PI,10400	;CLEAR PI SYSTEM AND TURN IT OFF.
+	SKIPN	USEINT		;CHECK FOR INTERRUPT MODE
+	JRST	GO1		;NOT USING INT MODE
+.WCTAB "\",<.RCTAB =22>
+	CONO	PI,<2200+<200\-INTCHN>>		;ENABLE INTERRUPTS
+						;ON DISK'S CHANNEL
+
+
+GO1:	LE [1]			;STARTS THE DISK OPERATION
+	DCONO	INTCHN		;PUT DISK ON RELEVANT CHANNEL
+	MOVE	1,TIMOUT	;GET TIMOUT COUNTER
+	SKIPE	COROUT		; IF any coroutine to perform while waiting
+	 PUSHJ	17,@COROUT	;  THEN go perform it
+	JFCL			; allow possible skip return from coroutine
+GOL:
+	CONI	TTY,4		; get console status
+	TRNE	4,40		; IF console wants service
+	 PUSHJ	17,SCANNR	;  THEN go treat input
+	SKIPE	USEMEM
+	 JRST	[MOVE	4,BLTAC
+		BLT 4,@BLTEND
+		JRST GOL1 ]
+	IMULI 4,1	;STOP USING MEMORY FOR A WHILE.
+GOL1:	RC 0		;READ COMMAND & STATUS BITS INTO AC 0
+	TLNN (S.NBSY)	;CHECK FOR NOT BUSY.
+	SOJG 1,GOL
+	JUMPG 1,.+2	;CHECK FOR TIMED OUT...
+B.TIMO:	JSP R,B.ERR
+	TRNN 6000	;SKIP IF NON-MEM OR WHOLE TRACK OPERATION.
+	 JRST GO3	;NOT A READ OR WRITE OPERATION
+	RM 1		;GET ENDING MA
+	TLZ 1,777776
+	SUB 1,MA
+GO3:	TRNE S.ANY	;CHECK ERROR SUMMARY BIT
+B.GANY:	JSP R,B.ERR
+	POPJ P,
+
+B.ERR:
+	SKIPN	NOOPER
+ERROR:	 JRST	(R)
+	PUSHJ	P,EREPOR
+	MOVE	1,DA		; get current disk address
+	PUSHJ	P,ERECRD	; record the erroneous address
+	POPJ	P,
+
+CLRFB:	MOVEI 1,<=20160/4>	;2060 BYTES ON A TRACK
+	SETZM FBUF(1)
+	SOJGE 1,.-1
+	POPJ P,
+
+
+;	format of a disk sector as created by the formatting routines
+
+;	  Region Mnemonic	# Bytes		Description
+;	+----------------+
+;	!     Gap 1      !	  48.
+;	!----------------!
+;	!     Sync       !	   1.
+;	!----------------!
+;	!  Disk Address  !	   4.
+;	!----------------!
+;	!     ECC 1      !	   4.
+;	!----------------!
+;	!     Splice     !	   1.
+;	!----------------!
+;	!     Gap 2      !	  16.
+;	!----------------!
+;	!     Sync       !         1.
+;	!----------------!
+;	!                !
+;	/     Data       /
+;	/   512 36-bit   /	2304.
+;	/     words      /
+;	!                !
+;	!----------------!
+;	!     ECC 2      !	   4.
+;	!----------------!
+;	!     Splice     !	   1.
+;	!----------------!
+;	!     Gap 3      !	 136.
+;	+----------------+
+
+
+COMFMT:	PUSHJ P,CLRFB
+COMFMB:	MOVE 10,[POINT 8,FBUF]
+	SETZM SECTOR
+	MOVEI 11,0
+COMFL1:	MOVEI 1,=48
+	IDPB 11,10	;GAP1
+	SOJG 1,.-1
+	MOVEI 12,1
+	IDPB 12,10	;SYNC
+	PUSHJ P,SETDA
+	MOVE 3,DA
+	LSH 3,4
+	TLZ 3,740000	;CLEAR HIGH ORDER 4 CYL BITS.
+	MOVEM 3,FDA#
+	PUSHJ P,[CML5:	MOVEI 1,4
+		 CML6:	LSHC 2,10
+			IDPB 2,10
+			SOJG 1,CML6
+			POPJ P,]
+	MOVE 4,FDA	;GET ADDRESS AGAIN.
+	MOVEI 1,40	;GENERATE 32 BITS OF ECC
+	MOVEI 3,0
+	LSHC 3,4
+COMFL2:	TLNE 3,400000
+	XORI 3,10
+	LSHC 3,1
+	TRNE 3,20
+	XOR 3,[1B8!1B10!1B20!1B29]
+	SOJG 1,COMFL2
+	PUSHJ P,CML5	;OUTPUT THE ECC BYTES.
+	MOVEI 1,=17
+	IDPB 11,10	;1 SPLICE, 16 GAP2
+	SOJG 1,.-1
+	MOVEI 1,1	;SYNC BYTE
+	IDPB 1,10
+;;	MOVEI 1,=2304+4+1+=136	;512 WORDS OF DATA, 4 ECC BYTES,
+;;	IDPB 11,10	; 1 SPLICE, 136 GAP3 (ALL ZEROES).
+;;	SOJG 1,.-1
+	ADDI 10,=611	;SKIP OVER DATA, ECC, SPLICE, AND GAP3,
+	IBP 10		; ALL OF WHICH ARE ZEROES.
+	AOS 4,SECTOR
+	CAIGE 4,10
+	JRST COMFL1	;GO DO ANOTHER SECTOR'S WORTH.
+	SETZM	SECTOR
+	POPJ P,
+
+FMT:	SETZM	HEAD
+	SETZM	CYL
+	PUSHJ P,CLRFB
+	PUSHJ P,RCAL	;RECALIBRATE THE DRIVE
+FMT1:	PUSHJ	P,COMFMB
+	MOVE	1,[13400,,FBUF]
+	MOVEI 4,13400
+	PUSHJ	P,DOOP
+
+	MOVE	1,[00000,,RBUF]
+	MOVEI 4,0
+	PUSHJ	P,DOOP
+	PUSHJ	P,INCDAX	;INCDAX INCREMENTS HEAD,CYL
+	 JRST	FMT1
+	JRST	dtexit	;INCDAX SKIPS WHEN DA INCR'D TO 0
+
+RDALL:	PUSHJ	P,INITDA
+RDALL1:	MOVE	1,[00000,,RBUF]
+	MOVEI 4,0
+	PUSHJ	P,DOOP
+	PUSHJ	P,INCDA		;INCR. DISK ADDR PARAMS
+	 JRST	RDALL1
+	JRST	dtexit
+
+MASK:	BLOCK 30	;FOR DATA TO BE WRITTEN TO DISK
+MSIZE:	1		;# OF VALID WORDS IN MASK ARRAY
+
+
+BFILLX:		; ROUTINE TO FILL WBUF WITH CONTENTS
+		; OF MASK, ROTATED BY ROTA ON EACH NEW WORD
+		; NOTE THE BUFFER IS FILLED IN REVERSE ORDER.
+	PUSH	P,1
+	PUSH	P,2
+	PUSH	P,3
+	SETZB	1,2		;INITIALIZE ADDRESS INDICES
+	HRRZS	ROTA#		;MAKE SURE IND.BIT IS OFF!
+BF1:	MOVE	3,MASK(2)	;GET DATA
+	ROT	3,@ROTA		;ROTATE IT 
+	MOVEM	3,MASK(2)	;REWRITE IT SO IT'LL BE ROTATED NEXT TIME
+	MOVEM	3,WBUF(1)	;STORE IT INTO THE DISK BUFFER
+	AOJ	2,		;INCREMENT MASK INDEX
+	CAML	2,MSIZE		;LESS THAN MASK SIZE?
+	SETZ	2,		;NO...REINITIALIZE
+	AOJ	1,		;INCREMENT BUFFER ADDRESS INDEX
+	CAIGE	1,1000		;FILLED BUFFER YET?
+	JRST	BF1		;NO, LOOP SOME MORE
+	POP	P,3
+	POP	P,2
+	POP	P,1
+	POPJ	P,
+
+
+
+
+CBUF:		; ROUTINE TO COMPARE WBUF TO RBUF
+		; FBUF = RBUF XOR WBUF
+		; COMERR = # BAD WORDS
+		; HALTS IF COMERR /= 0 AFTER CHECKING WHOLE BUFFER
+		; ORERR = OR OF ALL ERROR WORDS
+	PUSH	P,1
+	PUSH	P,2
+	SETZM	COMERR#
+	SETZM	ORERR#
+	MOVEI	1,777		;INDEX TO WBUF, RBUF, & FBUF
+CB1:	MOVE	2,WBUF(1)
+	XOR	2,RBUF(1)
+	MOVEM	2,FBUF(1)	;STORE THE XOR INTO FBUF
+	ORM	2,ORERR		;OR THE BAD BITS INTO A SPECIAL WORD
+	SKIPE	2
+	AOS	COMERR	;INCREMENT ERROR COUNT IF XOR NOT ZERO
+	SOJGE	1,CB1
+
+	MOVE	1,COMERR
+	ADDM	1,TOTERR#
+	POP	P,2
+	POP	P,1
+	SKIPE	COMERR
+B.CBUF:	JSP	R,B.ERR		;ERRORS,  SO STOP
+	POPJ	P,
+
+DWRCOM:		; WRITE ONE SECTOR, THEN READ IT,
+		; THEN COMPARE WBUF TO RBUF
+	PUSH	P,1
+	PUSHJ	P,BFILLX	; FILL WBUF
+	MOVE	1,[11000,,WBUF]
+	MOVEI 4,11000
+	PUSHJ	P,DOOP		; WRITE TO THE DISK
+	Skipe	Juke		; Move heads before readback?
+	 PushJ	P,DoJuke
+	MOVEI	1,777
+	SETZM	RBUF(1)
+	SOJGE	1,.-1
+	MOVE	1,[0,,RBUF]
+	MOVEI 4,0
+	PUSHJ	P,DOOP		; READ FROM THE DISK
+	PUSHJ	P,CBUF		; COMPARE BUFFERS
+	POP	P,1
+	POPJ	P,
+
+
+DoJuke:
+	Aos	Cyl		; skip to next cylinder
+	MOVE	1,[0,,RBUF]
+	MOVEI	4,0
+	PUSHJ	P,DOOP		; READ FROM THE DISK
+	Sos	Cyl		; return to where we were
+	PopJ	P,
+
+
+
+;; AND NOW...A FEW ELEMENTARY TAPE OPERATIONS TO BE CALLED WITH $G FROM DDT 
+
+REW:	TOP	0;		; REWIND TAPE
+	JRST	DDT
+
+BSR:	TOP	6;		; BACKSPACE RECORD
+	JRST	DDT
+
+SKR:	TOP	5;		; SKIP FORWARD ONE RECORD
+	JRST	DDT
+
+TWR:	MOVEI	WBUF		; WRITE ONE TAPE RECORD		
+	WTR	1000
+	JRST	DDT
+
+TRD:	MOVEI	1000		; READ ONE TAPE RECORD
+	RTR	RBUF
+	JRST	DDT
+
+
+TSTAT:	; TAPE STATUS ROUTINE.  GOES TO B.ERR IF THERE IS AN
+	; ERROR CONDITION.  SKIP RETURNS ONLY WHEN TAPE IS READY
+	; (NOTE...IF TAPE IS BUSY REWINDING, WON'T SKIP, BUT WON'T
+	; TAKE ERROR EXIT).
+
+	PUSH	P,1
+	RTS	1
+	TRNE 	1,1B30
+	JRST	.+3
+T.OFFL:	JSP	R,B.ERR		;TAPE OFF LINE
+	JRST	DDT
+	TRNN	1,1B32
+	JRST	.+3
+T.WPRO:	JSP	R,B.ERR		;TAPE WRITE PROTECTED
+	JRST	DDT
+	TRNN	1,1B35
+	JRST	.+3
+T.EOT:	JSP	R,B.ERR		;AT END OF TAPE
+	JRST	DDT
+	TRNE	1,1B31
+	JRST	TEX		;REWINDING...JUST EXIT
+	TRNE	1,1B34
+	AOS	-1(P)		;SKIP RETN IF TAPE READY
+TEX:	POP	P,1
+	POPJ	P,
+
+TWRCOM:		; WRITE ONE RECORD TO TAPE, THEN TRY TO READ IT BACK
+		; AND COMPARE WITH WRITE BUFFER.
+
+	PUSH	P,1
+	SKIPA
+T.REW:	 JSP	R,B.ERR		;REWINDING...LET USER CONTINUE WHEN READY
+	PUSHJ	P,TSTAT
+	JRST	.-2
+
+	PUSHJ	P,BFILLX	;FILL WBUF WITH DESIRED DATA
+	MOVEI	1,WBUF
+	WTR	1,1000		;WRITE WBUF TO TAPE
+	SKIPE	1
+T.WEOT:	JSP	R,B.ERR		;TRIED TO WRITE PAST EOT
+	PUSHJ	P,TSTAT
+	 JFCL
+	TOP	6		;SKIP BACK ONE RECORD
+	PUSHJ	P,TSTAT
+	 JRST	.-1		;WAIT UNTIL REWINDING IS DONE
+	MOVEI	1,777
+	SETZM	RBUF(1)
+	SOJGE	1,.-1		;CLEAR RBUF BEFORE READING
+	MOVEI	1,1000
+	RTR	1,RBUF		;READ THE TAPE RECORD
+	SKIPGE	1
+T.RERR:	 JSP	R,B.ERR		;GOOFUP IF AC LESS THAN 0
+	PUSHJ	P,CBUF		;NOW...COMPARE THE BUFFERS
+
+TWRCX:	POP	P,1
+	POPJ	P,
+
+WRCOM:				;CALL ROUTINE TO WRITE, READ, & COMPARE
+	SKIPE	USETAPE#	;BUFFER TO DISK OR TAPE
+	JRST	WRCTAP
+	PUSHJ	P,DWRCOM	;CALL DISK ROUTINE
+	POPJ	P,
+WRCTAP:	PUSHJ	P,TWRCOM	;CALL TAPE ROUTINE
+	POPJ	P,
+
+
+TEST4:		; CALL WRCOM INDEFINITELY.
+		; MANUALLY SET DA PARAMS AND MASK,ROTA
+	MOVE	P,[-20,,PDL-1]
+	PUSHJ	P,WRCOM
+	JRST	.-1
+
+TEST5:		; CALL WRCOM ONCE, WITH WHATEVER THE CURRENT
+		; DATA PATTERNS ARE, AT THE CURRENT ADDRESS
+	MOVE	P,[-20,,PDL-1]
+	PUSHJ	P,WRCOM
+	JRST	dtexit
+
+
+TEST6:		;DOES RANDOM SEEKS INDEFINTELY
+	MOVE	P,[-20,,PDL-1]
+TEST6L:	MOVE	1,MAXCYL
+	ADDI	1,1
+	MOVEM	1,RNDLIM
+	PUSHJ	P,RNDGEN		;Get random cylinder
+	MOVE	1,RANDOM
+	MOVEM	1,CYL
+	PUSHJ	P,RDSUB			;Call read routine
+	JRST	TEST6L			;loop forever...
+
+
+TCAD:		; THOROUGH DATA TEST AT CURRENT ADDRESS.
+	PUSH	P,1
+	PUSH	P,2
+
+	SETZM	MASK
+	SETZM	ROTA
+	MOVEI	1,1
+	MOVEM	1,MSIZE
+
+TZERO:	PUSHJ	P,WRCOM		;TEST WITH ALL ZEROS
+
+	SETOM	MASK
+TONES:	PUSHJ	P,WRCOM		;TEST WITH ALL ONES
+
+	MOVEI	2,1		;LONELY BIT TEST
+TC1:	MOVEM	2,MASK		;SAME POSITION IN EACH WORD.
+TLBIT:	PUSHJ	P,WRCOM
+	LSH	2,1		;TRY A NEW POSITION.
+	JUMPN	2,TC1
+
+	HRLOI	2,377777	;LONELY HOLE TEST.
+TC2:	MOVEM	2,MASK		;SAME POS. IN EACH WORD
+TLHOLE:	PUSHJ	P,WRCOM
+	ROT	2,1		;NEW POSITION
+	JUMPL	2,TC2
+
+	MOVEI	2,1
+	MOVEM	2,MASK
+	MOVEM	2,ROTA		;SET ROTATION COUNT TO 1
+TRBIT:	PUSHJ	P,WRCOM		;TEST ROTATING LONELY BIT
+
+	MOVNI	2,2
+	MOVEM	2,MASK
+TRHOLE:	PUSHJ	P,WRCOM		;TEST ROTATING LONELY HOLE
+
+	SETOM	MASK
+	SETZM	MASK+1
+	MOVEI	2,2
+	MOVEM	2,MSIZE
+	SETZM	ROTA
+TALT01:	PUSHJ	P,WRCOM		;TEST ALTERNATING -1,0
+
+	MOVE	2,[.BYTES,,MASK]
+	BLT	2,MASK+=15
+	MOVEI	2,=16
+	MOVEM	2,MSIZE
+TBYTES:	PUSHJ	P,WRCOM		;TEST 4 BIT BYTES
+
+	MOVEI	1,1
+	MOVEM	1,MSIZE		;RESTORE MSIZE, SINCE I'LL FORGET LATER!
+	JRST	POP21J
+
+; THE FOLLOWING KLUDGEY MACROS ARE FOR GENERATING MASK DATA FOR TCAD
+
+DEFINE FF
+<0,1,2,3,4,5,6,7,10,11,12,13,14,15,16,17>
+
+DEFINE FROB
+<FF,FF,FF,FF,FF,FF,FF,FF,FF
+>
+
+DEFINE FROTZ
+<BYTE (4) FROB
+>
+
+.BYTES:	FROTZ	; ASSEMBLE A STRING OF 4-BIT BYTES
+
+
+
+;	TEST 7  --  write data defined by current MASK and ROTA onto world
+
+TEST7:
+	move	p,[iowd 40,pdl]
+	pushj	p,initda	; initialize disk address
+	setzm	toterr		; initialize error count
+	pushj	p,bfillx	; fill write buffer according to MASK, ROTA
+	movei	1,incda		; INCDA will increment the disk address
+	movem	1,Corout	; set INCDA as the coroutine for GO loop
+
+tst7.1:				; DO
+	move	1,[11000,,wbuf]
+	movei	4,11000
+	pushj	p,doop		;  start the write operation
+	move	1,cyl
+	camg	1,maxcyl
+	 jrst	tst7.1		;  WHILE current cyl .le. maxcyl
+	jrst	dtexit
+
+;	TEST 10  --  read and check data defined by MASK and ROTA from world
+
+TEST10:
+	move	p,[iowd 40,pdl]
+	pushj	p,initda	; initialize disk address
+	setzm	toterr		; initialize error count
+	pushj	p,bfillx	; fill write buffer according to MASK, ROTA
+	movei	1,incda		; INCDA will increment the disk address
+	movem	1,Corout	; set INCDA as the coroutine for GO loop
+
+ts10.1:				; DO
+	movei	1,777
+	setzm	rbuf(1)
+	sojge	1,.-1		;  zero out the read buffer
+	move	1,[0,,rbuf]
+	movei	4,0
+	pushj	p,doop		;  start the read operation
+	pushj	p,cbuf		;  compare WBUF to RBUF reporting errors
+	move	1,cyl
+	camg	1,maxcyl
+	 jrst	ts10.1		;  WHILE current cyl .le. maxcyl
+	jrst	dtexit
+
+
+PAKCPY:
+	MOVE	P,[IOWD PDLSIZ,PDL]
+	PUSHJ	P,INITDA
+PAKLOP:
+	MOVE	1,FROM
+	MOVEM	1,UNIT
+	SETZM	COROUT
+	PUSHJ	P,RDSUB
+	MOVE	1,TO
+	MOVEM	1,UNIT
+	MOVEI	1,INCDAR
+	MOVEM	1,COROUT
+	PUSHJ	P,WRRBUF	; WRITE OUT "READ BUFFER"
+	MOVE	1,CYL
+	CAML	1,MAXCYL
+	 JRST	dtexit
+	JRST	PAKLOP
+
+WRRBUF:
+	PUSHJ	P,SETDA
+	MOVE	1,[11000,,RBUF]
+	MOVEI	4,11000
+	PUSHJ	P,DOOP
+	POPJ	P,
+
+;	routines for playing with Tenex Home and Bat blocks
+
+getbat:				; read in BAT blocks
+	jrst	dtexit
+
+putbat:				; write out the current image of BAT blocks
+	jrst	dtexit
+
+addbat:				; add entries in BADADR table to BAT blocks
+	jrst	dtexit
+
+gethom:				; read in home blocks
+	jrst	dtexit
+
+puthom:				; write out home blocks
+	jrst	dtexit
+
+
+;SKIPS IF CYL,HEAD,SECTOR POINT AT BAT BLOCK
+
+SKPBAT:	MOVE 1,BAT1CY
+	CAMN 1,[-1]		;-1 IS DOES NOT EXIST
+	 JRST SKPBA1
+	CAME 1,CYL		;RIGHT CYL?
+	 JRST SKPBA1		;NO
+	MOVE 1,BAT1HD
+	CAME 1,HEAD		;RIGHT HEAD?
+	 JRST SKPBA1		;NO
+	MOVE 1,BAT1SC
+	CAME 1,SECTOR		;RIGHT SECTOR?
+	 JRST SKPBA1
+	AOS (P)
+	RET			;POINTING AT PRIMARY BAT BLOCK
+
+SKPBA1:	MOVE 1,BAT2CY
+	CAMN 1,[-1]		;-1 IS DOES NOT EXIST
+	 RET
+	CAME 1,CYL		;RIGHT CYL?
+	 RET			;NO
+	MOVE 1,BAT2HD
+	CAME 1,HEAD		;RIGHT HEAD?
+	 RET			;NO
+	MOVE 1,BAT2SC
+	CAME 1,SECTOR		;RIGHT SECTOR?
+	 RET			;NO
+	AOS (P)
+	RET			;POINTING AT SECONDARY BAT BLOCK 
+
+
+;	routines to increment disk address
+
+
+INCDAR:				; INTENDED TO BE CALLED AS COROUTINE
+	PUSHJ	P,INCDA		; INCREMENT DISK ADDRESS
+	SETZM	COROUT		; MAKE SURE NOT AGAIN UNTIL RESET
+	POPJ	P,
+
+
+INCDAX:		; ALTERNATE ENTRY TO INCDA
+		; INCREMENTS ONLY HEAD & CYL (NOT SECTOR)
+	PUSH	P,1
+	JRST	INCDA1
+
+
+INCDA:		; INCREMENT DISK ADDRESS PARAMETERS
+		; SKIP RETURNS WHEN THEY OVERFLOW
+	PUSH	P,1
+	AOS	1,SECTOR
+	CAMG	1,MAXSEC
+	JRST	INCX
+	MOVE	1,MINSEC
+	MOVEM	1,SECTOR
+INCDA1:	AOS	1,HEAD
+	CAMG	1,MAXHED
+	JRST	INCX
+	MOVE	1,MINHED
+	MOVEM	1,HEAD
+	AOS	1,CYL
+	CAMG	1,MAXCYL
+	JRST	INCX
+	MOVE	1,MINCYL
+	MOVEM	1,CYL
+	AOS	-1(P)	;SKIP RETURN
+INCX:	POP	P,1
+	POPJ	P,
+
+INITDA:
+	PUSH	P,1
+	MOVE	1,MINSEC
+	MOVEM	1,SECTOR
+	MOVE	1,MINHED
+	MOVEM	1,HEAD
+	MOVE	1,MINCYL
+	MOVEM	1,CYL
+	POP	P,1
+	POPJ	P,
+
+TEST1:		; GO THROUGH WHOLE DISK AND DATA TEST EACH
+		; SECTOR
+		;DOES NOT CLOBBER BAT BLOCKS FOR PACK
+	MOVE	P,[-20,,PDL-1]
+	PUSHJ	P,INITDA
+	SETZM	TOTERR		;ZERO ERROR COUNT
+TS1:	PUSHJ	P,SKPBAT	;SKIP IF ITS A BAT BLOCK
+	 PUSHJ	P,TCAD		;TEST AT CURRENT ADDRESS
+	PUSHJ	P,INCDA		;INCREMENT DISK ADDRESS
+	JRST	TS1
+	JRST	dtexit		;INCDA SKIPS, WE'RE DONE.
+
+TEST2:		; DATA TEST OF CURRENT ADDRESS ONLY
+		; MANUALLY SET DISK ADDRESS PARAMETERS.
+	MOVE	P,[-20,,PDL-1]
+	PUSHJ	P,TCAD
+	JRST	dtexit
+
+TEST3:		; THIS TEST WRITES THE (ENCODED FORM OF)
+		; DISK ADDRESS INTO THE FIRST WORD OF EACH
+		; SECTOR, SEQUENTIALLY, AND THEN TRIES TO READ
+		; THEM BACK IN A SCREWY ORDER.
+		; DOES NOT CLOBBER BAT BLOCKS FOR PACK
+	MOVE	P,[-20,,PDL-1]
+	PUSH	P,1
+	PUSH	P,2
+	PUSHJ	P,INITDA
+	SETZM	LOSS#		; # TIMES COMPARISON FAILS
+	SETZM	WIN#		; # TIMES WE WIN SINCE LAST LOSS
+	SETZM	TOTWIN#		; TOTAL # TIMES WE WIN
+	MOVEI	1,777
+	SETZM	WBUF(1)		; CLEAR WBUF
+	SOJGE	1,.-1
+	
+T2A:	PUSHJ	P,SETDA		; ENCODE DA
+	MOVE	1,DA
+	MOVEM	1,WBUF
+	MOVE	1,[11000,,WBUF]
+	MOVEI 4,11000
+	PUSHJ	P,SKPBAT	; SKIP IF ITS A BAT BLOCK
+	 PUSHJ	P,DOOP		; WRITE OUT THE SECTOR
+	PUSHJ	P,INCDA		; INCR. DA.  INCDA SKIPS ON OV
+	JRST	T2A
+
+	MOVEI	2,=32640	; # OF SECTORS
+T2B:	MOVE	1,[0,,RBUF]
+	MOVEI 4,0
+	PUSHJ	P,SKPBAT	; SKIP IF ITS A BAT BLOCK
+	 CAIA
+	JRST	T3C		;FAKE WIN FOR BAT BLOCK
+	PUSHJ	P,DOOP		; READ DISK
+	MOVE	1,DA
+	CAMN	1,RBUF		; 1ST WORD OF RBUF SHOULD HAVE DA
+	JRST	T3C
+	AOS	LOSS
+B.T3:	JSP	R,B.ERR		; NOPE!
+	MOVE	1,WIN
+	ADDM	1,TOTWIN
+	SETOM	WIN
+T3C:	AOS	WIN
+	MOVE	1,HEAD
+	ADDI	1,3
+	CAIL	1,5
+	SUBI	1,5
+	MOVEM	1,HEAD
+	MOVE	1,CYL
+	ADDI	1,=409
+	CAIL	1,=816
+	SUBI	1,=816
+	MOVEM	1,CYL
+	SKIPN	1
+	AOSA	1,SECTOR	;SINCE #SECTORS DIVIDES #CYLINDERS
+			;MUST MANUALLY KNOCK SECTOR OUT OF PHASE.
+	MOVE	1,SECTOR
+	ADDI	1,3
+	ANDI	1,7
+	MOVEM	1,SECTOR
+	SOJG	2,T2B
+	POP	P,2
+	POP	P,1
+	JRST	dtexit
+
+
+CADINC:		; INCREMENTS ADDRESS IN AC 1, MAKING SURE
+		; TO SKIP OVER DATA BUFFERS AND PROGRAM
+		; NORMALLY SKIPS ON RETURN; DOESN'T SKIP
+		; WHEN ADDRESS INCREMENTED TO 1,,0
+	AOS	1
+CA1:	CAIE	1,32	; DDT USES THIS LOCATION
+	CAIN	1,36	; SKIP OVER SYMBOL TABLE POINTER
+	AOS	1
+	HRRZ	2,36	; GET PTR TO START OF SYMBOL TABLE
+	CAMN	1,2
+	 JRST	[HLRE	1,36	;GET -LENGTH OF SYMBOL TABLE
+		SUBM	2,1	;PTR TO 1ST LOC AFTER TABLE
+		JRST	CA1 ]
+	CAIN	1,WBUF
+	JRST	CA2
+	CAIE	1,FBUF
+	CAIN	1,RBUF
+	JRST	[CA2:	ADDI	1,1000
+			JRST	CA1]
+	CAIN	1,BEGPRG
+	JRST	[MOVEI	1,ENDPRG
+		JRST	CA1]
+	CAIN	1,DDT
+	JRST	[MOVEI	1,DDTEND+100	;ADD 100 FOR PATCH SPACE
+		JRST	CA1]
+	TLNN	1,-1
+	AOS	(P)
+	POPJ	P,
+
+MCONST:	777,,525252		; A NICE CONSTANT 
+
+WCONST:			; WRITE A CONSTANT (MCONST) EVERYWHERE
+			; IN MEMORY (EXCEPT DATA & CODE SPACE)
+	PUSH	P,1
+	PUSH	P,2
+	MOVEI	1,17	;INITIALIZE TO 1ST MEM LOC - 1
+WC1:	PUSHJ	P,CADINC
+	 JRST	POP21J
+	MOVE	2,MCONST	;GET THE CONSTANT
+	MOVEM	2,(1)
+	JRST	WC1
+
+POP21J:	POP	P,2
+	POP	P,1
+	Popj	P,
+
+CCONST:		;CHECK MEMORY AFTER WCONST
+	PUSH	P,1
+	PUSH	P,2
+	SETZM	LOSS	; KEEP TRACK OF # BAD WORDS
+	MOVEI	1,17
+CC1:	PUSHJ	P,CADINC
+	 JRST	POP21J
+	MOVE	2,(1)
+	CAMN	2,MCONST
+	JRST	CC1
+	AOS	LOSS
+B.CCON:	JSP	R,B.ERR
+	JRST	CC1
+
+WCON:		;CALL WCONST, FROM DDT LEVEL
+	MOVE	P,[-10,,PDL-1]
+	PUSHJ	P,WCONST
+	JRST	dtexit
+
+CCON:		;CALL CCONST, FROM DDT LEVEL
+	MOVE	P,[-10,,PDL-1]
+	PUSHJ	P,CCONST
+	JRST	dtexit
+
+; **** CONSOLE OUTPUT ROUTINES ****
+
+
+T.IBSY__1B29
+T.IDON__1B30
+T.OBSY__1B31
+T.ODON__1B32
+
+CHROUT:		; OUTPUT ONE CHARACTER
+		; CALL WITH:	MOVEI	1,"CHR"
+		;		PUSHJ	P,CHROUT
+
+	CONSZ	TTY,T.OBSY
+	JRST	.-1
+	DATAO	TTY,1
+	POPJ	P,
+
+STROUT:		; OUTPUT ASCIZ STRING
+		; CALL WITH:	MOVEI	2,[ASCIZ /FOO/]
+		;		PUSHJ	P,STROUT
+
+	PUSH	P,1
+	PUSH	P,3
+	MOVE	3,[POINT 7,0(2)]	;LOAD FRESH BYTE POINTER
+STR1:	ILDB	1,3
+	JUMPE	1,STRX
+	PUSHJ	P,CHROUT
+	JRST	STR1
+
+STRX:	POP	P,3
+	POP	P,1
+	POPJ	P,
+
+;	octal output routine
+
+;	2/ value to print
+;	pushj	p,octout
+
+octout:
+	push	p,1
+	push	p,2
+	push	p,3
+	pushj	p,oct
+	pop	p,3
+	pop	p,2
+	pop	p,1
+	popj	p,
+
+
+oct:
+	setz	3,
+	lshc	2,-3
+	rot	3,3
+	push	p,3
+	skipe	2
+	pushj	p,oct
+	pop	p,1
+	addi	1,60
+	pushj	p,chrout
+	popj	p,
+
+;	halfword print routine
+
+hlfprt:
+	push	p,1
+	push	p,2
+	hlrz	2,(p)
+	jumpe	2,noleft
+	move	1,2
+	pushj	p,octout
+	movei	2,[asciz/,,/]
+	skipe	1
+	pushj	p,strout
+noleft:
+	hrrz	2,(p)
+	pushj	p,octout
+	pop	p,2
+	pop	p,1
+	popj	p,
+
+strcpy:
+	hll	2,[point 7,0]
+strlop:
+	ildb	1,2
+	skipn	1
+	 popj	p,
+	idpb	1,3
+	jrst	strlop
+
+;	global storage declarations
+
+MA:	0
+CMD:	0
+DA:	0
+
+
+UNIT:	-1			; give impossible initial values for safety
+CYL:	-1
+HEAD:	-1
+S:
+SECTOR:	-1
+
+MINCYL:	0
+MINHED:	0
+MINSEC:	0
+
+MAXCYL:	0
+MAXHED:	0
+MAXSEC:	0
+
+MINSAF:	0
+MAXSAF:	0
+
+BAT1CY:	0
+BAT1HD:	0
+BAT1SC:	0
+BAT2CY:	0
+BAT2HD:	0
+BAT2SC:	0
+
+TO:	0
+FROM:	0
+
+COROUT:	0			; address of coroutine to be performed while
+				; in GO loop, if any is desired
+LDIGIT:	0			; format flag for OCTOUT
+HIT:	0
+NOOPER:	0			; NON-ZERO FOR UNATTENDED OPERATION
+
+
+	outsiz__30
+outbuf:	block	outsiz
+
+badcnt:	0			; count of bad spots marked in bdadr table
+badadr:	block	2000		; should be enough space for bad spots
+
+;	SCANNR  --  treat terminal input while any test is running
+
+scannr:
+	push	17,1		; be nice, now
+	datai	tty,1		; get character pending from the console
+	cain	1,3		; IF ^C
+	 jrst	tsexit		;  THEN abort the test
+	cain	1,24		; IF ^T
+	 jrst	tstrpt		;  THEN report progress of the test
+	movei	1,7
+	datao	tty,1		; IF not recognized, then complain
+	pop	p,1
+	popj	p,
+
+tsexit:				; abort the current test, return to ddt
+	push	p,2
+	movei	2,[asciz/
+? Aborted
+/]
+	pushj	p,strout	; give abortion message
+	pop	p,2
+	pop	p,1
+	jrst	dtexit		; get back to known state
+
+tstrpt:				; report progress of test
+	push	p,2
+	pushj	p,darpt		; print da and activity
+	pop	p,2
+	pop	p,1
+	popj	p,
+
+;	DTEXIT  --  all $G routines come here to exit and clean up
+
+dtexit:
+	setzm	writok		; writing is not ok
+	setzm	corout		; no coroutine is active
+done:
+	jrst	ddt		; back into ddt
+
+;******	Random Gubbish -- 13 NOV 79 -- MLB
+
+;This code uses two Fibbonacci generators: one picks an address in the =64 word
+;table at RNDBUF and adds to the value there the output of the other generator.
+;The two 18 bit halves of the 36 bit result are added together and the sum is
+;masked to 18 bits.  This quantity is then multiplied by the value in RNDLIM
+;(which is assumed to fit in 18 bits).  The left half of the product is then
+;returned in RANDOM, so that 0 <= RANDOM < RNDLIM.  (Cf Knuth Chap 3 Alg M)
+
+RNDGEN:			;Quasi-random generator, steps value in RANDOM
+	PUSH	P,1		;Save some ACs on stack
+	PUSH	P,2
+	MOVE	1,[RHYMEN: <BEGPRG+PDLSIZ>,,RNDBUF]	;Init buffer with prog
+	JUMPE	1,.+2		;Skip buffer init if not virgin
+	BLT	1,RNDBUF+77	;Init buffer
+	SETZM	RHYMEN		;Clear buffer init flag
+	MOVE	1,FIBBA1	;Step the "address" generator
+	EXCH	1,FIBBA0
+	ADD	1,FIBBA1
+	JUMPN	1,.+3		;Unhang if in 0,0 loop (once every 2^36 !!)
+	SKIPN	FIBBA0
+	MOVE	1,[SIXBIT/FOONLY/]
+	MOVEM	1,FIBBA1	;Address generator is stepped, in AC 1 too
+				;Now fold up AC 1 into six bits by adding bytes
+	HLR	2,1		;Add left and right halves
+	ADD	1,2
+	MOVE	2,1		;Add in each sixth
+	LSH	2,-6
+	ADD	1,2
+	MOVE	2,1
+	LSH	2,-6
+	ADD	1,2
+	ANDI	1,77 		;Mask off the resulting mess
+	MOVE	2,FIBBS1	;Step the "source" generator
+	EXCH	2,FIBBS0
+	ADD	2,FIBBS1
+	JUMPN	2,.+3		;Unhang if in 0,0 loop (once every 2^36 !!)
+	SKIPN	FIBBS0
+	MOVE	2,[SIXBIT/FOONLY/]
+	MOVEM	2,FIBBS1	;Source generator now stepped, in AC 2 too
+	XOR	2,[SIXBIT/FOONLY/]	;Just for randomness
+	ADDM	2,RNDBUF(1)	;Alter value in table
+	HLRZ	2,RNDBUF(1)	;Add left and right halves
+	ADD	2,RNDBUF(1)
+	HRRZ	2,2		;Mask to get low half	
+	HRRZ	1,RNDLIM	;Get (masked) limit
+	IMUL	1,2		;Multiply
+	HLRZM	1,RANDOM	;Save scaled random value
+	POP	P,2		;Restore and exit
+	POP	P,1
+	POPJ	P,
+
+RANDOM:	0		;Random output
+RNDLIM:	0		;Upper limit: 0 <= RANDOM < RNDLIM (must fit in RH)
+FIBBA0:	SIXBIT/YOWIAM/	;Fibbonacci address generator
+FIBBA1: SIXBIT/HAVING/
+FIBBS0:	SIXBIT/FUN!!!/	;Fibbonacci source generator
+FIBBS1:	SIXBIT/-ZIPPY/
+RNDBUF:	BLOCK =64	;Buffer for random gubbish
+
+
+;	Error reporting routine
+
+Erepor:
+	pushj	p,darpt
+	pushj	p,statro
+	popj	p,
+
+darpt:				; print disk address and command
+	push	p,2
+	movei	2,[asciz/
+Unit = /]
+	pushj	p,strout
+	ldb	2,[point 3,da,6]
+	pushj	p,octout	; report unit number
+	movei	2,[asciz/, Cyl = /]
+	pushj	p,strout
+	ldb	2,[point 12,da,19]
+	pushj	p,octout	; report cylinder number
+	movei	2,[asciz/, Head = /]
+	pushj	p,strout
+	ldb	2,[point 8,da,27]
+	pushj	p,octout	; report head number
+	movei	2,[asciz/, Sector = /]
+	pushj	p,strout
+	ldb	2,[point 8,da,35]
+	pushj	p,octout
+	movei	2,[asciz/, Command = /]
+	pushj	p,strout
+	move	2,cmd
+	pushj	p,hlfprt
+	movei	2,[asciz/
+/]
+	pushj	p,strout
+	pop	p,2
+	popj	p,
+
+;	Error recording routine
+
+erecrd:
+	push	p,2
+	setz	2,
+ereclp:				; FOR every entry in table
+	caml	2,badcnt	;   IF end of table
+	 jrst	badadd		;     THEN entry is new, go add it
+	camn	1,badadr(2)	;   IF disk address already in table
+	 jrst	badfnd		;     THEN ignore it
+	aoja	2,ereclp	; END FOR
+
+badadd:
+	movem	1,badadr(2)
+	aos	badcnt
+	movei	2,[asciz/Bad spot marked in BADADR table
+/]
+	skipa
+badfnd:
+	movei	2,[asciz/Bad spot already existed in BADADR table
+/]
+	pushj	p,strout
+	pop	p,2
+	popj	p,
+
+;	the STATUS feature
+
+;	this routine prints all the bits in 0 as text according to stbtbl
+
+status:
+	move	p,[iowd pdlsiz,pdl]
+	pushj	p,statro
+	jrst	dtexit
+
+statro:
+	movei	2,[asciz/
+Controller Status = /]
+	pushj	p,strout
+	move	2,0
+	pushj	p,hlfprt
+	movei	2,[asciz/
+/]
+	pushj	p,strout
+	pushj	p,exprou
+	movei	2,[asciz/
+/]
+	pushj	p,strout
+	popj	p,
+
+exprou:
+	movei	3,stbtab
+explin:
+	movni	4,10
+explop:
+	tdnn	0,(3)
+	 jrst	expnop
+	movei	2,[asciz/, /]
+	skipe	hit
+	 pushj	p,strout
+	setom	hit
+	aojle	4,expprt
+	movni	4,10
+	movei	2,[asciz/
+/]
+	pushj	p,strout
+expprt:
+	move	2,1(3)
+	pushj	p,strout
+expnop:
+	addi	3,2
+	skipe	(3)
+	 jrst	explop
+	setzm	hit
+	movei	2,[asciz/
+
+/]
+	pushj	p,strout
+	popj	p,
+
+
+;	help feature
+
+;	the MKHELP macro is used to define a heirarchy of help text nodes
+;	MKHELP takes:
+;
+;	name	--	the name of the node.  this is declared as a symbol
+;			is this assembly, so they must be unique herein
+;
+;	descrp	--	a description of the help node, printed when visiting
+;			the 'up' 
+;
+;	text	--	the text of the node
+;
+;	nxtlev	--	the name of the table containing the 'subs' of this
+;			node, if any.  when visiting name, the names and
+;			descrps of the subs are printed...
+
+
+define	mkhelp(name,descrp,nxtlev,text),<
+name:	jsp	4,dohelp
+	[asciz	/name/]
+	[asciz	/descrp/]
+	[asciz	/text/]
+	nxtlev>
+
+;	you must declare the beginning and end of a level of help (a plex
+;	of help nodes with the BEGHLP and ENDHLP macros...
+
+define	beghlp,<0>
+
+define	endhlp,<0>
+
+;	start of help structure...
+
+	beghlp			; start of the top level
+
+	mkhelp	Help,<Getting help while in the Disk Tester>,hlp1,<
+
+You are at the top node of the disk tester help system.  Below you are
+a number of nodes which contain information on how to use the diagnostic,
+how to run various tests, how to interpret their results, and so forth.
+
+When you "visit" a node of the help system, you will see the name of the
+node, a brief description, and the main text of the node.  You will also
+get to see a list of the nodes which offer more information about the
+current subject.
+
+You "visit" a node by typing NAME$G where NAME is the name of the node
+as described above.  No doubt you will begin to remember the names of
+some of the nodes you find especially useful in your work.
+
+Now to begin, type LIST$G to see a list of commands>
+
+
+	endhlp			; end of the top level
+
+
+	beghlp
+
+hlp1:
+	mkhelp	LIST,<List of diagnostic functions available>,llist,<
+
+Here is a list of the available diagnostic function of this tester.
+
+To run one of these tests, type TEST$G where TEST is the name of the
+test given in the description below.
+
+For an explanation of the test, type NAME$G where NAME is the node name
+given as the first item in the list below...
+
+>
+	mkhelp	VARS,<Important variables you can set>,hvars,<
+
+While using the disk tester, there are a number of features, modes,
+and so forth available to you.  You control these by setting certain
+memory locations with DDT.  
+
+Here is a list of the useful mode control variables...
+>
+	mkhelp	INTRPT,<Interrupting the program>,0,<
+
+Typing a control-C while a test is running returns you to EDDT.
+
+Typing a control-T while a test is running tells you the current disk address
+>
+	mkhelp	CONFIG,<Choosing the initial drive configuration>,H14,<
+
+Before you can run any of the tests, you must "configure" the disk drive.
+This means that you must execute a routine which will set up the initial
+values for the configuration of the disk drive.  These configuration values
+are used to control which areas of the drive are used for maintenance
+testing and the number of cylinders, heads, and sectors.
+
+You may also set the configuration parameters manually in DDT to create
+custom tests or restrict tests to desired ranges of cylinders, heads,
+sectors, or combinations of these.
+>
+	endhlp
+
+	beghlp
+llist:
+	mkhelp	HTEST1,<Data test whole disk>,0,<
+
+Not complete
+>
+	mkhelp	HTEST2,<Data test current address>,0,<
+
+Not complete
+>
+	mkhelp	HTEST3,<Write and read disk addresses>,0,<
+
+Not complete
+>
+	mkhelp	HTEST4,<Continous test at current disk address>,0,<
+
+Not complete
+>
+	mkhelp	HTEST5,<Single test at current address>,0,<
+
+Not complete
+>
+	mkhelp	HTEST6,<Random seeks>,0,<
+
+Not complete
+>
+	endhlp
+
+	beghlp
+hvars:
+	mkhelp	HUSETAP,<testing the tape drive instead of disk>,0,<
+
+Not complete
+>
+	mkhelp	HCONFG,<Configuring the disk before testing>,0,<
+
+Not complete
+>
+	mkhelp	HUSEMEM,<Memory usage during testing>,0,<
+
+Not complete
+>
+	endhlp
+
+	beghlp
+
+h14:				; CONFIG subs
+	mkhelp	CFGLST,<List of standard configurations available>,h141,<
+Initial values for the disk parameters are set by running one of the standard
+configuration routines.
+
+Below is a list of the standard disk drive configurations known to DSKTST.
+>
+	mkhelp	MANCFG,<Manually configuring drive parameters>,0,<
+You may change the standard configuration parameters manually.  This enables
+you to design special tests on the fly.  For example:
+
+    Setting MINHED=MAXHED=0 would cause TEST1 to data test only the sectors
+    under head 0 in all the enabled cylinders.
+
+    Setting MINSEC=MAXSEC=0 would cause TEST1 to data test only sector 0
+    of all heads in the enabled cylinders.
+
+    Setting MINSEC=MAXSEC=MINHED=MAXHED=0 would test only sector 0, head 0
+    of all the enabled cylinders.
+
+    Setting MINSEC=4, MAXSEC=5, MINHED=2, MAXHED=2, MINCYL=800., MAXCYL=822.
+    would cause TEST1 to data test only sectors 4 and 5 of head 2 in cylinders
+    800. through 822.
+>
+	mkhelp	DPARAM,<Description of disk configuration parameters>,0,<
+
+    MINCYL  --  Minimum cylinder to use
+    MINHED  --  Minimum head to use
+    MINSEC  --  Minimum sector to use
+
+    MAXCYL  --  Maximum cylinder to use
+    MAXHED  --  Maximum head to use
+    MAXSEC  --  Maximum sector to use
+
+    MINSAF  --  Lowest cylinder to write on without complaint
+    MAXSAF  --  Highest cylinder to write on without complaint
+
+    BAT1CY  --  PRIMARY BAT BLOCK CYLINDER
+    BAT1HD  --  PRIMARY BAT BLOCK HEAD OR LOGICAL SURFACE
+    BAT1SC  --  PRIMARY BAT BLOCK SECTOR
+    BAT2CY  --  SECONDARY BAT BLOCK CYLINDER
+    BAT2HD  --  SECONDARY BAT BLOCK HEAD OR LOGICAL SURFACE
+    BAT2SC  --  SECONDARY BAT BLOCK SECTOR
+
+If, at the start of any test which performs a disk write, MINCYL is less than
+MINSAF, then DSKTST will ask you to confirm the write operation.
+>
+	endhlp
+
+	beghlp
+h141:
+	mkhelp	HCDC160,<CDC 160Mb MiniModule Drive>,0,<
+To configure this type of drive, type CDC160$G
+
+The parameters are:
+
+    MINSEC    0          MAXSEC    8.		BAT1CY	0	BAT2CY	0
+    MINHED    0          MAXHED   10.		BAT1HD	0	BAT2HD	1
+    MINCYL    0          MAXCYL  822.		BAT1SC	4	BAT2SC	4
+
+    MINSAF  820.         MAXSAF  822.
+>
+	endhlp
+
+;	code for the help system
+
+dohelp:
+	move	p,[iowd pdlsiz,pdl]
+	movei	2,[asciz/
+/]
+	pushj	p,strout
+	move	2,(4)		; get name pointer
+	pushj	p,strout
+	movei	2,[asciz/  --  /]
+	pushj	p,strout
+	move	2,1(4)		; get description pointer
+	pushj	p,strout
+	move	2,2(4)		; get text pointer
+	pushj	p,strout
+	skipn	4,3(4)		; get pointer to next level of help
+	 jrst	nosubs		;   none, no subs of this node
+	movei	2,[asciz/
+
+Name      Description of Subtopic
+------    -----------------------
+/]
+	pushj	p,strout
+toplop:
+	move	1,[asciz/     /]
+	movem	1,outbuf
+	hrli	1,outbuf
+	hrri	1,outbuf+1
+	blt	1,outbuf+outsiz-1
+	move	3,[point 7,outbuf]
+	move	2,1(4)		; get name pointer
+	pushj	p,strcpy
+	move	3,[point 7,outbuf+2]
+	move	2,2(4)		; get description pointer
+	pushj	p,strcpy
+	movei	2,[asciz/
+/]
+	pushj	p,strcpy
+	setz	1,
+	idpb	1,3
+	movei	2,outbuf
+	pushj	p,strout
+	skipn	5(4)
+	 jrst	subend
+	movei	4,5(4)
+	jrst	toplop
+
+subend:
+	movei	2,[asciz/
+
+/]
+	pushj	p,strout
+	jrst	dtexit
+
+
+nosubs:
+	movei	2,[asciz/
+There are no subtopics available from here
+
+/]
+	pushj	p,strout
+	jrst	dtexit
+
+	LIT
+	VAR
+ENDPRG=.	; LEAVE THIS POINTING TO 1ST LOC AFTER PROGRAM
+PATCH:
+
+
+
+
+	END
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
