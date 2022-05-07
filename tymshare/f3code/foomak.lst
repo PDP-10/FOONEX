@@ -1,0 +1,315 @@
+01 0001  	;microcrox for TYMSHARE system
+01 0002  	
+01 0003  	;Initialize switch settings
+01 0004  	.INSERT SWINIT.SLO
+
+SLOE   Jan ***, 1859 00:00:03  file DSK:SWINIT.SLO[3,222635]  --  of -- FOOMAK
+
+01 0001  	;INIT ALL SWITCHES FOR CF TO 0.
+01 0002  	
+01 0003  	.DEFINE FOOLIST[] [ XLIST ]
+01 0004  	
+01 0005  0 	!-.INSERT-'SWINIT.SLO'-! = 0  ;ERROR MESSAGE FOR LOSERS
+01 0006  	
+01 0007  1 	F2SW = 1        ; SET F2SW = 1 FOR F2,  F2SW = 0 FOR F3
+01 0008  	
+01 0009  1 	FAST = 1        ;IF 0, ALL CYCLES ARE 500NS OR MORE.
+01 0010  	
+01 0011  1 	SLOW1 = 1       ;MAKES 350NS CYCLES LONGER BY 50*SLOW1 NS. DWP 2/10
+01 0012  	
+01 0013  0 	SLOW2 = 0       ;MAKES 400NS CYCLES LONGER BY 50*SLOW2 NS.
+01 0014  	
+01 0015  0 	TYMNET = 0
+01 0016  	
+01 0017  0 	TLXTAPE = 0
+01 0018  	
+01 0019  0 	125TAPE = 0
+01 0020  	
+01 0021  0 	SLOWTAPE = 0
+01 0022  	
+01 0023  0 	KNYTAPE = 0
+01 0024  	
+01 0025  0 	NTP = 0         ;NEW TAPE CTRL (DMA TYPE)
+01 0026  	
+01 0027  0 	TAPE = 0        ;New tape ctrl with long records.
+01 0028  	
+01 0029  0 	75IPS = 0       ;Not 75IPS drive -- implies 125IPS
+01 0030  	
+01 0031  0 	DLS = 0
+01 0032  	
+01 0033  0 	IMP = 0
+01 0034  	
+01 0035  0 	VID = 0         ;FooVision
+01 0036  0 	VIC2 = 0        ;Smart video controler (with sysnthsis)
+01 0037  	
+01 0038  0 	LPT = 0         ;Lineprinter (Printronix, etc.)
+01 0039  	
+01 0040  0 	VC = 0          ;Versatec/Varian plotter interface.
+01 0041  	
+01 0042  1 	NEWMAP = 1      ;SET FOR MACHINES F3-3 AND LATER.
+01 0043  	
+01 0044  1 	CROCK = 1       ;set to 1 to get some old crockish code back
+01 0045  	
+01 0046  0 	DEBUGSW = 0     ;Set to 1 to get some debugging crocks
+01 0047  	
+01 0048  0 	TIMER = 0       ;INTERVAL TIMER
+01 0049  	
+01 0050  0 	STANSW = 0      ;Special Stanford I/O devices
+01 0051  	
+01 0052  0 	WAITS = 0       ;BBN Pager was modified for WAITS
+01 0053  	
+01 0054  0 	KL = 0          ;KL PAGER
+01 0055  	
+01 0056  0 	XUCODE = 0      ;Set to 1 (exactly !) if 8k u-memory present.
+
+SLOE   Jan ***, 1859 00:00:03  file DSK:FOOMAK.SLO[3,222635]  --  of -- FOOMAK
+
+01 0004  	
+01 0005  	; F2 VERSION OF MICROCODE
+01 0006  	
+01 0007  	; SET F2SW = 1 FOR F2,  F2SW = 0 FOR F3
+01 0008  	
+01 0009  1 	F2SW = 1
+01 0010  	
+01 0011  	XLIST
+01m0014                               	LIST
+01m0014                               	
+01m0014       1	KL = 1
+01m0014                               	
+01m0014       1	NEWMAP = 1
+01m0014                               	
+01m0014       0	TIMER = 0
+01m0014                               	
+01m0014       1	NTP = 1
+01m0014       1	TYMNET = 1
+01m0014                               	
+01m0014                               	
+01m0014       1	CROCK = 1               ;for now!!
+01m0014                               	
+01m0014                               	.INSERT FOO
+
+SLOE   Jan ***, 1859 00:00:03  file DSK:FOO.SLO[3,222635]  --  of -- FOOMAK
+
+01m0001                               	.REPEAT KL [
+01m0001                               	        .OPCODE[114]    ;DADD
+01m0001                               	
+01m0001                               	DADD:   FIXM1 $         ;FINISH FETCH OF HI ORDER WORD
+01m0001                               	        D[MEM] DEST[AR] JUMP[DADD1] NORM $
+01m0001                               	                ;SAVE IT FOR LATER.
+01m0001                               	DSUB:   FIXM1 $
+01m0001                               	        D[MEM] DEST[AR] JUMP[DSUB1] NORM $
+01m0001                               	];[
+01m0001                               	        .OPCODE[114]     [XLIST 
+?ERROR - set lecation with : must be followed by a valid expression 
+?ERROR - garbage token" 114 "ignored
+?ERROR - garbage token" * "ignored
+?ERROR - garbage token" 2 "ignored
+?ERROR - garbage token" + "ignored
+01m0001                               	 LIST            ];DADD
+01m0001                               	
+01m0001                               	DADD:   FIXM1 $         ;FINISH FETCH OF HI ORDER WORD
+?ERROR - FIXM1   is unrecognized junk 
+01m0001 00000 640150004571000440000000	        D[MEM] DEST[AR] JUMP[DADD1] NORM $
+01m0001                               	                ;SAVE IT FOR LATER.
+01m0001                               	DSUB:   FIXM1 $
+?ERROR - FIXM1   is unrecognized junk 
+01m0001 00001 640150004571000440000000	        D[MEM] DEST[AR] JUMP[DSUB1] NORM $
+01m0001                               	].REPEAT KL
+01m0001                               	
+SLOE   Jan ***, 1859 00:00:03  file DSK:FOO.SLO[3,222635]  --  of -- FOOMAK
+
+02m0001                               	.REPEAT KL [
+02m0001                               	.DEFINE DARITH [OP]
+02m0001                               	
+02m0001                               	[       D[MA] ALU[D+1] DEST[MA] NORM $
+02m0001                               	                ;START FETCH OF LO ORDER WORD
+02m0001                               	        FIXM1 $
+02m0001                               	                ;WAIT FOR IT
+02m0001                               	        D[CONST 1] ROT[35. - 0] ACSEL[AC+1] ALU[-D&AC] DEST[AC] NORM $
+02m0001                               	                ;CLEAR SIGN BIT IN LO ORDER AC
+02m0001                               	        D[MEM] MASK[35.] ACSEL[AC+1] ALU[ OP ] DEST[AC]
+02m0001                               	           COND[-OBUS<0] C550 JUMP[. + 2] $
+02m0001                               	                ;ADD OR SUBTRACT C(E+1) WITHOUT SIGN TO C(AC+1), RESULT IN AC.
+02m0001                               	                ; JUMP IF NO OVERFLOW INTO HI ORDER WORD.
+02m0001                               	        D[AR] ALU[D+1] DEST[AR] SPEC[CRYOV] NORM $
+02m0001                               	                ;HI ORDER WORD INCREMENTED BY ONE TO ACCOUNT FOR CARRY.
+02m0001                               	        D[AR] ACSEL[AC] ALU[ OP ] DEST[AC] SPEC[CRYOV]
+02m0001                               	           COND[OBUS<0] C550 JUMP[. + 2] $
+02m0001                               	                ;ADD HI ORDER WORDS AND JUMP IF SIGN IS NEGATIVE
+02m0001                               	        D[CONST 1] ROT[35. - 0] ACSEL[AC+1] ALU[-D&AC] DEST[AC MA] SPEC[MA_PC]
+02m0001                               	           JUMP[MAIN1] NORM $
+02m0001                               	                ;RESULT IS + SO CLEAR SIGN BIT IN LO ORDER WORD
+02m0001                               	        D[CONST 1] ROT[35. - 0] ACSEL[AC+1] ALU[DORAC] DEST[AC MA] SPEC[MA_PC]
+02m0001                               	           JUMP[MAIN1] NORM $
+02m0001                               	];.DEFINE DARITH
+02m0001                               	
+02m0001                               	        .USE[AREA350]
+02m0001                               	DADD1:  DARITH[AC+D]
+02m0001                               	        .USE[NORMAL]
+02m0001                               	DSUB1:  DARITH[AC-D]
+02m0001                               	];[
+02m0001                               	.DEFINE DARITH [OP]
+02m0001                               	
+02m0001                               	[       D[MA] ALU[D+1] DEST[MA] NORM $
+02m0001                               	                ;START FETCH OF LO ORDER WORD
+02m0001                               	        FIXM1 $
+02m0001                               	                ;WAIT FOR IT
+02m0001                               	        D[CONST 1] ROT[35. - 0] ACSEL[AC+1] ALU[-D&AC] DEST[AC] NORM $
+02m0001                               	                ;CLEAR SIGN BIT IN LO ORDER AC
+02m0001                               	        D[MEM] MASK[35.] ACSEL[AC+1] ALU[ OP ] DEST[AC]
+02m0001                               	           COND[-OBUS<0] C550 JUMP[. + 2] $
+02m0001                               	                ;ADD OR SUBTRACT C(E+1) WITHOUT SIGN TO C(AC+1), RESULT IN AC.
+02m0001                               	                ; JUMP IF NO OVERFLOW INTO HI ORDER WORD.
+02m0001                               	        D[AR] ALU[D+1] DEST[AR] SPEC[CRYOV] NORM $
+02m0001                               	                ;HI ORDER WORD INCREMENTED BY ONE TO ACCOUNT FOR CARRY.
+02m0001                               	        D[AR] ACSEL[AC] ALU[ OP ] DEST[AC] SPEC[CRYOV]
+02m0001                               	           COND[OBUS<0] C550 JUMP[. + 2] $
+02m0001                               	                ;ADD HI ORDER WORDS AND JUMP IF SIGN IS NEGATIVE
+02m0001                               	        D[CONST 1] ROT[35. - 0] ACSEL[AC+1] ALU[-D&AC] DEST[AC MA] SPEC[MA_PC]
+02m0001                               	           JUMP[MAIN1] NORM $
+02m0001                               	                ;RESULT IS + SO CLEAR SIGN BIT IN LO ORDER WORD
+02m0001                               	        D[CONST 1] ROT[35. - 0] ACSEL[AC+1] ALU[DORAC] DEST[AC MA] SPEC[MA_PC]
+02m0001                               	           JUMP[MAIN1] NORM $
+02m0001                               	];.DEFINE DARITH
+02m0001                               	
+02m0001                               	        .USE[AREA350]
+02m0001                               	 [ XLIST
+?ERROR - set lecation with : must be followed by a valid expression 
+SLOE   Jan ***, 1859 00:00:03  STRING:  --  of -- FOOMAK
+
+02m0002                               	 LIST ]DADD1:   DARITH[AC+D]
+02m0002                               	
+02m0002                               	
+02m0002 00002 640720024433000440000000	[       D[MA] ALU[D+1] DEST[MA] NORM $
+02m0002                               	                ;START FETCH OF LO ORDER WORD
+02m0002                               	        FIXM1 $
+?ERROR - FIXM1   is unrecognized junk 
+02m0002                               	                ;WAIT FOR IT
+02m0002 00003 640700015661506010000000	        D[CONST 1] ROT[35. - 0] ACSEL[AC+1] ALU[-D&AC] DEST[AC] NORM $
+02m0002                               	                ;CLEAR SIGN BIT IN LO ORDER AC
+02m0002                               	        D[MEM] MASK[35.] ACSEL[AC+1] ALU[ AC+D ] DEST[AC]
+02m0002 00004 531140005421400430000006	           COND[-OBUS<0] C550 JUMP[. + 2] $
+02m0002                               	                ;ADD OR SUBTRACT C(E+1) WITHOUT SIGN TO C(AC+1), RESULT IN AC.
+02m0002                               	                ; JUMP IF NO OVERFLOW INTO HI ORDER WORD.
+02m0002 00005 640710000433000441200000	        D[AR] ALU[D+1] DEST[AR] SPEC[CRYOV] NORM $
+02m0002                               	                ;HI ORDER WORD INCREMENTED BY ONE TO ACCOUNT FOR CARRY.
+02m0002                               	        D[AR] ACSEL[AC] ALU[ AC+D ] DEST[AC] SPEC[CRYOV]
+02m0002 00006 511140001421000441200010	           COND[OBUS<0] C550 JUMP[. + 2] $
+02m0002                               	                ;ADD HI ORDER WORDS AND JUMP IF SIGN IS NEGATIVE
+02m0002                               	        D[CONST 1] ROT[35. - 0] ACSEL[AC+1] ALU[-D&AC] DEST[AC MA] SPEC[MA_PC]
+02m0002 00007 640160015661506010600000	           JUMP[MAIN1] NORM $
+02m0002                               	                ;RESULT IS + SO CLEAR SIGN BIT IN LO ORDER WORD
+02m0002                               	        D[CONST 1] ROT[35. - 0] ACSEL[AC+1] ALU[DORAC] DEST[AC MA] SPEC[MA_PC]
+02m0002 00010 640160015561506010600000	           JUMP[MAIN1] NORM $
+02m0003                               	]       .USE[NORMAL]
+02m0003                               	 [ XLIST
+?ERROR - set lecation with : must be followed by a valid expression 
+02m0004                               	 LIST ]DSUB1:   DARITH[AC-D]
+02m0004                               	
+02m0004                               	
+02m0004 00011 640720024433000440000000	[       D[MA] ALU[D+1] DEST[MA] NORM $
+02m0004                               	                ;START FETCH OF LO ORDER WORD
+02m0004                               	        FIXM1 $
+?ERROR - FIXM1   is unrecognized junk 
+02m0004                               	                ;WAIT FOR IT
+02m0004 00012 640700015661506010000000	        D[CONST 1] ROT[35. - 0] ACSEL[AC+1] ALU[-D&AC] DEST[AC] NORM $
+02m0004                               	                ;CLEAR SIGN BIT IN LO ORDER AC
+02m0004                               	        D[MEM] MASK[35.] ACSEL[AC+1] ALU[ AC-D ] DEST[AC]
+02m0004 00013 531140005463400430000015	           COND[-OBUS<0] C550 JUMP[. + 2] $
+02m0004                               	                ;ADD OR SUBTRACT C(E+1) WITHOUT SIGN TO C(AC+1), RESULT IN AC.
+02m0004                               	                ; JUMP IF NO OVERFLOW INTO HI ORDER WORD.
+02m0004 00014 640710000433000441200000	        D[AR] ALU[D+1] DEST[AR] SPEC[CRYOV] NORM $
+02m0004                               	                ;HI ORDER WORD INCREMENTED BY ONE TO ACCOUNT FOR CARRY.
+02m0004                               	        D[AR] ACSEL[AC] ALU[ AC-D ] DEST[AC] SPEC[CRYOV]
+02m0004 00015 511140001463000441200017	           COND[OBUS<0] C550 JUMP[. + 2] $
+02m0004                               	                ;ADD HI ORDER WORDS AND JUMP IF SIGN IS NEGATIVE
+02m0004                               	        D[CONST 1] ROT[35. - 0] ACSEL[AC+1] ALU[-D&AC] DEST[AC MA] SPEC[MA_PC]
+02m0004 00016 640160015661506010600000	           JUMP[MAIN1] NORM $
+02m0004                               	                ;RESULT IS + SO CLEAR SIGN BIT IN LO ORDER WORD
+02m0004                               	        D[CONST 1] ROT[35. - 0] ACSEL[AC+1] ALU[DORAC] DEST[AC MA] SPEC[MA_PC]
+02m0004 00017 640160015561506010600000	           JUMP[MAIN1] NORM $
+02m0001                               	]].REPEAT KL
+
+SLOE   Jan ***, 1859 00:00:03  file DSK:FOOMAK.SLO[3,222635]  --  of -- FOOMAK
+
+01m0014                               	
+01m0014                               	LIST-LABELS
+
+labels
+  0   38     0 .                1    1     0 DADD             2    2     2 DADD1
+  1    1     1 DSUB             2    4     9 DSUB1            2    2     0*MAIN1            0   38     0*NAF
+  2    2     0*no-@           
+01m0013                               	LIST-CORMAP
+
+
+			Storage map
+
+
+     0	XXXXXXXXXXXXXXXX................................................
+   100	................................................................
+   200	................................................................
+   300	................................................................
+   400	................................................................
+   500	................................................................
+   600	................................................................
+   700	................................................................
+  1000	................................................................
+  1100	................................................................
+  1200	................................................................
+  1300	................................................................
+  1400	................................................................
+  1500	................................................................
+  1600	................................................................
+  1700	................................................................
+  2000	................................................................
+  2100	................................................................
+  2200	................................................................
+  2300	................................................................
+  2400	................................................................
+  2500	................................................................
+  2600	................................................................
+  2700	................................................................
+  3000	................................................................
+  3100	................................................................
+  3200	................................................................
+  3300	................................................................
+  3400	................................................................
+  3500	................................................................
+  3600	................................................................
+  3700	................................................................
+  4000	................................................................
+  4100	................................................................
+  4200	................................................................
+  4300	................................................................
+  4400	................................................................
+  4500	................................................................
+  4600	................................................................
+  4700	................................................................
+  5000	................................................................
+  5100	................................................................
+  5200	................................................................
+  5300	................................................................
+  5400	................................................................
+  5500	................................................................
+  5600	................................................................
+  5700	................................................................
+  6000	................................................................
+  6100	................................................................
+  6200	................................................................
+  6300	................................................................
+  6400	................................................................
+  6500	................................................................
+  6600	................................................................
+  6700	................................................................
+  7000	................................................................
+  7100	................................................................
+  7200	................................................................
+  7300	................................................................
+  7400	................................................................
+  7500	................................................................
+  7600	................................................................
+  7700	................................................................
+    16 locations used,  highest used = 17
+%Warn    MAIN1  is an undefined label 
+%Warn    no-@  is an undefined label 
+    ZV{S

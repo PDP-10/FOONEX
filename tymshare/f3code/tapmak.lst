@@ -1,0 +1,1038 @@
+01 0001                          	;microcrox for TYMSHARE system
+01 0002                          	
+01 0003                          	;Initialize switch settings
+01 0004                          	.INSERT SWINIT.SLO
+
+SLOE   Jan ***, 1859 00:00:03  file DSK:SWINIT.SLO[3,222635]  --  of -- TAPMAK
+
+01 0001                          	;INIT ALL SWITCHES FOR CF TO 0.
+01 0002                          	
+01 0003                          	.DEFINE FOOLIST[] [ XLIST ]
+01 0004                          	
+01 0005  0	!-.INSERT-'SWINIT.SLO'-! = 0  ;ERROR MESSAGE FOR LOSERS
+01 0006                          	
+01 0007  1	F2SW = 1        ; SET F2SW = 1 FOR F2,  F2SW = 0 FOR F3
+01 0008                          	
+01 0009  1	FAST = 1        ;IF 0, ALL CYCLES ARE 500NS OR MORE.
+01 0010                          	
+01 0011  1	SLOW1 = 1       ;MAKES 350NS CYCLES LONGER BY 50*SLOW1 NS. DWP 2/10
+01 0012                          	
+01 0013  0	SLOW2 = 0       ;MAKES 400NS CYCLES LONGER BY 50*SLOW2 NS.
+01 0014                          	
+01 0015  0	TYMNET = 0
+01 0016                          	
+01 0017  0	TLXTAPE = 0
+01 0018                          	
+01 0019  0	125TAPE = 0
+01 0020                          	
+01 0021  0	SLOWTAPE = 0
+01 0022                          	
+01 0023  0	KNYTAPE = 0
+01 0024                          	
+01 0025  0	NTP = 0         ;NEW TAPE CTRL (DMA TYPE)
+01 0026                          	
+01 0027  0	TAPE = 0        ;New tape ctrl with long records.
+01 0028                          	
+01 0029  0	75IPS = 0       ;Not 75IPS drive -- implies 125IPS
+01 0030                          	
+01 0031  0	DLS = 0
+01 0032                          	
+01 0033  0	IMP = 0
+01 0034                          	
+01 0035  0	VID = 0         ;FooVision
+01 0036  0	VIC2 = 0        ;Smart video controler (with sysnthsis)
+01 0037                          	
+01 0038  0	LPT = 0         ;Lineprinter (Printronix, etc.)
+01 0039                          	
+01 0040  0	VC = 0          ;Versatec/Varian plotter interface.
+01 0041                          	
+01 0042  1	NEWMAP = 1      ;SET FOR MACHINES F3-3 AND LATER.
+01 0043                          	
+01 0044  1	CROCK = 1       ;set to 1 to get some old crockish code back
+01 0045                          	
+01 0046  0	DEBUGSW = 0     ;Set to 1 to get some debugging crocks
+01 0047                          	
+01 0048  0	TIMER = 0       ;INTERVAL TIMER
+01 0049                          	
+01 0050  0	STANSW = 0      ;Special Stanford I/O devices
+01 0051                          	
+01 0052  0	WAITS = 0       ;BBN Pager was modified for WAITS
+01 0053                          	
+01 0054  0	KL = 0          ;KL PAGER
+01 0055                          	
+01 0056  0	XUCODE = 0      ;Set to 1 (exactly !) if 8k u-memory present.
+
+SLOE   Jan ***, 1859 00:00:03  file DSK:TAPMAK.SLO[3,222635]  --  of -- TAPMAK
+
+01 0004                          	
+01 0005                          	; F2 VERSION OF MICROCODE
+01 0006                          	
+01 0007                          	; SET F2SW = 1 FOR F2,  F2SW = 0 FOR F3
+01 0008                          	
+01 0009  1	F2SW = 1
+01 0010                          	
+01 0011                          	XLIST
+01m0014                               	LIST
+01m0014                               	
+01m0014       1	KL = 1
+01m0014                               	
+01m0014       1	NEWMAP = 1
+01m0014                               	
+01m0014       0	TIMER = 0
+01m0014                               	
+01m0014       1	NTP = 1
+01m0014       1	TYMNET = 1
+01m0014                               	
+01m0014                               	
+01m0014       1	CROCK = 1               ;for now!!
+01m0014                               	
+01m0014                               	.INSERT TAPE
+
+SLOE   Jan ***, 1859 00:00:03  file DSK:TAPE.SLO[3,222635]  --  of -- TAPMAK
+
+01m0001                               	;-------------------------------------------------------------------------------
+01m0001                               	;
+01m0001                               	;       Ucode for KENNEDY or PERTEC formatter and DMA tape controller.
+01m0001                               	;
+01m0001                               	;-------------------------------------------------------------------------------
+01m0001                               	.REPEAT XUCODE [
+01m0001                               	        .USE[HIGHMEM]   ;If 8K u-mem present, put tape code there.
+01m0001                               	   ]
+01m0001                               	
+01m0001                               	;TAPE READING AND WRITING CODE
+01m0001                               	; A-MEM USEAGE:
+01m0001                               	;               0       DISPATCH ADDR.
+01m0001       0	TPMODE =        0       ;DATA PACKING MODE 
+01m0001                               	;                        BIT 0: 0=PDP-10 CORE-DUMP, 1=INDUSTRY (32-bit mode)
+01m0001                               	;                        BIT 1: NRZI Kluge Mode (to read old CCRMA & SCI tapes)
+01m0001                               	;               1       Timeout values for NCNTWT and FMNBWT.
+01m0001                               	;               2       Copy of last writ to TP.WC,
+01m0001                               	;                       Status at end of tape operation.
+01m0001                               	;               3       DON'T USE... Storing into it clobbers IR left !
+01m0001                               	;               4       Next mem adr of xfer (STRTDC) -- 0 during non-data ops
+01m0001                               	;               5       Remaining word count in current WCMA (STRTDC)
+01m0001                               	;               6       Not currently used-- will be  Data Channel PC
+01m0001                               	;               7       Interrupt state and transfer flags:
+01m0001                               	;                       1b0 = read, 1b1 = waiting for formatter to become idle
+01m0001                               	;                       1b2 = mtop interrupt (set with read)
+01m0001                               	;                       18-35 CONI bits:
+01m0001                               	;                       7b35 = pi assignment. 10 = interrupt flag.
+01m0001                               	
+01m0001                               	;MAPF values
+01m0001                               	
+01m0001       4	TP.RS = 4       ;read status (from formatter)
+01m0001       2	TP.RC = 2       ;read control (controller status and un-fifo'd read data)
+01m0001                               	
+01m0001       2	TP.WF = 2       ;write formatter (send ctrl bits to formatter)
+01m0001       4	TP.WM = 4       ;write mode control reg.
+01m0001       1	TP.WC = 1       ;write control reg.
+01m0001       5	TP.MR = 5       ;give Master Reset
+01m0001       3	TP.WMA = 3      ;write (load) the CNTMA reg. (count and MA)
+01m0001                               	
+01m0001                               	KNYCLR:  ;RESET the formatter and drive.
+01m0001                               	
+01m0001 00000 000702200615000443600000	KNYRS1: START-OUT ALU[0]  DEST[IOD] $
+01m0001                               	                ;Turn off "FORMATTER ENABLE"
+01m0001 00001 000300000571000440020000	        MAPF[TP.WF] LONG POPJ $
+01m0001                               	
+01m0001                               	   ;725 - OBSOLETE VERSION OF READ
+01m0001                               	
+01m0001                               	  .PAIR
+01m0001                               	 [:. \ 2 + .
+01m0002                               	]  UIOTRP[MUUO] $
+?ERROR - MUUO   is unrecognized junk 
+?ERROR - UIOTRP   is unrecognized junk 
+01m0002                               	
+01m0002 00002 640700074171000410000000	TAPERD: D[17] MASK[33.] DEST[Q] SHORT $
+01m0002                               	                ;CLEAR OUT READ, MTAPE AND INTERRUPT FLAGS.
+01m0002 00003 640701600555000443000000	        ALU[Q] DEST[7] DEST-A-MEM NORM $
+01m0002 00004 640040214571014140000000	        D[CONST 14] ROT[6] DEST[IR-ADR] NORM PUSHJ[KNYRGO] $
+01m0002                               	                ;Fake a word count of 1400
+SLOE   Jan ***, 1859 00:00:03  file DSK:TAPE.SLO[3,222635]  --  of -- TAPMAK
+
+01m0002 00005 640041024571000443000000	        D[MA] DEST[4] DEST-A-MEM NORM PUSHJ[TRP2] $
+01m0002 00006 640140001555000440000000	        ALU[Q] DEST[AC] ACSEL[AC] NORM JUMP[GOMAIN] $
+01m0002                               	                ;Move status into AC.
+01m0002                               	
+01m0002                               	; KNYRGO -- Called to start tape motion on reads.
+01m0002 00007 640040000571000440000000	KNYRGO: NORM PUSHJ[DCINIT] $
+01m0002                               	                ;Init the data channel.
+01m0002 00010 640710040571002010000000	        D[10 + TPMODE]  ROT[1] MASK[1] DEST[AR] NORM $
+01m0002                               	                ;Get the 32-bit mode flag.
+01m0002 00011 640702200571014443600000	        START-OUT D[AR] ROT[35. - 29.] DEST[IOD] NORM $
+01m0002                               	                ;Position it for the hardware.
+01m0002  440140014171000000040000	        MAPF[TP.WM] D[CONST 0] DEST[Q]   C-OUT JUMP[KNYGOA] $
+01m0002                               	                ;Send command to formatter.
+01m0002                               	
+01m0002                               	  ;Send a tape-motion command to the formatter.  Call with command bits
+01m0002                               	  ;  (except for FMTR ENABLE and GO) in Q.  Clobbers Q, HOLD, AR
+01m0002 00013 000040014175022013400000	KNYGOA: START-IN D[CONST 1] ROT[35. - 26.] ALU[DORQ] DEST[Q] PUSHJ[FMNBWT] $
+01m0002                               	          ;Add the FMTR ENBL bit to the command word.
+01m0002                               	          ;Wait for FORMATTER NOT BUSY.
+01m0002 00014 440702214735004013600000	        START-OUT D[CONST 1] ROT[35. - 33.] ALU[D#Q] DEST[IOD] C-OUT $
+01m0002                               	          ;Set the GO bit to fmtr (except: on RWD, CLEAR the bit !)
+01m0002 00015 000702214675004013620000	        MAPF[TP.WF] START-OUT D[CONST 1] ROT[35. - 33.] ALU[-D&Q] DEST[IOD] $
+01m0002                               	          ;Send command word again, without GO bit.
+01m0002 00016 000300000571000440020000	        MAPF[TP.WF] LONG POPJ $
+01m0002                               	
+01m0002                               	
+01m0002                               	FMNBWT:   ;Wait for formatter to be not busy.
+01m0002                               	          ;Return tape status in MEM;  timeout in 164 msec.
+01m0002                               	          ;Duration of loop should be 10 usec. (for TRCHECK).
+01m0002 00017 640710014571034013400000	        START-IN D[CONST 1] ROT[14.] DEST[AR] NORM $
+01m0002 00020 240704430571000440040000	FMNBW1: MAPF[TP.RS] D[IOD] DEST[HOLD] C800 $ ;GET STATUS BITS.
+01m0002 00021 511350000531000440000000	        D[AR] ALU[D-1] DEST[AR] C550 OBUS<0 JPOP[FMTHNG] $
+01m0002 00022 440740014571000160000000	        D[CONST 14.] LLOAD C600 $
+01m0002 00023 540240000571000440000023	        C500 LOOP[.] $
+01m0002                               	          ;We execute this instr. 15. times, for a 7.5 usec delay.
+01m0002 00024 531140004571016443400020	        START-IN D[MEM] ROT[7] C550 -OBUS<0 JUMP[FMNBW1] $
+01m0002                               	          ;check for 'BUSY'
+01m0002 00025 640300200571000443000000	        D[AR] DEST[1] DEST-A-MEM NORM POPJ $
+01m0002                               	          ;Save ending timeout count (for TRCHECK)
+01m0002 00026 640040000571000440000000	FMTHNG: NORM PUSHJ[KNYRS1] $
+01m0002                               	                ;Blast the formatter.
+01m0002 00027 000340015571074420000000	        D[CONST 42] ROT[30.] DEST[AC] JPOP[GOMAIN] $
+01m0002                               	                ;Return error code for 'hung fmtr' and abort.
+01m0002                               	
+01m0002                               	NCNTWT:   ;Wait for TP CNT GO to be off.
+01m0002                               	          ;Return tape status in MEM;  timeout in 164 msec.
+01m0002                               	          ;Duration of loop should be 10 usec. (for TRCHECK).
+01m0002 00030 240704430571000440020000	NCNTW1: MAPF[TP.RC] D[IOD] DEST[HOLD] C800 $ ;GET STATUS BITS.
+01m0002 00031 511310000531000440000000	        D[AR] ALU[D-1] DEST[AR] C550 OBUS<0 POPJ $
+01m0002                               	          ;Exit if we time out-- probably just a short record.
+01m0002 00032 440740014571000160000000	        D[CONST 14.] LLOAD C600 $
+01m0002 00033 540240000571000440000033	        C500 LOOP[.] $
+01m0002                               	          ;We execute this instr. 15. times, for a 7.5 usec delay.
+01m0002 00034 511140004571046443400030	        START-IN D[MEM] ROT[19.] C550 OBUS<0 JUMP[NCNTW1] $
+01m0002                               	          ;check for not TP CNT GO
+01m0002 00035 640300200571000443000000	        D[AR] DEST[1] DEST-A-MEM NORM POPJ $
+01m0002                               	          ;Save ending timeout count (for TRCHECK)
+SLOE   Jan ***, 1859 00:00:03  file DSK:TAPE.SLO[3,222635]  --  of -- TAPMAK
+
+01m0002                               	
+01m0002                               	
+01m0002                               	;INITIALIZE DATA CHANNEL
+01m0002                               	
+01m0002 00036 640740014571000103600000	DCINIT: START-OUT D[CONST 8.] LLOAD NORM $
+01m0002                               	                ;Give TP MR
+01m0002 00037 440702200615000443650000	        MAPF[TP.MR] START-OUT ALU[0] DEST[IOD] C600 $
+01m0002                               	                ;Load 0 into cntma (the COUNT and MA registers)
+01m0002 00040 440702210571054143630000	        MAPF[TP.WMA] START-OUT D[MASK 12.] ROT[35. - 13.] DEST[IOD] C600 $
+01m0002                               	                ;Load cntma again-- since COUNT is currently  0, this will 
+01m0002                               	                ; force BUF CNT to be 0.  But, we put -1 into COUNT this
+01m0002                               	                ; time, which, with BUF CNT = 0, will make BUF CNT load
+01m0002                               	                ; properly when STARTDC loads cntma.
+01m0002 00041 440702214571000023630000	        MAPF[TP.WMA] START-OUT D[CONST 2] DEST[IOD] C600 $
+01m0002                               	                ;Set MBUSY
+01m0002 00042 500240000571000440010042	        MAPF[TP.WC] C550 LOOP[.] $
+01m0002                               	                ;Wait for a few usec.  This clears mem rq.
+01m0002 00043 640702200615000443600000	        START-OUT ALU[0] DEST[IOD] NORM $
+01m0002                               	                ;Clr MBUSY
+01m0002 00044 440300400615000443010000	        MAPF[TP.WC] C600 ALU[0] DEST[2] DEST-A-MEM POPJ $
+01m0002                               	                ;Zero out copy of TP.WC contents.
+01m0002                               	
+01m0002                               	;START DATA CHANNEL to write or read a record. Transfer up to C(IR-ADR) words;
+01m0002                               	;  starting address is in A-MEM[4].
+01m0002                               	;  This routine is for interrupt type transfers - does not wait for
+01m0002                               	;  transfer to complete, but enables for not FMRT BSY and not TP CNT GO.
+01m0002                               	
+01m0002                               	INT-STARTDC:
+01m0002 00045 640041234571000223000000	        D[IR] MASK[18.] NORM DEST[5] DEST-A-MEM PUSHJ[DCGO] $
+01m0002                               	          ;Set word count. (Better not be zero.)
+01m0002 00046 640700014171030120000000	        MAPF[0] D[CONST 12] ROT[12.] DEST[Q] NORM $
+01m0002                               	          ;MAPF[0] FOR DCGO. SETUP BITS FOR -FMTR BSY AND -TP CNT GO.
+01m0002 00047 440142250575000443600000	        START-OUT D[12] ALU[DORQ] DEST[IOD] C600 JUMP[WCPOPJ] $
+01m0002                               	          ;Enable for -FMTR BSY and -TP CNT GO.
+01m0002                               	
+01m0002                               	
+01m0002                               	
+01m0002                               	;START DATA CHANNEL to write or read a record.  Transfer up to C(IR-ADR) words;
+01m0002                               	;  starting address is in A-MEM[4].
+01m0002                               	;  This is used for non-interrupt transfers. Waits for transfer completion.
+01m0002                               	
+01m0002 00050 640701234571000223000000	STRTDC: D[IR] MASK[18.] NORM DEST[5] DEST-A-MEM $
+01m0002                               	                ;Initialize word count
+01m0002 00051 640700214571034013000000	        D[CONST 1] ROT[14.] DEST[1] DEST-A-MEM NORM $
+01m0002                               	                ;Initialize timeout count (for NCNTWT and FMNBWT)
+01m0002 00052 440040000571000440000000	STDC1:  MAPF[0] C600 PUSHJ[DCGO] $
+01m0002                               	          ;start xfer -- MAPF is relevant if we looped back here on READ
+01m0002 00053 440050044571000443400030	        MAPF[0] START-IN D[11] DEST[AR] C600 PUSHJ[NCNTW1] $
+01m0002                               	          ;Wait for TP CNT GO to be off (continue with current timeout count)
+01m0002                               	          ;MAPF is relevant if we came from DCGWR below.
+01m0002 00054 531140074571000440000052	        D[17] C550 -OBUS<0 JUMP[STDC1] $
+01m0002                               	          ;Jump if this is a WRITE operation.
+01m0002 00055 531140000571000443600052	        START-OUT D[AR] C550 -OBUS<0 JUMP[STDC1] $
+01m0002                               	          ;READ op, so set MEM RQ to store last word.
+01m0002                               	          ;Jump unless we timed out waiting for end of last COUNT.
+01m0002                               	
+01m0002 00056 440150044571000443400020	WCDONE: MAPF[0] START-IN D[11] DEST[AR] C600 JUMP[FMNBW1] $
+SLOE   Jan ***, 1859 00:00:03  file DSK:TAPE.SLO[3,222635]  --  of -- TAPMAK
+
+01m0002                               	          ;Enter FMNBWT with the timeout count left from NCNTWT.
+01m0002                               	          ;The MAPF sets MEM RQ if we have fallen in from previous instr.
+01m0002 00057 510354464171000440000056	DCGO:   D[15] DEST[Q AR HOLD] C550 OBUS=0 JPOP[WCDONE] $
+01m0002                               	                ;Get remaining word count. If =0, we are done.
+01m0002 00060 511140014477014140000000	        D[CONST 14] ROT[6] ALU[Q-D] C550 OBUS<0 JUMP[DCG1] $
+01m0002                               	                ;Jump if it is less than 1400
+01m0002 00061 640710014171014140000000	         D[CONST 14] ROT[6] DEST[Q AR] NORM $   
+01m0002                               	                ;It is not. Use 1400 instead.
+01m0002 00062 640701204537000443000000	DCG1:   D[MEM] ALU[D-Q] DEST[5] DEST-A-MEM NORM $
+01m0002                               	                ;Decrement remaining WC by amount of current WC.
+01m0002 00063 640704460571000440000000	        D[14] DEST[HOLD] SHORT $
+01m0002                               	                ;Get current starting adr
+01m0002 00064 640701004435000443000000	        D[MEM] ALU[D+Q] DEST[4] DEST-A-MEM NORM $
+01m0002                               	                ;Increment it by current WC.
+01m0002 00065 511140040571000440000067	        D[10 + TPMODE] C550 OBUS<0 JUMP[. + 2] $
+01m0002                               	                ;Are we in 32-bit mode ?  Jump if so.
+01m0002 00066 640150000435004440000070	         D[AR] ROT[2] ALU[D+Q] DEST[AR] NORM JUMP[. + 2] $
+01m0002                               	                ;Form byte count (=5*word count).
+01m0002 00067 640710000571004440000000	         D[AR] ROT[2] ALU[D] DEST[AR] NORM $
+01m0002                               	                ;Form byte count (=4*word count).
+01m0002 00070 640710000531000440000000	        D[AR] ALU[D-1] DEST[AR] NORM $
+01m0002                               	                ;Adjust count to be right for hdwr.
+01m0002 00071 640700000171054440000000	        D[AR] ROT[35. - 13.] DEST[Q] NORM $
+01m0002                               	                ;Align count at bit 13.
+01m0002 00072 640702204575000243600000	        START-OUT D[MEM] MASK[20.] ALU[DORQ] DEST[IOD] NORM $
+01m0002                               	                ;Include mem addr and load into COUNT, MA
+01m0002                               	                ;Also sets BUF CNT to 0 (if IN) or 5 (if OUT)-- this
+01m0002                               	                ; depends on COUNT not =0 and BUF CNT not = 4 or 5
+01m0002 00073 440700414571000023030000	        MAPF[TP.WMA] D[CONST 2] DEST[2] DEST-A-MEM C600 $
+01m0002                               	                ;Remember what we are about to set bits in TP.WC to so we
+01m0002                               	                ; can set the enable bits in TP.WC later.
+01m0002 00074 440702214571000023600000	        START-OUT D[CONST 2] DEST[IOD] C600 $
+01m0002                               	                ;Set M BUSY
+01m0002 00075 440700000571000443610000	        MAPF[TP.WC] START-OUT C600 $
+01m0002                               	                ;Set CNT GO
+01m0002 00076 451300074571000440130000	        MAPF[13] D[17] C600 OBUS<0 POPJ $
+01m0002                               	                ;Return if this is a READ op.
+01m0002 00077 530300064571000443600000	DCGWR:  START-OUT D[15] C550 -OBUS=0 POPJ $
+01m0002                               	                ;Set MEM RQ to fetch first word.
+01m0002                               	                ;Return unless this is the last WCMA in the record.
+01m0002 00100 440700414571000123000000	        MAPF[0] D[CONST 12] DEST[2] DEST-A-MEM C600 $
+01m0002                               	                ;Rembember what we set TP.WC to so we can set enable bits
+01m0002                               	                ; later.
+01m0002 00101 640702214571000123600000	        START-OUT D[CONST 12] DEST[IOD] NORM  $
+01m0002                               	                ;Last one.  Set TP ENB LAST BYTE as well as M BUSY
+01m0002 00102 440300000571000440010000	WCPOPJ: MAPF[TP.WC] C600 POPJ $
+01m0002                               	
+01m0002                               	
+01m0002                               	  ;Routine to gather ending status for a tape operation.
+01m0002                               	  ;Returns status + ending MA in Q
+01m0002                               	
+01m0002 00103 640700000571000443400000	ITRCHK: START-IN NORM $
+01m0002 00104 240144430571000440040000	        MAPF[TP.RS] D[IOD] DEST[HOLD] C800 JUMP[TRCHKB] $
+01m0002                               	          ;Get tape status in MEM and go assemble status in Q.
+01m0002                               	
+01m0002                               	  ;Here to do the data xfer for a non-interrupt read operation.
+01m0002 00105 640700074171000440000000	TRP2:   D[17] DEST[Q] SHORT $
+SLOE   Jan ***, 1859 00:00:03  file DSK:TAPE.SLO[3,222635]  --  of -- TAPMAK
+
+01m0002                               	          ;SET READ FLAG IN A-MEM[7]
+01m0002 00106 640041614575106013000050	        D[CONST 1] ROT[35.] ALU[DORQ] DEST[7] DEST-A-MEM NORM PUSHJ[STRTDC] $
+01m0002                               	          ;Flag op. as a READ, start the data channel
+01m0002 00107 000140000571000440000000	        JUMP[TRCHKB] $
+01m0002                               	
+01m0002                               	TRCHECK:        
+01m0002 00110 000040000571000440000017	        PUSHJ[FMNBWT] $
+01m0002                               	          ;wait for formatter not busy.
+01m0002 00111 531140004571100440000000	TRCHKB: D[MEM] ROT[32.] C550 -OBUS<0 JUMP[TRERR] $
+01m0002                               	          ;check for hard error status.
+01m0002 00112 531140004571102440000000	TRCHA:  D[MEM] ROT[33.] C550 -OBUS<0 JUMP[TREOF] $
+01m0002                               	          ;Jump if EOF seen by formatter
+01m0002 00113 640700000215000440000000	        ALU[0] DEST[Q] NORM $
+01m0002                               	                ;Flag no errors.
+01m0002 00114 640700000571000443400000	TRDONE: START-IN NORM $
+01m0002 00115 440710030571000443420000	        MAPF[TP.RC] START-IN D[IOD] DEST[AR] C600  $  
+01m0002                               	          ;Get data channel status bits.
+01m0002 00116 240701230175000253030000	        MAPF[3] D[IOD] MASK[21.] ALU[DORQ] DEST[Q 5] DEST-A-MEM C800 $
+01m0002                               	          ;Include ending MA value in status info.
+01m0002 00117 531140000571046440000000	        D[AR] ROT[19.] C550 -OBUS<0 JUMP[TPMAOK] $
+01m0002                               	          ;If TP CNT GO is off,
+01m0002 00120 530140000531060033400000	        START-IN D[AR] ROT[24.] MASK[3] ALU[D-1] C550 -OBUS=0 JUMP[TPMAOK] $
+01m0002                               	          ;  or if BUF CNT is not =1, then right no. of words were stored.
+01m0002 00121 640701200055000443000000	         ALU[Q-1] DEST[Q 5] DEST-A-MEM NORM $
+01m0002                               	           ;Otherwise, 1 extra word was stored, so decrement ending MA.
+01m0002                               	
+01m0002                               	;Note: we no longer support NRZI kludge mode, and no longer
+01m0002                               	; clear part of read buffer that no data was read into.
+01m0002                               	
+01m0002 00122 640300064171000440000000	TPMAOK: D[15] DEST[Q] NORM POPJ $       
+01m0002                               	          ;Recover ending status and return.
+01m0002                               	
+01m0002 00123 640140014171074600000114	TREOF:  D[CONST 60] ROT[30.] DEST[Q]  NORM JUMP[TRDONE] $
+01m0002 00124 640140014171074500000114	TRERR:  D[CONST 50] ROT[30.] DEST[Q] NORM JUMP[TRDONE] $
+01m0002                               	          ;Flag hard read error to progm.
+01m0002                               	
+01m0002                               	        .PAIR
+01m0002                               	 [:. \ 2 + .
+01m0003                               	]       UIOTRP[MUUO] $
+?ERROR - MUUO   is unrecognized junk 
+?ERROR - UIOTRP   is unrecognized junk 
+01m0003                               	TAPEMT: ;OPCODE 726 -- MTAPE FUNCTIONS.
+01m0003                               	        ;Set/Clear NRZI kludge mode used to be fns 60/61.
+01m0003                               	
+01m0003 00126 640040000571000440000130	        NORM PUSHJ[. + 2] $
+01m0003 00127 640140000571000440000000	        NORM JUMP[GOMAIN] $
+01m0003                               	
+01m0003 00130 510140024171000440000000	        D[MA] DEST[Q] COND[OBUS=0] JUMP[TAPERW] C550 $
+01m0003 00131 510040014537000010000000	        D[CONST 1] ALU[D-Q] COND[OBUS=0] PUSHJ[TWREOF] C550 $
+01m0003 00132 510040014537000130000000	        D[CONST 13] ALU[D-Q] COND[OBUS=0] PUSHJ[TERASE] C550 $
+01m0003 00133 510140014537000500000000	        D[CONST 50] ALU[D-Q] COND[OBUS=0] JUMP[TPSETIND] C550 $
+01m0003                               	          ;Code ?, set industry compatable mode.
+01m0003 00134 510140014537000510000000	        D[CONST 51] ALU[D-Q] COND[OBUS=0] JUMP[TPSETDMP] C550 $
+01m0003                               	          ;Code ?, set PDP-10 dump mode.
+01m0003 00135 510040014537000050000000	        D[CONST 5] ALU[D-Q] COND[OBUS=0] PUSHJ[TAPEFR] C550 $
+01m0003 00136 510040014537000060000000	        D[CONST 6] ALU[D-Q] COND[OBUS=0] PUSHJ[TAPEBR] C550 $
+01m0003 00137 530140074571000030000000	        D[17] MASK[3] -OBUS=0 C550 JUMP[INT-MT] $
+01m0003                               	                ;JUMP IF THIS IS INTERRUPT VERSION OF INSTRUCTION.
+SLOE   Jan ***, 1859 00:00:03  file DSK:TAPE.SLO[3,222635]  --  of -- TAPMAK
+
+01m0003 00140 640041000615000443000110	        ALU[0] DEST[4] DEST-A-MEM NORM PUSHJ[TRCHECK] $
+01m0003                               	            ;Wait for op. to finish and get ending status in Q.
+01m0003                               	            ; The 0 in A-MEM[4] prevents TRCHECK from clearing read buf !
+01m0003 00141 640340001555000440000000	        ALU[Q] DEST[AC] NORM JPOP[GOMAIN] $
+01m0003                               	            ;Return status to caller in his AC (same as READ)
+01m0003                               	
+01m0003                               	
+01m0003                               	TWREOF:  ;WRITE AN END OF FILE (TAPE MARK)
+01m0003 00142 640700014171016010000000	        D[CONST 1] ROT[35. - 28.] DEST[Q] NORM $ 
+01m0003                               	          ;Get WFM (WRITE EOF) cmd bit for formatter
+01m0003 00143 640144414575032010000000	TERAS1: D[CONST 1] ROT[35. - 22.] ALU[DORQ] DEST[HOLD] NORM JUMP[KNYMTP] $  
+01m0003                               	          ;Add WRT CMD bit and start command.
+01m0003                               	
+01m0003 00144 640140014171014030000143	TERASE: D[CONST 3] ROT[35. - 29.] DEST[Q] NORM JUMP[TERAS1] $
+01m0003                               	          ;ERASE A 3.75" GAP ON THE TAPE (get WFM and ERASE bits for formatter)
+01m0003                               	
+01m0003 00145 640700000571000443600000	KNYMTP: START-OUT NORM $
+01m0003                               	          ;Give TP MR to clear mode, error status
+01m0003 00146 440040004171000440050013	        MAPF[TP.MR] D[MEM] DEST[Q] C-OUT PUSHJ[KNYGOA] $
+01m0003                               	          ;Put command bits in Q and start formatter.
+01m0003 00147 640702214571022013600000	        START-OUT D[CONST 1] ROT[35. - 26.] DEST[IOD] NORM $
+01m0003                               	                ;Clear all command bits except FORMATTER ENABLE.
+01m0003 00150 000300000341000440020000	        MAPF[TP.WF] ALU[-1] DEST[Q] LONG POPJ $
+01m0003                               	                ;Put -1 in Q in case we are returning to TAPEMT.
+01m0003                               	
+01m0003                               	TAPERW: ;REWIND
+01m0003 00151 640144414571000240000145	        D[CONST 24] DEST[HOLD] NORM JUMP[KNYMTP] $
+01m0003                               	          ;RWD AND GO BITS -- KNYGOA WILL DELETE THE GO BIT !
+01m0003                               	
+01m0003                               	TAPEFR: ;SKIP FORWARD ONE RECORD.
+01m0003 00152 640144414571000000000145	        D[CONST 0] DEST[HOLD] NORM JUMP[KNYMTP] $
+01m0003                               	          ;START A READ, BUT IGNORE THE DATA.
+01m0003                               	
+01m0003                               	TAPEBR: ;SKIP BACKWARD ONE RECORD.
+01m0003 00153 640144414571020010000145	        D[CONST 1] ROT[35. - 27.] DEST[HOLD] NORM JUMP[KNYMTP] $
+01m0003                               	          ;JUST A READ BACKWARD, WITH THE DATA IGNORED.
+01m0003                               	
+01m0003                               	TPSETIND:       ;Set industry compatable mode
+01m0003 00154 640700040171000440000000	        D[10 + TPMODE] DEST[Q] NORM $   ;Stupid A-MEM
+01m0003 00155 000140014575106013000000	        D[CONST 1] ROT[35.] ALU[DORQ] DEST[TPMODE] DEST-A-MEM JUMP[GOMAIN] $
+01m0003                               	          ;Set appropriate bit and done
+01m0003                               	TPSETDMP:       ;Set PDP-10 Dump Mode
+01m0003 00156 640700040171000440000000	        D[10 + TPMODE] DEST[Q] NORM $   ;Stupid A-MEM
+01m0003 00157 000140014675106013000000	        D[CONST 1] ROT[35.] ALU[-D&Q] DEST[TPMODE] DEST-A-MEM JUMP[GOMAIN] $
+01m0003                               	          ;Clear industry compatable mode and done.
+01m0003                               	
+01m0003 00160 640701000615000443000000	INT-MT: ALU[0] DEST[4] DEST-A-MEM NORM $
+01m0003                               	          ;ZERO COUNT REGISTER TO BE SAFE
+01m0003 00161 640700074171000410000000	        D[17] MASK[33.] DEST[Q] SHORT $
+01m0003                               	          ;GET READY TO SET READ BIT, MTAPE BIT, AND WAITING FOR FORMATTER BIT.
+01m0003 00162 640701614575102073000000	        D[CONST 7] ROT[33.] ALU[DORQ] DEST[7] DEST-A-MEM NORM $
+01m0003                               	          ;READ BIT SO INTERRUPT CALLS ITRCHK, MTAPE BIT SO NO LENGTH ERROR CHECK,
+01m0003                               	          ; FORMATTER INTERRUPT BIT SO DOESN'T MESS AROUND WITH TRANSFER COUNTS.
+01m0003                               	
+01m0003 00163 640700400615000443000000	        ALU[0] DEST[2] DEST-A-MEM NORM $
+01m0003                               	          ;NOT WRITING ANY BITS TO TP.WC, SO ZERO THIS OUT.
+01m0003                               	          ;(DON'T REMEMBER REAL LAST BITS WRITTEN, SINCE A-MEM[2] IS USED
+SLOE   Jan ***, 1859 00:00:03  file DSK:TAPE.SLO[3,222635]  --  of -- TAPMAK
+
+01m0003                               	          ; FOR BOTH REMEMBERING TP.WC VALUES AND ENDING STATUS.)
+01m0003 00164 640702214571030023600000	        D[CONST 2] ROT[12.] DEST[IOD] START-OUT NORM $
+01m0003                               	          ;ENABLE FOR FORMATTER NOT BUSY
+01m0003 00165 440340000571000440010000	        MAPF[TP.WC] C600 JPOP[GOMAIN] $
+01m0003                               	          ;AND RETURN FROM INSTRUCTION.
+01m0003                               	
+01m0003                               	        .PAIR
+01m0003                               	 [:. \ 2 + .
+01m0004                               	]       UIOTRP[MUUO]
+?ERROR - garbage token" MUUO "ignored
+?ERROR - garbage token" UIOTRP "ignored
+01m0004                               	
+01m0004                               	TAPERS: ;OPCODE 727 -- READ STATUS BITS FROM TAPE DRIVE.
+01m0004                               	
+01m0004                               	.DEFINE TSS[A B]   
+01m0004                               	[  ;MOVE BIT A OF AR TO BIT B OF Q.
+01m0004                               	        D[AR] ROT[1 + A] MASK[1] DEST[HOLD] NORM $
+01m0004                               	        D[MEM] ROT[35. - B] ALU[DORQ] DEST[Q] NORM $ ]
+01m0004                               	
+01m0004 00166 640700000571000443400000	        START-IN NORM $
+01m0004                               	          ;NEED TO CHECK FOR FORMATTER BUSY
+01m0004 00167 240710030771000440040000	        MAPF[TP.RS] D[IOD] ALU[NOTD] DEST[AR] C800 $
+01m0004                               	          ;GET STATUS BITS
+01m0004 00170 511140000571016440000000	        D[AR] ROT[7] OBUS<0 C550 JUMP[TAPERS1] $
+01m0004                               	          ;JUMP IF FORMTTER STILL BUSY, DON'T TOUCH AND RUIN XFER.
+01m0004                               	          ;JUST USE THESE BITS.
+01m0004                               	
+01m0004 00171 640702200615000443600000	        START-OUT ALU[0] DEST[IOD] NORM $
+01m0004                               	          ;CLEAR THE MODE CTRL REGISTER.
+01m0004                               	        MAPF[TP.WM] START-OUT 
+01m0004 00172 440702214571022013640000	         D[CONST 1] ROT[35. - 26.] DEST[IOD] C-OUT $
+01m0004                               	          ;ENABLE THE FORMATTER.
+01m0004 00173 240700000215000443420000	        MAPF[TP.WF] START-IN ALU[0] DEST[Q] C800 $
+01m0004                               	          ;READ STATUS BITS.
+01m0004 00174 240710030771000440040000	        MAPF[TP.RS] D[IOD] ALU[NOTD] DEST[AR] C800 $
+01m0004                               	          ;NOW RE-ARRANGE THE BITS
+01m0004                               	TAPERS1:
+01m0004                               	        TSS[ 3 30. ]       
+01m0004                               	[  ;MOVE BIT 3 OF AR TO BIT 30. OF Q.
+01m0004 00175 640704400571010010000000	        D[AR] ROT[1 + 3] MASK[1] DEST[HOLD] NORM $
+01m0004 00176 640700004175012440000000	        D[MEM] ROT[35. - 30.] ALU[DORQ] DEST[Q] NORM $ ];ON LINE
+01m0004                               	        TSS[ 11. 31. ]     
+01m0004                               	[  ;MOVE BIT 11. OF AR TO BIT 31. OF Q.
+01m0004 00177 640704400571030010000000	        D[AR] ROT[1 + 11.] MASK[1] DEST[HOLD] NORM $
+01m0004 00200 640700004175010440000000	        D[MEM] ROT[35. - 31.] ALU[DORQ] DEST[Q] NORM $ ];REWINDING
+01m0004                               	        TSS[ 4 32. ]       
+01m0004                               	[  ;MOVE BIT 4 OF AR TO BIT 32. OF Q.
+01m0004 00201 640704400571012010000000	        D[AR] ROT[1 + 4] MASK[1] DEST[HOLD] NORM $
+01m0004 00202 640700004175006440000000	        D[MEM] ROT[35. - 32.] ALU[DORQ] DEST[Q] NORM $ ];FILE PROTECT
+01m0004                               	        TSS[ 12. 33. ]     
+01m0004                               	[  ;MOVE BIT 12. OF AR TO BIT 33. OF Q.
+01m0004 00203 640704400571032010000000	        D[AR] ROT[1 + 12.] MASK[1] DEST[HOLD] NORM $
+01m0004 00204 640700004175004440000000	        D[MEM] ROT[35. - 33.] ALU[DORQ] DEST[Q] NORM $ ];LOAD POINT
+01m0004                               	        TSS[ 10. 34. ]     
+01m0004                               	[  ;MOVE BIT 10. OF AR TO BIT 34. OF Q.
+01m0004 00205 640704400571026010000000	        D[AR] ROT[1 + 10.] MASK[1] DEST[HOLD] NORM $
+01m0004 00206 640700004175002440000000	        D[MEM] ROT[35. - 34.] ALU[DORQ] DEST[Q] NORM $ ];READY
+01m0004                               	        TSS[ 34. 35. ]     
+SLOE   Jan ***, 1859 00:00:03  file STRING:  --  of -- TAPMAK
+
+01m0004                               	[  ;MOVE BIT 34. OF AR TO BIT 35. OF Q.
+01m0004 00207 640704400571106010000000	        D[AR] ROT[1 + 34.] MASK[1] DEST[HOLD] NORM $
+01m0004 00210 640700004175000440000000	        D[MEM] ROT[35. - 35.] ALU[DORQ] DEST[Q] NORM $ ];END OF TAPE
+01m0004                               	        ALU[Q] DEST[MEMSTO] NORM
+01m0004 00211 662104200555000440000000	                COND[-MA-AC] LBJUMP[HIGHSMAIN] $
+01m0004                               	
+01m0004                               	
+01m0004                               	        .PAIR
+01m0004                               	 [:. \ 2 + .
+01m0005                               	]       UIOTRP[MUUO] $
+?ERROR - MUUO   is unrecognized junk 
+?ERROR - UIOTRP   is unrecognized junk 
+01m0005                               	TAPENR: ;730, AC/COUNT.  READ WHOLE RECORD, STORING UP TO COUNT WORDS STARTING AT EFF
+01m0005                               	 ADR.
+01m0005                               	         ;SWAP AC AND IR, THEN DO TAPERX.
+01m0005 00212 640140235171000440000000	        D[IR] DEST[O_AC IR-ADR] ACSEL[AC]  NORM JUMP[TAPERX] $ 
+01m0005                               	
+01m0005                               	        .PAIR
+01m0005                               	 [:. \ 2 + .
+01m0006                               	]       UIOTRP[MUUO] $
+?ERROR - MUUO   is unrecognized junk 
+?ERROR - UIOTRP   is unrecognized junk 
+01m0006                               	TAPERX: ;732 - (AC) IS START ADDR., E IS # OF WORDS TO READ.
+01m0006 00214 640700074171000410000000	        D[17] MASK[33.] DEST[Q] SHORT $
+01m0006                               	          ;CLEAR ALL FLAG BITS IN A-MEM[7]
+01m0006 00215 640041600555000443000007	        ALU[Q] DEST[7] DEST-A-MEM NORM PUSHJ[KNYRGO] $ ;GET TAPE STARTED.
+01m0006 00216 530140074571000030000000	        D[17] MASK[3] -OBUS=0 C550 JUMP[INT-READ] $
+01m0006                               	                ;JUMP IF WE ARE TO DO THE INTERRUPT FLAVOR OF INSTRUCTION.
+01m0006 00217 640041000551000443000105	        ALU[AC] ACSEL[AC] DEST[4] DEST-A-MEM PUSHJ[TRP2] NORM $ ;READ REC.
+01m0006 00220 031140000571040440000000	        D[AR] ROT[16.] -OBUS<0 JUMP[TNRP3] $
+01m0006                               	                ;Was record longer than word count ?
+01m0006                               	                ;Jump unless FIFO RDY FOR BUF is on, indicating
+01m0006                               	                ;  that tape supplied more bytes after count ran out.
+01m0006 00221 640700014175074440000000	        D[CONST 44] ROT[30.] ALU[DORQ] DEST[Q] NORM $ ;YES, SET BIT 3.
+01m0006 00222 640340001555000440000000	TNRP3:  ALU[Q] DEST[AC] ACSEL[AC] JPOP[GOMAIN] NORM $  ;NO, NOT TOO LONG.
+01m0006                               	                ;MOVE STATUS INTO AC.
+01m0006                               	
+01m0006                               	;HERE FOR INTERRUPT FLAVOR OF TAPE READ INSTRUCTIONS, WHERE PI ASSIGNMENT
+01m0006                               	; IS NON-ZERO.
+01m0006                               	
+01m0006                               	INT-READ:
+01m0006 00223 640700074171000420000000	        D[17] MASK[34.] DEST[Q] NORM $
+01m0006                               	                ;GET PLACE WHERE TO SET READ FLAG, CLEAR INTERRUPT STATE FLAG
+01m0006                               	                ; IN BIT 1.
+01m0006 00224 640141614575106013000000	        D[CONST 1] ROT[35.] ALU[DORQ] DEST[7] DEST-A-MEM JUMP[INT-WRITE] NORM $
+01m0006                               	                ;SET READ FLAG IN A-MEM[7].
+01m0006                               	                ;REST OF STUFF SAME AS FOR WRITE.
+01m0006                               	
+01m0006                               	        .PAIR
+01m0006                               	 [:. \ 2 + .
+01m0007                               	]UTAPWR:        UIOTRP[MUUO] $
+?ERROR - MUUO   is unrecognized junk 
+?ERROR - UIOTRP   is unrecognized junk 
+01m0007                               	
+01m0007                               	TAPEWR: ;731, AC/ADR, E/+COUNT.  WRITE RECORD OF +COUNT
+01m0007                               	        ; WORDS, DATA FROM ADR.
+01m0007                               	        ;SET AC:=0 IF OPERATION COMPLETED SUCCESSFULLY.
+01m0007                               	        ; SET AC:=<SETZ> + HIGHEST ADR READ IF REACHED
+01m0007                               	        ; EOT DURING OPERATION (CURRENTLY THIS IS THE ONLY
+01m0007                               	        ; ERROR CONDITION.)  OPERATION IS COMPLETED EVEN
+SLOE   Jan ***, 1859 00:00:03  file DSK:TAPE.SLO[3,222635]  --  of -- TAPMAK
+
+01m0007                               	        ; IF EOT IS PASSED.
+01m0007                               	
+01m0007                               	
+01m0007 00226 640700074171000410000000	        D[17] MASK[33.] DEST[Q] NORM $
+01m0007                               	                ;Setup to clear the read, mtape, and interrupt state flags.
+01m0007 00227 640041600555000443000036	        ALU[Q] DEST[7] DEST-A-MEM NORM PUSHJ[DCINIT] $
+01m0007                               	                ;Init. the data channel.
+01m0007 00230 640710040571002010000000	        D[10 + TPMODE]  ROT[1] MASK[1] DEST[AR] NORM $
+01m0007                               	                ;Get the 32-bit mode flag.
+01m0007 00231 640700000171014440000000	        D[AR] ROT[35. - 29.] DEST[Q] NORM $
+01m0007                               	                ;Position it for the hardware.
+01m0007 00232 640702214575016013600000	        START-OUT D[CONST 1] ROT[35. - 28.] ALU[DORQ] DEST[IOD] NORM $
+01m0007                               	                ;Set the OUT bit.
+01m0007 00233 000040014171032010040013	        MAPF[TP.WM] D[CONST 1] ROT[35. - 22.] DEST[Q] PUSHJ[KNYGOA] $
+01m0007                               	                ;Issue WRITE command to formatter.
+01m0007 00234 530140074571000030000000	        D[17] MASK[3] -OBUS=0 C550 JUMP[INT-WRITE] $
+01m0007                               	                ;If non-zero PI assignment, do the interrupt form of the
+01m0007                               	                ; instruction.
+01m0007 00235 640041000551000443000050	        ALU[AC] DEST[4] DEST-A-MEM NORM PUSHJ[STRTDC] $
+01m0007                               	                ;Get word count and start the channel.
+01m0007 00236 031140004571100440000000	        D[MEM] ROT[32.] -OBUS<0 JUMP[TWERR] $ ;Test HARD ERR.
+01m0007 00237 640700001615000440000000	        ALU[0] DEST[AC] NORM $ ;We return 0 in AC if no EOT.
+01m0007 00240 511140004571104440000000	        D[MEM] ROT[34.] C550 OBUS<0 JUMP[GOMAIN] $
+01m0007                               	         ;If no EOT seen, all done.
+01m0007 00241 640140015561074600000000	        D[CONST 60] ROT[35. - 5] ALU[DORAC] DEST[AC] NORM JUMP[GOMAIN] $
+01m0007                               	         ;Turn on bit 0 to indicate EOT seen during operation.
+01m0007                               	
+01m0007                               	;Here for the case where PI assignment is non-zero - just start the
+01m0007                               	; transfer and return. Also come here at end of INT-READ.
+01m0007                               	
+01m0007                               	INT-WRITE:
+01m0007 00242 640041000551000443000045	        ALU[AC] DEST[4] DEST-A-MEM PUSHJ[INT-STARTDC] NORM $
+01m0007                               	          ;PUT COUNT IN AMEM[4], START THE TRANSFER
+01m0007 00243 640140000571000440000000	        JUMP[GOMAIN] NORM $
+01m0007                               	          ;AND RETURN FROM THIS INSTRUCTION WITHOUT CHANGING AC.
+01m0007                               	
+01m0007                               	TWERR:  ;;Error occurred during write.
+01m0007                               	
+01m0007 00244 640040000571000440000000	        NORM PUSHJ[KNYRS1] $ 
+01m0007                               	          ;Blast the tape formatter and drive 
+01m0007 00245 000140015571074500000000	        D[CONST 50] ROT[30.] DEST[AC] JUMP[GOMAIN] $
+01m0007                               	          ;And give error return to program. We no longer
+01m0007                               	          ;do backspace erase gap rewrite at micro-level, MACRO level
+01m0007                               	          ; must do this.
+01m0007                               	
+01m0007                               	
+01m0007                               	;TAPE MICRO-INTERRUPT ROUTINE.
+01m0007                               	
+01m0007 00246 640702250571000443600000	TAPINT: START-OUT D[12] DEST[IOD] NORM $
+01m0007 00247 440700000571000443410000	        MAPF[TP.WC] START-IN C600 $
+01m0007                               	          ;CLEAR ENABLES
+01m0007 00250 240710030571000440040000	        MAPF[TP.RS] D[IOD] DEST[AR] C800 $
+01m0007                               	          ;GET STATUS IN AR FOR CHECKING.
+01m0007 00251 511140074571002440000000	        D[17] ROT[1] OBUS<0 C550 JUMP[FMTDON] $
+01m0007                               	          ;JUMP IF EXPECTING A -FMT BUSY INTERRUPT
+01m0007 00252 531140074571000440000000	        D[17] -OBUS<0 C550 JUMP[TAPINTWRT] $
+01m0007                               	          ;JUMP IF THIS XFER IS A WRITE.
+SLOE   Jan ***, 1859 00:00:03  file DSK:TAPE.SLO[3,222635]  --  of -- TAPMAK
+
+01m0007 00253 000700000571000443600000	        START-OUT $
+01m0007                               	          ;THE MAPF[0] WRITES LAST WORD TO MEMORY.
+01m0007 00254 511140000571016440000000	        MAPF[0] D[AR] ROT[7] OBUS<0 C550 JUMP[INT-RDDONE] $
+01m0007                               	          ;IF FORMATTER NO LONGER BUSY, THEN WE READ RECORD SHORTER
+01m0007                               	          ; THAN THE COUNT, SO FORGET REST OF TRANSFER.
+01m0007                               	
+01m0007                               	;HERE ALWAYS IF WRITE OR IF READ AND FORMATTER IS STILL GOING.
+01m0007                               	; MAY EITHER BE END OF TRANSFER OR TIME TO CONTINUE CURRENT LONG RECORD.
+01m0007                               	; TAPE COUNT GO HAS TO BE OFF SINCE ITS EITHER WRITE OR READ WITH FORMATTER
+01m0007                               	; IDLE.
+01m0007                               	
+01m0007                               	TAPINTWRT:
+01m0007 00255 510140064571000440000000	        D[15] OBUS=0 C550 JUMP[TAPEXFRDON] $
+01m0007                               	          ;IF WE HAVE EXHAUSED COUNT, TRANSFER IS DONE.
+01m0007                               	          ; COME BACK TO FMTDON WHEN -FMT BUSY COMES TRUE.
+01m0007 00256 640040000571000440000057	        PUSHJ[DCGO] NORM $
+01m0007                               	          ;START UP NEXT PART OF THE TRANSFER
+01m0007 00257 640140014171030120000000	        MAPF[0] D[CONST 12] ROT[12.] DEST[Q] JUMP[TAPINTENB] NORM $
+01m0007                               	          ;MAPF 0 for DCGO. Enable for -FMTR BSY and -TP CNT GO.
+01m0007                               	TAPEXFRDON:
+01m0007 00260 640700074171000440000000	        D[17] DEST[Q] SHORT $
+01m0007                               	          ;GET DATA TO OR IN WAITING FOR FORMAT DONE BIT
+01m0007 00261 640701614575104013000000	        D[CONST 1] ROT[35. - 1] ALU[DORQ] DEST[7] DEST-A-MEM NORM $
+01m0007                               	          ;WE CONTINUE AT FMTDON ON NEXT INTERRUPT.
+01m0007 00262 640140014171030020000000	        D[CONST 02] ROT[12.] DEST[Q] NORM JUMP[TAPINTENB] $
+01m0007                               	          ;BITS FOR JUST -FMT BUSY INTERRUPT ENABLE
+01m0007                               	
+01m0007                               	TAPINTENB:;HERE WITH BITS FOR INTERRUPT ENABLES IN Q.
+01m0007 00263 640702250575000443600000	        D[12] ALU[DORQ] DEST[IOD] START-OUT NORM $
+01m0007                               	          ;ENABLE FOR BITS IN Q.
+01m0007 00264 240140000571000440010000	        MAPF[TP.WC] C800 JUMP[UINT-DISMISS] $
+01m0007                               	          ;AND RETURN FROM THIS MICROINTERRUPT.
+01m0007                               	
+01m0007 00265 531140000571016440000265	FMTDON: D[AR] ROT[7] -OBUS<0 C550 JUMP[.] $
+01m0007                               	          ;HANG IF FORMATTER IS STILL BUSY.
+01m0007 00266 531140074571000440000000	        D[17] -OBUS<0 C550 JUMP[INT-WRTDONE] $
+01m0007                               	          ;JUMP IF ITS NOT A READ.
+01m0007                               	
+01m0007                               	;HERE ALSO IF FORMATTER SHUT DOWN BECAUSE NOT ENOUGH DATA ON TAPE TO SATISFY
+01m0007                               	; THE CHANNEL'S COUNT.
+01m0007                               	
+01m0007                               	INT-RDDONE:
+01m0007 00267 640040000571000440000103	        PUSHJ[ITRCHK] NORM $
+01m0007                               	          ;GET STATUS OF XFER INTO Q
+01m0007 00270 511140074571004440000000	        D[17] ROT[2] OBUS<0 JUMP[INT-RDWCOK] C550 $
+01m0007                               	          ;IF NON-DATA OPERATION, DON'T CHECK FOR WORD COUNT.
+01m0007 00271 531140000571040440000000	        D[AR] ROT[16.] -OBUS<0 JUMP[INT-RDWCOK] C550 $
+01m0007                               	          ;JUMP IF NO PROBLEM WITH WORD COUNT
+01m0007 00272 640700014175074440000000	        D[CONST 44] ROT[30.] ALU[DORQ] DEST[Q] NORM $
+01m0007                               	          ;RECORD WAS LONGER THAN WORD COUNT, SET LENGTH ERROR.
+01m0007                               	INT-RDWCOK:
+01m0007 00273 640700400555000443000000	        ALU[Q] DEST[2] DEST-A-MEM NORM $
+01m0007                               	          ;STORE STATUS IN AMEM[2] FOR THE TRANSFER STATUS READING INST.
+01m0007 00274 640700074171000440000000	TAPEPI: D[17] DEST[Q] SHORT $
+01m0007                               	          ;GET CONI WORD.
+01m0007 00275 640701614575000103000000	        D[CONST 10] ALU[DORQ] DEST[7] DEST-A-MEM NORM $
+01m0007                               	          ;SET INTERRUPT BIT FOR CONSO
+SLOE   Jan ***, 1859 00:00:03  file DSK:TAPE.SLO[3,222635]  --  of -- TAPMAK
+
+01m0007 00276 530150074171000030000000	        D[17] DEST[Q AR] MASK[3] -OBUS=0 JUMP[PIGEN] C550 $
+01m0007                               	          ;IF PI CHANNEL ASSIGNED, GO INTERRUPT.
+01m0007 00277 640140000571000440000000	        JUMP[UINT-DISMISS] NORM $
+01m0007                               	          ;CLEARED PI ASSIGNMENT OUT DURING XFER?
+01m0007                               	
+01m0007                               	INT-WRTDONE:
+01m0007 00300 640700400215000443000000	        ALU[0] DEST[2 Q] DEST-A-MEM NORM $
+01m0007                               	          ;CLEAR OUT ACCUMULATED STATUS
+01m0007 00301 511140000571100440000303	        D[AR] ROT[32.] OBUS<0 JUMP[. + 2] C550 $
+01m0007                               	          ;JUMP IF NO HARD ERROR
+01m0007 00302 000040414175102053000000	        D[CONST 5] ROT[33.] ALU[DORQ] DEST[2 Q] DEST-A-MEM PUSHJ[KNYRS1] $
+01m0007                               	          ;HARD ERROR, SET 1B0 FOR ANY ERROR, 1B2 FOR HARD WRITE ERROR
+01m0007 00303 511140000571104440000274	        D[AR] ROT[34.] OBUS<0 C550 JUMP[TAPEPI] $
+01m0007                               	          ;IF EOT NOT SET, JUST CAUSE PI ON PROPER CHANNEL.
+01m0007 00304 640140414575102063000274	        D[CONST 6] ROT[33.] ALU[DORQ] DEST[2] DEST-A-MEM JUMP[TAPEPI] NORM $
+01m0007                               	          ;EOT, SET IT IN AMEM AND GO CAUSE PI
+01m0007                               	
+01m0007                               	        .PAIR
+01m0007                               	 [:. \ 2 + .
+01m0008                               	]       UIOTRP[MUUO] $
+?ERROR - MUUO   is unrecognized junk 
+?ERROR - UIOTRP   is unrecognized junk 
+01m0008                               	;TPCONI INSTRUCTION, OPCODE 733.
+01m0008                               	; 10 MEANS INTERRUPT HAS BEEN REQUESTED.
+01m0008                               	; 33-35 PI ASSIGNMENT.
+01m0008                               	
+01m0008                               	
+01m0008                               	TPCONIBTS:
+01m0008 00306 240700030235000443420000	        MAPF[TP.RC] D[IOD] ALU[D&Q] DEST[Q] C800 START-IN $
+01m0008                               	          ;1B18 = OVERRUN, CLEARED ON MASTER RESET.
+01m0008                               	          ;1B19 = CONTROLLER BUSY.
+01m0008 00307 240710030571000440040000	        MAPF[TP.RS] D[IOD] DEST[AR] C800 $
+01m0008                               	          ;GET FORMATTER STATUS IN AR
+01m0008 00310 511300000571016440000000	        D[AR] ROT[7] OBUS<0 C550 POPJ $
+01m0008                               	          ;RETURN IF FORMATTER IS IDLE.
+01m0008 00311 640300014175036010000000	        D[CONST 1] ROT[35. - 20.] ALU[DORQ] DEST[Q] NORM POPJ $
+01m0008                               	          ;FORMATTER IS BUSY, SET THE BIT.
+01m0008                               	          ;1B20 = FORMATTER BUSY
+01m0008                               	
+01m0008 00312 640040014171036063400306	TPCONI: START-IN D[CONST 6] ROT[15.] DEST[Q] PUSHJ[TPCONIBTS] NORM $
+01m0008                               	          ;GET THE HI ORDER CONI BITS
+01m0008 00313 662104274575000170000000	        D[17] MASK[15.] ALU[DORQ] DEST[MEMSTO] NORM COND[-MA-AC] LBJUMP[HIGHSMAIN] $
+01m0008                               	          ;STORE CONI BITS INTO EA.
+01m0008                               	          ;ALSO STORE INTERRUPT STATE BITS FOR DEBUGGING.
+01m0008                               	
+01m0008                               	
+01m0008                               	        .PAIR
+01m0008                               	 [:. \ 2 + .
+01m0009                               	]       UIOTRP[MUUO] $
+?ERROR - MUUO   is unrecognized junk 
+?ERROR - UIOTRP   is unrecognized junk 
+01m0009                               	;TPCONO INSTRUCTION, OPCODE 734.
+01m0009                               	; 100 MEANS CLEAR FORMATTER.
+01m0009                               	; 20 MEANS CLEAR INTERRUPT FLAG.
+01m0009                               	; 33-35 ARE TO SET PI ASSIGNMENT.
+01m0009                               	
+01m0009 00314 511040034571072440000000	TPCONO: D[IR] ROT[29.] OBUS<0 C550 PUSHJ[TAPCLR] $
+01m0009                               	          ;IF 100 BIT IS SET, CLEAR THE FORMATTER.
+01m0009 00315 640700014371000070000000	        D[CONST 7] ALU[NOTD] DEST[Q] SHORT $
+SLOE   Jan ***, 1859 00:00:03  file DSK:TAPE.SLO[3,222635]  --  of -- TAPMAK
+
+01m0009                               	          ;MASK TO CLEAR PI ASSIGNMENT
+01m0009 00316 531140034571076440000320	        D[IR] ROT[31.] -OBUS<0 C550 JUMP[. + 2] $
+01m0009                               	          ;JUMP IF NOT CLEARING IT
+01m0009 00317 640700014371000170000000	        D[CONST 17] ALU[NOTD] DEST[Q] SHORT $
+01m0009                               	          ;CLEARING INTERRUPT FLAG, GET DIFFERENT MASK
+01m0009 00320 640700074235000440000000	        D[17] ALU[D&Q] DEST[Q] SHORT $
+01m0009                               	          ;CLEAR OUT PI ASSIGNMENT AND MAYBE INTERRUPT FLAG
+01m0009 00321 640141634575000033000000	        D[IR] MASK[3] ALU[DORQ] DEST[7] DEST-A-MEM NORM JUMP[GOMAIN] $
+01m0009                               	          ;STORE PI ASSIGNMENT IN A-MEM[7] AND RETURN FROM INSTRUCTION.
+01m0009                               	
+01m0009 00322 640040000571000440000036	TAPCLR: PUSHJ[DCINIT] NORM $
+01m0009                               	          ;GET RID OF INTERRUPT ENABLES, RESET CHANNEL
+01m0009 00323 640140000571000440000000	        JUMP[KNYCLR] NORM $
+01m0009                               	          ;AND CLEAR FORMATTER AND DRIVE.
+01m0009                               	
+01m0009                               	        .PAIR
+01m0009                               	 [:. \ 2 + .
+01m0010                               	]       UIOTRP[MUUO] $
+?ERROR - MUUO   is unrecognized junk 
+?ERROR - UIOTRP   is unrecognized junk 
+01m0010                               	;TPCNSO - OPCODE 735.
+01m0010                               	; SKIP IF BITS IN EA ARE SET.
+01m0010                               	; SEE TPCONI FOR BIT ASSIGNMENTS.
+01m0010                               	
+01m0010 00324 640040014171036063400306	TPCNSO: START-IN D[CONST 6] ROT[15.] DEST[Q] PUSHJ[TPCONIBTS] NORM $
+01m0010                               	          ;GET THE HI ORDER BITS INTO Q.
+01m0010 00325 640700074175000220000000	        D[17] MASK[18.] ALU[DORQ] DEST[Q] SHORT $
+01m0010                               	          ;GET WHAT BITS ARE.
+01m0010 00326 510140024635000440000000	        D[MA] ALU[D&Q] OBUS=0 C550 JUMP[MAIN] $
+01m0010                               	          ;IF NO MASKED BITS ARE 1, DON'T SKIP.
+01m0010                               	        DOSKIP $
+?ERROR - DOSKIP   is unrecognized junk 
+01m0010                               	          ;ELSE SKIP.
+01m0010                               	
+01m0010                               	;LEAVE OUT TPCNSZ, DON'T WASTE THE SPACE.
+01m0010                               	
+01m0010                               	        .PAIR
+01m0010                               	 [:. \ 2 + .
+01m0011                               	]       UIOTRP[MUUO] $
+?ERROR - MUUO   is unrecognized junk 
+?ERROR - UIOTRP   is unrecognized junk 
+01m0011                               	;TPDATI - OPCODE 736
+01m0011                               	;RETURNS TRANSFER STATUS (BITS, ENDING ADDRESS) TO C(EA).
+01m0011                               	
+01m0011 00330 022104250571000440000000	TPDATI: D[12] DEST[MEMSTO] COND[-MA-AC] LBJUMP[HIGHSMAIN] $
+01m0011                               	          ;STORE STATUS SAVED ON LAST XFER TO C(EA)
+01m0011                               	
+01m0011                               	
+01m0011                               	
+01m0011                               	
+01m0011                               	;BOOTSTRAP LOADER FOR MACROCODE.
+01m0011                               	
+01m0011                               	 .ORG[5000]
+01m0011                               	 [ XLIST
+01m0012                               	 LIST ]
+01m0012 05000 000340000571000440005001	MBOOT:  JPOP[. + 1] $
+01m0012                               	         ;The . + 1 is to make the lights look familiar for the operator...
+01m0012 05001 000140000571000440000000	        JUMP[MBOOTA] $
+01m0012                               	         ;MBOOTA takes us to MBOOTH, whether or not that is in high u-mem.
+SLOE   Jan ***, 1859 00:00:03  file DSK:TAPE.SLO[3,222635]  --  of -- TAPMAK
+
+01m0012                               	
+01m0012                               	.REPEAT XUCODE [ ;If 8K u-mem, put this code in upper 4K
+01m0012                               	AREA50 = .
+01m0012                               	 .USE[HIGHMEM]
+01m0012                               	 ] ;XUCODE
+01m0012                               	
+01m0012 05002 000041614571000070000000	MBOOTH: D[CONST 7] DEST[DEV-ADR] PUSHJ[KNYCLR] $ ;RESET TAPE CTRL
+01m0012 05003 640042600615000440000000	        ALU[0] DEST[HI-ABS-MA] PUSHJ[CCLR] NORM $
+01m0012 05004 640042614571044010000000	        D[CONST 1] ROT[18.] DEST[HI-ABS-MA] PUSHJ[CCLR] NORM $
+01m0012 05005 640042614571044020000000	        D[CONST 2] ROT[18.] DEST[HI-ABS-MA] PUSHJ[CCLR] NORM $
+01m0012 05006 640042614571044030000000	        D[CONST 3] ROT[18.] DEST[HI-ABS-MA] PUSHJ[CCLR] NORM $
+01m0012 05007 000041614571000070000007	        D[CONST 7] DEST[DEV-ADR] CYLEN[LONG] PUSHJ[KNYRGO] $
+01m0012                               	                ;SELECT DEVICE 7, START READ.
+01m0012 05010 640040000571000440000000	        NORM PUSHJ[KNYWAIT] $
+01m0012 05011 240044430771000443420000	        MAPF[TP.RC] START-IN D[IOD] ALU[NOTD] DEST[HOLD] C800 PUSHJ[MBTBYX] $ 
+01m0012                               	                ;Read 1st byte of new record.
+01m0012 05012 640162600615000440000000	        ALU[0] DEST[MA HI-ABS-MA] NORM JUMP[P2A] $
+01m0012                               	                ;Clear high-order MA and enter reading loop.
+01m0012                               	
+01m0012 05013 640060024433000440000000	P2:     D[MA] ALU[D+1] DEST[MA] PUSHJ[MBTBYTE] NORM $
+01m0012 05014 640040004171070440000000	P2A:    D[MEM] ROT[34] DEST[Q] PUSHJ[MBTBYTE] NORM $
+01m0012 05015 640040004175050440000000	        D[MEM] ROT[24] ALU[DORQ] DEST[Q] PUSHJ[MBTBYTE] NORM $
+01m0012 05016 640040004175030440000000	        D[MEM] ROT[14] ALU[DORQ] DEST[Q] PUSHJ[MBTBYTE] NORM $
+01m0012 05017 640040004175010440000000	        D[MEM] ROT[4] ALU[DORQ] DEST[Q] PUSHJ[MBTBYTE] NORM $
+01m0012 05020 640144204575000040005013	        D[MEM] MASK[4]  ALU[DORQ] DEST[MEMSTO] NORM JUMP[P2] $
+01m0012                               	
+01m0012 05021 640720000615000440000000	CCLR:   ALU[0] DEST[MA] NORM $
+01m0012 05022 640704200615000440000000	        ALU[0] DEST[MEMSTO] NORM $
+01m0012 05023 640720024433000440000000	        D[MA] ALU[D+1] DEST[MA] NORM $
+01m0012 05024 470140024571000220005022	        D[MA] MASK[18.] COND[-OBUS=0] JUMP[. - 2] C600 $
+01m0012 05025 640300000571000440000000	        POPJ NORM $
+01m0012                               	
+01m0012                               	MBTBYTE:
+01m0012 05026 640740014571002353400000	        START-IN D[CONST 35] ROT[1] LLOAD NORM $
+01m0012                               	                ;Ask tape for a byte and status thereof
+01m0012                               	                ;Set loop counter to do timeout
+01m0012                               	                ;(TIMEOUT ABOUT 78 USEC)
+01m0012 05027 240244430571000440020000	MBTBY1: MAPF[TP.RC] D[IOD] DEST[HOLD] C800 LOOP[MBTBY2] $
+01m0012                               	                ;Read byte and status.  Byte comes complemented.
+01m0012                               	                ;Result is put in HOLD to avoid synchronizer problems
+01m0012                               	                ;Do timeout check and branch if still waiting
+01m0012 05030 640040000571000443400000	        START-IN NORM PUSHJ[MBTCHECK] $
+01m0012                               	                ;Byte wasn't ready in time.  Go find out why
+01m0012 05031 000040000571000440000007	        PUSHJ[KNYRGO] $ ;START NEXT RECORD.
+01m0012 05032 640040000571000440000000	        NORM PUSHJ[KNYWAIT] $
+01m0012 05033 240044430771000443420000	        MAPF[TP.RC] START-IN D[IOD] ALU[NOTD] DEST[HOLD] C800 PUSHJ[MBTBYX] $ 
+01m0012                               	                ;Read 1st byte of new record.
+01m0012 05034 640340000571000440005014	        NORM JPOP[P2A] $
+01m0012                               	                ;Go for another record
+01m0012                               	;       ---
+01m0012                               	MBTBY2:
+01m0012 05035 531140004571064443405027	        START-IN D[MEM] ROT[26.] -OBUS<0 C550 JUMP[MBTBY1] $
+01m0012                               	                ;Check for byte ready (this is a two instruction loop)
+01m0012                               	                ;Start getting byte and status again in case we have
+01m0012                               	                ;  to loop
+01m0012 05036 240704430771000443420000	        START-IN MAPF[TP.RC] D[IOD] ALU[NOTD] DEST[HOLD] C800 $
+01m0012                               	                ;READ THE DATA AGAIN (NOW THAT IT'S STABLE !)
+SLOE   Jan ***, 1859 00:00:03  file DSK:TAPE.SLO[3,222635]  --  of -- TAPMAK
+
+01m0012 05037 500304404571000100010000	MBTBYX: MAPF[1] D[MEM] MASK[10] DEST[HOLD] C550 POPJ $
+01m0012                               	                ;MAPF[1] clears byte ready
+01m0012                               	                ;Extract data byte from other status information
+01m0012                               	
+01m0012                               	;       ---
+01m0012                               	
+01m0012                               	KNYWAIT: ;Wait for first byte of read data (BOOTSTRAP mode only)
+01m0012 05040 640700000571000443400000	        START-IN SHORT $
+01m0012 05041 640710014571030773410000	        MAPF[1] START-IN D[CONST 77] ROT[12.] DEST[AR] NORM $
+01m0012                               	                ;Clear read data ready flag
+01m0012 05042 440704430571000440020000	KNYW1:  MAPF[TP.RC] D[IOD] DEST[HOLD] C600 $
+01m0012 05043 511300004571064443400000	        START-IN D[MEM] ROT[26.] OBUS<0 POPJ C550 $
+01m0012                               	                ;Return if READ DATA RDY is now on.
+01m0012 05044 530150000531000443405042	        START-IN D[AR] ALU[D-1] DEST[AR] C550 -OBUS=0 JUMP[KNYW1] $
+01m0012 05045 640300000571000440000000	        NORM POPJ $
+01m0012                               	
+01m0012 05046 640040000571000443400017	MBTCHECK:       START-IN NORM PUSHJ[FMNBWT] $
+01m0012                               	          ;WAIT FOR FORMATTER IDLE.
+01m0012 05047 531140004571100440000000	        D[MEM] ROT[32.] C550 -OBUS<0 JUMP[MBTERR] $
+01m0012                               	          ;CHECK FOR ERROR STATUS.
+01m0012 05050 511300004571102440000000	        D[MEM] ROT[33.] C550 OBUS<0 POPJ $
+01m0012                               	          ;IF END OF FILE NOT SEEN, RETURN FOR MORE, ELSE DONE.
+01m0012 05051 640700000215000440000000	        ALU[0] DEST[Q] NORM $ ;CLEAR LIGHTS TO INDICATE NO ERRORS.
+01m0012 05052 000341600615000443605053	MBTDNX: START-OUT ALU[0] DEST[DEV-ADR] JPOP[. + 1] $
+01m0012                               	                ;Setup to display code in lights
+01m0012 05053 000340000555000443625054	        START-OUT MAPF[2] ALU[Q] JPOP[. + 1] $  ;LOAD LIGHTS FROM Q, CLR SW FF'S
+01m0012 05054 000700000571000443440000	D1:     MAPF[4] START-IN $
+01m0012                               	           ;CHECK START AND CONT SWITCHES.  RD NEXT FILE ON CONT
+01m0012 05055 000710030571000440040000	        MAPF[4] D[IOD] DEST[AR] $
+01m0012                               	        D[AR]  ROT[5] MASK[2] DEST[AR]
+01m0012 05056 010150000571012020005054	                COND[OBUS=0] JUMP[D1] CYLEN[LONG] $
+01m0012                               	                ;WAIT FOR A SWITCH.
+01m0012 05057 530140000571000010000000	        D[AR] MASK[1] COND[-OBUS=0] JUMP[GOMSTART] C550 $
+01m0012                               	           ;  ... START MAIN MICROCODE ON START SWITCH.
+01m0012 05060 640700000571000443600000	        START-OUT NORM $  ;CLEAR SWITCH FF'S
+01m0012 05061 000340000571000440045002	        MAPF[4] JPOP[MBOOTH] CYLEN[LONG] $
+01m0012                               	
+01m0012                               	GOMSTART: ;Branch to MSTART
+01m0012 05062 000140000571000440000000	        GETADR[MSTART] JUMP[GOLOW] $
+?ERROR - MSTART   is unrecognized junk 
+?ERROR - GETADR   is unrecognized junk 
+01m0012                               	
+01m0012 05063 000140014371000000005052	MBTERR: D[CONST 0] ALU[NOTD] DEST[Q] JUMP[MBTDNX] $
+01m0012                               	;       ---
+01m0012                               	
+01m0012                               	  .ORG[2150]
+01m0012                               	 [ XLIST
+01m0013                               	 LIST ]
+01m0013 02150 000140000571000440000246	        JUMP[TAPINT] $  ;INTERRUPT FOR DEVICE 7 GO TO TAPINT.
+01m0013                               	
+01m0013                               	    .USE[OTHER]  [ XLIST
+?ERROR - set lecation with : must be followed by a valid expression 
+01m0013                               	 LIST ] ;RETURN TO OLD LOC. CTR.
+01m0013                               	
+01m0013 02151 000140000571000440000000	MBOOTA: GETADR[MBOOTH] JUMP[GOHIGH] $
+?ERROR - MBOOTH   is unrecognized junk 
+?ERROR - GETADR   is unrecognized junk 
+01m0013                               	        
+
+SLOE   Jan ***, 1859 00:00:03  file DSK:TAPMAK.SLO[3,222635]  --  of -- TAPMAK
+
+01m0014                               	
+01m0014                               	LIST-LABELS
+
+labels
+  0   38     0 .                1   12  2577 CCLR             1   12  2604 D1
+  1    2    50 DCG1             1    2    47 DCGO             1    2    63 DCGWR            1    2    30 DCINIT
+  1    2    16 FMNBW1           1    2    15 FMNBWT           1    7   181 FMTDON           1    2    22 FMTHNG
+  1   13     0*GOHIGH           1   12     0*GOLOW            1    2     0*GOMAIN           1   12  2610 GOMSTART
+  1    4     0*HIGHSMAIN        1    3   112 INT-MT           1    7   183 INT-RDDONE       1    7   187 INT-RDWCOK
+  1    6   147 INT-READ         1    2    37 INT-STARTDC      1    7   162 INT-WRITE        1    7   192 INT-WRTDONE
+  1    2    67 ITRCHK           1    1     0 KNYCLR           1    2    11 KNYGOA           1    3   101 KNYMTP
+  1    2     7 KNYRGO           1    1     0 KNYRS1           1   12  2594 KNYW1            1   12  2592 KNYWAIT
+  1   10     0*MAIN             1   12  2560 MBOOT            1   13  1129 MBOOTA           1   12  2562 MBOOTH
+  1   12  2583 MBTBY1           1   12  2589 MBTBY2           1   12  2582 MBTBYTE          1   12  2591 MBTBYX
+  1   12  2598 MBTCHECK         1   12  2602 MBTDNX           1   12  2611 MBTERR           0   38     0*NAF
+  1    2    24 NCNTW1           1    2    24 NCNTWT           1    1     0*no-@             1   12  2571 P2
+  1   12  2572 P2A              1    7     0*PIGEN            1    2    42 STDC1            1    2    40 STRTDC
+  1    9   210 TAPCLR           1    3   107 TAPEBR           1    3   106 TAPEFR           1    3    86 TAPEMT
+  1    5   138 TAPENR           1    7   188 TAPEPI           1    2     2 TAPERD           1    4   118 TAPERS
+  1    4   125 TAPERS1          1    3   105 TAPERW           1    6   140 TAPERX           1    7   150 TAPEWR
+  1    7   176 TAPEXFRDON       1    7   166 TAPINT           1    7   179 TAPINTENB        1    7   173 TAPINTWRT
+  1    3    99 TERAS1           1    3   100 TERASE           1    6   146 TNRP3            1   10   212 TPCNSO
+  1    8   202 TPCONI           1    8   198 TPCONIBTS        1    9   204 TPCONO           1   11   216 TPDATI
+  1    2    82 TPMAOK           1    3   110 TPSETDMP         1    3   108 TPSETIND         1    2    74 TRCHA
+  1    2    72 TRCHECK          1    2    73 TRCHKB           1    2    76 TRDONE           1    2    83 TREOF
+  1    2    84 TRERR            1    2    69 TRP2             1    7   164 TWERR            1    3    98 TWREOF
+  1    7     0*UINT-DISMISS     1    7   150 UTAPWR           1    2    46 WCDONE           1    2    66 WCPOPJ
+
+01m0013                               	LIST-CORMAP
+
+
+			Storage map
+
+
+     0	XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+   100	XXXXXXXXXXXXXXXXXXXXX.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+   200	XXXXXXXXXXX.XXXXXXXXX.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+   300	XXXXX.XXXXXXXXXXXXXXXXX.X.......................................
+   400	................................................................
+   500	................................................................
+   600	................................................................
+   700	................................................................
+  1000	................................................................
+  1100	................................................................
+  1200	................................................................
+  1300	................................................................
+  1400	................................................................
+  1500	................................................................
+  1600	................................................................
+  1700	................................................................
+  2000	................................................................
+  2100	........................................XX......................
+  2200	................................................................
+  2300	................................................................
+  2400	................................................................
+  2500	................................................................
+  2600	................................................................
+  2700	................................................................
+  3000	................................................................
+  3100	................................................................
+  3200	................................................................
+  3300	................................................................
+  3400	................................................................
+  3500	................................................................
+  3600	................................................................
+  3700	................................................................
+  4000	................................................................
+  4100	................................................................
+  4200	................................................................
+  4300	................................................................
+  4400	................................................................
+  4500	................................................................
+  4600	................................................................
+  4700	................................................................
+  5000	XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX............
+  5100	................................................................
+  5200	................................................................
+  5300	................................................................
+  5400	................................................................
+  5500	................................................................
+  5600	................................................................
+  5700	................................................................
+  6000	................................................................
+  6100	................................................................
+  6200	................................................................
+  6300	................................................................
+  6400	................................................................
+  6500	................................................................
+  6600	................................................................
+  6700	................................................................
+  7000	................................................................
+  7100	................................................................
+  7200	................................................................
+  7300	................................................................
+  7400	................................................................
+  7500	................................................................
+  7600	................................................................
+  7700	................................................................
+   266 locations used,  highest used = 5063
+%Warn    GOHIGH  is an undefined label 
+%Warn    GOLOW  is an undefined label 
+%Warn    GOMAIN  is an undefined label 
+%Warn    HIGHSMAIN  is an undefined label 
+%Warn    MAIN  is an undefined label 
+%Warn    no-@  is an undefined label 
+%Warn    PIGEN  is an undefined label 
+%Warn    UINT-DISMISS  is an undefined label 
+    m@nÉ

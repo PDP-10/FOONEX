@@ -1,0 +1,17 @@
+
+proj code: 
+type job number to attach, job 7, or c.r. to login: 
+
+tymshare  1017  15-apr-1981
+
+.attach 7
+FROM JOB 8
+
+.cont
+
+- Reading file DSK:CFINST.SLO[3,222635] 
+- Reading file DSK:CFIO.SLO[3,222635] 
+- Reading file DSK:TAPE.SLO[3,222635] 
+page 1 line 12 %Warn    no-@  is an undefined label 
+
+>

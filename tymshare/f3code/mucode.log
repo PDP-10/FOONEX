@@ -1,0 +1,46 @@
+.R(KL10)SLOEXP
+
+  Export Version of Sloe	-  Superb Lethally Outlandish Ephemerizer
+
+:FILE filespec		processes a file
+:TAPE filespec		write output tape
+:SORT 			flag to sort tape by location
+:GRIPE			to send complaints/suggestions to Dave
+:COM			to list commands
+> >:FILE F33KLN
+- Writing file DSK:F33KLN.LST[3,222635] 
+- Reading file DSK:F33KLN.SLO[3,222635] 
+- Reading file DSK:SWINIT.SLO[3,222635] 
+- Reading file DSK:CFDEF.SLO[3,222635] 
+- Reading file DSK:CFINST.SLO[3,222635] 
+- Reading file DSK:CFIO.SLO[3,222635] 
+- Reading file DSK:TAPE.SLO[3,222635] 
+page 1 line 18 %Warn    DMOVMA2  is an undefined label 
+%Warn    no-@  is an undefined label 
+
+> >:TAPE MUCODE.BIN
+- Writing file DSK:MUCODE.BIN[3,222635] 
+
+> >:SORT
+
+> >:TAPE MUCODE.SOR
+- Writing file DSK:MUCODE.SOR[3,222635] 
+_sorting
+
+> >:SORT
+
+>
+EXIT
+
+.SEND LOIS
+TYPE LETTER:
+; PCOM v1.63 - processed: (KL10)MUCODE.LOG = (KL10)MUCODE.CTL
+; Options: DETACH  LOG NOAPPEND SUPERSEDE LICENSE 
+; Limits: TIME:60 TRULIMIT:0 
+; Status: completed.
+; Output recorded in file (KL10)MUCODE.LOG.
+
+mail waiting
+.LOGOUT
+188.47 tru
+terminal time: 0:33:18

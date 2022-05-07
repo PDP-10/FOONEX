@@ -1,0 +1,34 @@
+;microcrox for TYMSHARE system
+
+;Initialize switch settings
+.INSERT SWINIT.SLO
+
+; F2 VERSION OF MICROCODE
+
+; SET F2SW = 1 FOR F2,  F2SW = 0 FOR F3
+
+F2SW = 1
+
+XLIST
+
+FAST = 1
+.INSERT CFDEF.SLO
+
+LIST
+
+KL = 1
+
+NEWMAP = 1
+
+TIMER = 0
+
+NTP = 1
+TYMNET = 1
+
+
+CROCK = 1		;for now!!
+
+.INSERT FOO
+
+LIST-LABELS
+LIST-CORMAP

@@ -1,0 +1,752 @@
+;-------------------------------------------------------------------------------
+;
+;	Ucode for KENNEDY or PERTEC formatter and DMA tape controller.
+;
+;-------------------------------------------------------------------------------
+.REPEAT XUCODE [
+	.USE[HIGHMEM]	;If 8K u-mem present, put tape code there.
+   ]
+
+;TAPE READING AND WRITING CODE
+; A-MEM USEAGE:
+;		0	DISPATCH ADDR.
+TPMODE =	0	;DATA PACKING MODE 
+;			 BIT 0: 0=PDP-10 CORE-DUMP, 1=INDUSTRY (32-bit mode)
+;			 BIT 1: NRZI Kluge Mode (to read old CCRMA & SCI tapes)
+;		1	Timeout values for NCNTWT and FMNBWT.
+;		2	Copy of last writ to TP.WC,
+;			Status at end of tape operation.
+;		3	DON'T USE... Storing into it clobbers IR left !
+;		4	Next mem adr of xfer (STRTDC) -- 0 during non-data ops
+;		5	Remaining word count in current WCMA (STRTDC)
+;		6	Not currently used-- will be  Data Channel PC
+;		7	Interrupt state and transfer flags:
+;			1b0 = read, 1b1 = waiting for formatter to become idle
+;			1b2 = mtop interrupt (set with read)
+;			18-35 CONI bits:
+;			7b35 = pi assignment. 10 = interrupt flag.
+
+;MAPF values
+
+TP.RS = 4	;read status (from formatter)
+TP.RC = 2	;read control (controller status and un-fifo'd read data)
+
+TP.WF = 2	;write formatter (send ctrl bits to formatter)
+TP.WM = 4	;write mode control reg.
+TP.WC = 1	;write control reg.
+TP.MR = 5	;give Master Reset
+TP.WMA = 3	;write (load) the CNTMA reg. (count and MA)
+
+KNYCLR:  ;RESET the formatter and drive.
+
+KNYRS1:	START-OUT ALU[0]  DEST[IOD] $
+	 	;Turn off "FORMATTER ENABLE"
+	MAPF[TP.WF] LONG POPJ $
+
+   ;725 - OBSOLETE VERSION OF READ
+
+  .PAIR
+  UIOTRP[MUUO] $
+
+TAPERD:	D[17] MASK[33.] DEST[Q] SHORT $
+		;CLEAR OUT READ, MTAPE AND INTERRUPT FLAGS.
+	ALU[Q] DEST[7] DEST-A-MEM NORM $
+	D[CONST 14] ROT[6] DEST[IR-ADR] NORM PUSHJ[KNYRGO] $
+		;Fake a word count of 1400
+	D[MA] DEST[4] DEST-A-MEM NORM PUSHJ[TRP2] $
+	ALU[Q] DEST[AC] ACSEL[AC] NORM JUMP[GOMAIN] $
+		;Move status into AC.
+
+; KNYRGO -- Called to start tape motion on reads.
+KNYRGO:	NORM PUSHJ[DCINIT] $
+		;Init the data channel.
+	D[10 + TPMODE]  ROT[1] MASK[1] DEST[AR] NORM $
+		;Get the 32-bit mode flag.
+	START-OUT D[AR] ROT[35. - 29.] DEST[IOD] NORM $
+		;Position it for the hardware.
+	MAPF[TP.WM] D[CONST 0] DEST[Q]   C-OUT JUMP[KNYGOA] $
+	 	;Send command to formatter.
+
+  ;Send a tape-motion command to the formatter.  Call with command bits
+  ;  (except for FMTR ENABLE and GO) in Q.  Clobbers Q, HOLD, AR
+KNYGOA:	START-IN D[CONST 1] ROT[35. - 26.] ALU[DORQ] DEST[Q] PUSHJ[FMNBWT] $
+	  ;Add the FMTR ENBL bit to the command word.
+	  ;Wait for FORMATTER NOT BUSY.
+	START-OUT D[CONST 1] ROT[35. - 33.] ALU[D#Q] DEST[IOD] C-OUT $
+	  ;Set the GO bit to fmtr (except: on RWD, CLEAR the bit !)
+	MAPF[TP.WF] START-OUT D[CONST 1] ROT[35. - 33.] ALU[-D&Q] DEST[IOD] $
+	  ;Send command word again, without GO bit.
+	MAPF[TP.WF] LONG POPJ $
+
+
+FMNBWT:	  ;Wait for formatter to be not busy.
+	  ;Return tape status in MEM;  timeout in 164 msec.
+	  ;Duration of loop should be 10 usec. (for TRCHECK).
+	START-IN D[CONST 1] ROT[14.] DEST[AR] NORM $
+FMNBW1:	MAPF[TP.RS] D[IOD] DEST[HOLD] C800 $ ;GET STATUS BITS.
+	D[AR] ALU[D-1] DEST[AR] C550 OBUS<0 JPOP[FMTHNG] $
+	D[CONST 14.] LLOAD C600 $
+	C500 LOOP[.] $
+	  ;We execute this instr. 15. times, for a 7.5 usec delay.
+	START-IN D[MEM] ROT[7] C550 -OBUS<0 JUMP[FMNBW1] $
+	  ;check for 'BUSY'
+	D[AR] DEST[1] DEST-A-MEM NORM POPJ $
+	  ;Save ending timeout count (for TRCHECK)
+FMTHNG:	NORM PUSHJ[KNYRS1] $
+		;Blast the formatter.
+	D[CONST 42] ROT[30.] DEST[AC] JPOP[GOMAIN] $
+		;Return error code for 'hung fmtr' and abort.
+
+NCNTWT:	  ;Wait for TP CNT GO to be off.
+	  ;Return tape status in MEM;  timeout in 164 msec.
+	  ;Duration of loop should be 10 usec. (for TRCHECK).
+NCNTW1:	MAPF[TP.RC] D[IOD] DEST[HOLD] C800 $ ;GET STATUS BITS.
+	D[AR] ALU[D-1] DEST[AR] C550 OBUS<0 POPJ $
+	  ;Exit if we time out-- probably just a short record.
+	D[CONST 14.] LLOAD C600 $
+	C500 LOOP[.] $
+	  ;We execute this instr. 15. times, for a 7.5 usec delay.
+	START-IN D[MEM] ROT[19.] C550 OBUS<0 JUMP[NCNTW1] $
+	  ;check for not TP CNT GO
+	D[AR] DEST[1] DEST-A-MEM NORM POPJ $
+	  ;Save ending timeout count (for TRCHECK)
+
+
+;INITIALIZE DATA CHANNEL
+
+DCINIT:	START-OUT D[CONST 8.] LLOAD NORM $
+		;Give TP MR
+	MAPF[TP.MR] START-OUT ALU[0] DEST[IOD] C600 $
+		;Load 0 into cntma (the COUNT and MA registers)
+	MAPF[TP.WMA] START-OUT D[MASK 12.] ROT[35. - 13.] DEST[IOD] C600 $
+		;Load cntma again-- since COUNT is currently  0, this will 
+		; force BUF CNT to be 0.  But, we put -1 into COUNT this
+		; time, which, with BUF CNT = 0, will make BUF CNT load
+		; properly when STARTDC loads cntma.
+	MAPF[TP.WMA] START-OUT D[CONST 2] DEST[IOD] C600 $
+		;Set MBUSY
+	MAPF[TP.WC] C550 LOOP[.] $
+		;Wait for a few usec.  This clears mem rq.
+	START-OUT ALU[0] DEST[IOD] NORM $
+		;Clr MBUSY
+	MAPF[TP.WC] C600 ALU[0] DEST[2] DEST-A-MEM POPJ $
+		;Zero out copy of TP.WC contents.
+
+;START DATA CHANNEL to write or read a record. Transfer up to C(IR-ADR) words;
+;  starting address is in A-MEM[4].
+;  This routine is for interrupt type transfers - does not wait for
+;  transfer to complete, but enables for not FMRT BSY and not TP CNT GO.
+
+INT-STARTDC:
+	D[IR] MASK[18.] NORM DEST[5] DEST-A-MEM PUSHJ[DCGO] $
+	  ;Set word count. (Better not be zero.)
+	MAPF[0] D[CONST 12] ROT[12.] DEST[Q] NORM $
+	  ;MAPF[0] FOR DCGO. SETUP BITS FOR -FMTR BSY AND -TP CNT GO.
+	START-OUT D[12] ALU[DORQ] DEST[IOD] C600 JUMP[WCPOPJ] $
+	  ;Enable for -FMTR BSY and -TP CNT GO.
+
+
+
+;START DATA CHANNEL to write or read a record.  Transfer up to C(IR-ADR) words;
+;  starting address is in A-MEM[4].
+;  This is used for non-interrupt transfers. Waits for transfer completion.
+
+STRTDC:	D[IR] MASK[18.] NORM DEST[5] DEST-A-MEM $
+		;Initialize word count
+	D[CONST 1] ROT[14.] DEST[1] DEST-A-MEM NORM $
+		;Initialize timeout count (for NCNTWT and FMNBWT)
+STDC1:	MAPF[0] C600 PUSHJ[DCGO] $
+	  ;start xfer -- MAPF is relevant if we looped back here on READ
+	MAPF[0] START-IN D[11] DEST[AR] C600 PUSHJ[NCNTW1] $
+	  ;Wait for TP CNT GO to be off (continue with current timeout count)
+	  ;MAPF is relevant if we came from DCGWR below.
+	D[17] C550 -OBUS<0 JUMP[STDC1] $
+	  ;Jump if this is a WRITE operation.
+	START-OUT D[AR] C550 -OBUS<0 JUMP[STDC1] $
+	  ;READ op, so set MEM RQ to store last word.
+	  ;Jump unless we timed out waiting for end of last COUNT.
+
+WCDONE:	MAPF[0] START-IN D[11] DEST[AR] C600 JUMP[FMNBW1] $
+	  ;Enter FMNBWT with the timeout count left from NCNTWT.
+	  ;The MAPF sets MEM RQ if we have fallen in from previous instr.
+DCGO:	D[15] DEST[Q AR HOLD] C550 OBUS=0 JPOP[WCDONE] $
+		;Get remaining word count. If =0, we are done.
+	D[CONST 14] ROT[6] ALU[Q-D] C550 OBUS<0 JUMP[DCG1] $
+		;Jump if it is less than 1400
+	 D[CONST 14] ROT[6] DEST[Q AR] NORM $	
+		;It is not. Use 1400 instead.
+DCG1:	D[MEM] ALU[D-Q] DEST[5] DEST-A-MEM NORM $
+		;Decrement remaining WC by amount of current WC.
+	D[14] DEST[HOLD] SHORT $
+		;Get current starting adr
+	D[MEM] ALU[D+Q] DEST[4] DEST-A-MEM NORM $
+		;Increment it by current WC.
+	D[10 + TPMODE] C550 OBUS<0 JUMP[. + 2] $
+		;Are we in 32-bit mode ?  Jump if so.
+	 D[AR] ROT[2] ALU[D+Q] DEST[AR] NORM JUMP[. + 2] $
+		;Form byte count (=5*word count).
+	 D[AR] ROT[2] ALU[D] DEST[AR] NORM $
+		;Form byte count (=4*word count).
+	D[AR] ALU[D-1] DEST[AR] NORM $
+		;Adjust count to be right for hdwr.
+	D[AR] ROT[35. - 13.] DEST[Q] NORM $
+		;Align count at bit 13.
+	START-OUT D[MEM] MASK[20.] ALU[DORQ] DEST[IOD] NORM $
+		;Include mem addr and load into COUNT, MA
+		;Also sets BUF CNT to 0 (if IN) or 5 (if OUT)-- this
+		; depends on COUNT not =0 and BUF CNT not = 4 or 5
+	MAPF[TP.WMA] D[CONST 2] DEST[2] DEST-A-MEM C600 $
+		;Remember what we are about to set bits in TP.WC to so we
+		; can set the enable bits in TP.WC later.
+	START-OUT D[CONST 2] DEST[IOD] C600 $
+		;Set M BUSY
+	MAPF[TP.WC] START-OUT C600 $
+		;Set CNT GO
+	MAPF[13] D[17] C600 OBUS<0 POPJ $
+		;Return if this is a READ op.
+DCGWR:	START-OUT D[15] C550 -OBUS=0 POPJ $
+		;Set MEM RQ to fetch first word.
+		;Return unless this is the last WCMA in the record.
+	MAPF[0] D[CONST 12] DEST[2] DEST-A-MEM C600 $
+		;Rembember what we set TP.WC to so we can set enable bits
+		; later.
+	START-OUT D[CONST 12] DEST[IOD] NORM  $
+		;Last one.  Set TP ENB LAST BYTE as well as M BUSY
+WCPOPJ:	MAPF[TP.WC] C600 POPJ $
+
+
+  ;Routine to gather ending status for a tape operation.
+  ;Returns status + ending MA in Q
+
+ITRCHK:	START-IN NORM $
+	MAPF[TP.RS] D[IOD] DEST[HOLD] C800 JUMP[TRCHKB] $
+	  ;Get tape status in MEM and go assemble status in Q.
+
+  ;Here to do the data xfer for a non-interrupt read operation.
+TRP2:	D[17] DEST[Q] SHORT $
+	  ;SET READ FLAG IN A-MEM[7]
+	D[CONST 1] ROT[35.] ALU[DORQ] DEST[7] DEST-A-MEM NORM PUSHJ[STRTDC] $
+	  ;Flag op. as a READ, start the data channel
+	JUMP[TRCHKB] $
+
+TRCHECK:	
+	PUSHJ[FMNBWT] $
+	  ;wait for formatter not busy.
+TRCHKB:	D[MEM] ROT[32.] C550 -OBUS<0 JUMP[TRERR] $
+	  ;check for hard error status.
+TRCHA:	D[MEM] ROT[33.] C550 -OBUS<0 JUMP[TREOF] $
+	  ;Jump if EOF seen by formatter
+	ALU[0] DEST[Q] NORM $
+		;Flag no s.
+TRDONE:	START-IN NORM $
+	MAPF[TP.RC] START-IN D[IOD] DEST[AR] C600  $  
+	  ;Get data channel status bits.
+	MAPF[3] D[IOD] MASK[21.] ALU[DORQ] DEST[Q 5] DEST-A-MEM C800 $
+	  ;Include ending MA value in status info.
+	D[AR] ROT[19.] C550 -OBUS<0 JUMP[TPMAOK] $
+	  ;If TP CNT GO is off,
+	START-IN D[AR] ROT[24.] MASK[3] ALU[D-1] C550 -OBUS=0 JUMP[TPMAOK] $
+	  ;  or if BUF CNT is not =1, then right no. of words were stored.
+	 ALU[Q-1] DEST[Q 5] DEST-A-MEM NORM $
+	   ;Otherwise, 1 extra word was stored, so decrement ending MA.
+
+;Note: we no longer support NRZI kludge mode, and no longer
+; clear part of read buffer that no data was read into.
+
+TPMAOK:	D[15] DEST[Q] NORM POPJ $	
+	  ;Recover ending status and return.
+
+TREOF:	D[CONST 60] ROT[30.] DEST[Q]  NORM JUMP[TRDONE] $
+TRERR:	D[CONST 50] ROT[30.] DEST[Q] NORM JUMP[TRDONE] $
+	  ;Flag hard read error to progm.
+
+	.PAIR
+	UIOTRP[MUUO] $
+TAPEMT:	;OPCODE 726 -- MTAPE FUNCTIONS.
+	;Set/Clear NRZI kludge mode used to be fns 60/61.
+
+	NORM PUSHJ[. + 2] $
+	NORM JUMP[GOMAIN] $
+
+	D[MA] DEST[Q] COND[OBUS=0] JUMP[TAPERW] C550 $
+	D[CONST 1] ALU[D-Q] COND[OBUS=0] PUSHJ[TWREOF] C550 $
+	D[CONST 13] ALU[D-Q] COND[OBUS=0] PUSHJ[TERASE] C550 $
+	D[CONST 50] ALU[D-Q] COND[OBUS=0] JUMP[TPSETIND] C550 $
+	  ;Code ?, set industry compatable mode.
+	D[CONST 51] ALU[D-Q] COND[OBUS=0] JUMP[TPSETDMP] C550 $
+	  ;Code ?, set PDP-10 dump mode.
+	D[CONST 5] ALU[D-Q] COND[OBUS=0] PUSHJ[TAPEFR] C550 $
+	D[CONST 6] ALU[D-Q] COND[OBUS=0] PUSHJ[TAPEBR] C550 $
+	D[17] MASK[3] -OBUS=0 C550 JUMP[INT-MT] $
+		;JUMP IF THIS IS INTERRUPT VERSION OF INSTRUCTION.
+	ALU[0] DEST[4] DEST-A-MEM NORM PUSHJ[TRCHECK] $
+	    ;Wait for op. to finish and get ending status in Q.
+	    ; The 0 in A-MEM[4] prevents TRCHECK from clearing read buf !
+	ALU[Q] DEST[AC] NORM JPOP[GOMAIN] $
+	    ;Return status to caller in his AC (same as READ)
+
+
+TWREOF:	 ;WRITE AN END OF FILE (TAPE MARK)
+	D[CONST 1] ROT[35. - 28.] DEST[Q] NORM $ 
+	  ;Get WFM (WRITE EOF) cmd bit for formatter
+TERAS1:	D[CONST 1] ROT[35. - 22.] ALU[DORQ] DEST[HOLD] NORM JUMP[KNYMTP] $  
+	  ;Add WRT CMD bit and start command.
+
+TERASE:	D[CONST 3] ROT[35. - 29.] DEST[Q] NORM JUMP[TERAS1] $
+	  ;ERASE A 3.75" GAP ON THE TAPE (get WFM and ERASE bits for formatter)
+
+KNYMTP:	START-OUT NORM $
+	  ;Give TP MR to clear mode, error status
+	MAPF[TP.MR] D[MEM] DEST[Q] C-OUT PUSHJ[KNYGOA] $
+	  ;Put command bits in Q and start formatter.
+	START-OUT D[CONST 1] ROT[35. - 26.] DEST[IOD] NORM $
+	   	;Clear all command bits except FORMATTER ENABLE.
+	MAPF[TP.WF] ALU[-1] DEST[Q] LONG POPJ $
+	  	;Put -1 in Q in case we are returning to TAPEMT.
+
+TAPERW:	;REWIND
+	D[CONST 24] DEST[HOLD] NORM JUMP[KNYMTP] $
+	  ;RWD AND GO BITS -- KNYGOA WILL DELETE THE GO BIT !
+
+TAPEFR:	;SKIP FORWARD ONE RECORD.
+	D[CONST 0] DEST[HOLD] NORM JUMP[KNYMTP] $
+	  ;START A READ, BUT IGNORE THE DATA.
+
+TAPEBR:	;SKIP BACKWARD ONE RECORD.
+	D[CONST 1] ROT[35. - 27.] DEST[HOLD] NORM JUMP[KNYMTP] $
+	  ;JUST A READ BACKWARD, WITH THE DATA IGNORED.
+
+TPSETIND:	;Set industry compatable mode
+	D[10 + TPMODE] DEST[Q] NORM $	;Stupid A-MEM
+	D[CONST 1] ROT[35.] ALU[DORQ] DEST[TPMODE] DEST-A-MEM JUMP[GOMAIN] $
+	  ;Set appropriate bit and done
+TPSETDMP:	;Set PDP-10 Dump Mode
+	D[10 + TPMODE] DEST[Q] NORM $	;Stupid A-MEM
+	D[CONST 1] ROT[35.] ALU[-D&Q] DEST[TPMODE] DEST-A-MEM JUMP[GOMAIN] $
+	  ;Clear industry compatable mode and done.
+
+INT-MT:	ALU[0] DEST[4] DEST-A-MEM NORM $
+	  ;ZERO COUNT REGISTER TO BE SAFE
+	D[17] MASK[33.] DEST[Q] SHORT $
+	  ;GET READY TO SET READ BIT, MTAPE BIT, AND WAITING FOR FORMATTER BIT.
+	D[CONST 7] ROT[33.] ALU[DORQ] DEST[7] DEST-A-MEM NORM $
+	  ;READ BIT SO INTERRUPT CALLS ITRCHK, MTAPE BIT SO NO LENGTH ERROR CHECK,
+	  ; FORMATTER INTERRUPT BIT SO DOESN'T MESS AROUND WITH TRANSFER COUNTS.
+
+	ALU[0] DEST[2] DEST-A-MEM NORM $
+	  ;NOT WRITING ANY BITS TO TP.WC, SO ZERO THIS OUT.
+	  ;(DON'T REMEMBER REAL LAST BITS WRITTEN, SINCE A-MEM[2] IS USED
+	  ; FOR BOTH REMEMBERING TP.WC VALUES AND ENDING STATUS.)
+	D[CONST 2] ROT[12.] DEST[IOD] START-OUT NORM $
+	  ;ENABLE FOR FORMATTER NOT BUSY
+	MAPF[TP.WC] C600 JPOP[GOMAIN] $
+	  ;AND RETURN FROM INSTRUCTION.
+
+	.PAIR
+	UIOTRP[MUUO]
+
+TAPERS:	;OPCODE 727 -- READ STATUS BITS FROM TAPE DRIVE.
+
+.DEFINE TSS[A B]   
+[  ;MOVE BIT A OF AR TO BIT B OF Q.
+  	D[AR] ROT[1 + A] MASK[1] DEST[HOLD] NORM $
+	D[MEM] ROT[35. - B] ALU[DORQ] DEST[Q] NORM $ ]
+
+	START-IN NORM $
+	  ;NEED TO CHECK FOR FORMATTER BUSY
+	MAPF[TP.RS] D[IOD] ALU[NOTD] DEST[AR] C800 $
+	  ;GET STATUS BITS
+	D[AR] ROT[7] OBUS<0 C550 JUMP[TAPERS1] $
+	  ;JUMP IF FORMTTER STILL BUSY, DON'T TOUCH AND RUIN XFER.
+	  ;JUST USE THESE BITS.
+
+	START-OUT ALU[0] DEST[IOD] NORM $
+	  ;CLEAR THE MODE CTRL REGISTER.
+	MAPF[TP.WM] START-OUT 
+	 D[CONST 1] ROT[35. - 26.] DEST[IOD] C-OUT $
+	  ;ENABLE THE FORMATTER.
+	MAPF[TP.WF] START-IN ALU[0] DEST[Q] C800 $
+	  ;READ STATUS BITS.
+	MAPF[TP.RS] D[IOD] ALU[NOTD] DEST[AR] C800 $
+	  ;NOW RE-ARRANGE THE BITS
+TAPERS1:
+	TSS[ 3 30. ]	;ON LINE
+	TSS[ 11. 31. ]	;REWINDING
+	TSS[ 4 32. ]	;FILE PROTECT
+	TSS[ 12. 33. ]	;LOAD POINT
+	TSS[ 10. 34. ]	;READY
+	TSS[ 34. 35. ]	;END OF TAPE
+	ALU[Q] DEST[MEMSTO] NORM
+		COND[-MA-AC] LBJUMP[HIGHSMAIN] $
+
+
+	.PAIR
+	UIOTRP[MUUO] $
+TAPENR:	;730, AC/COUNT.  READ WHOLE RECORD, STORING UP TO COUNT WORDS STARTING AT EFF ADR.
+	 ;SWAP AC AND IR, THEN DO TAPERX.
+	D[IR] DEST[O_AC IR-ADR] ACSEL[AC]  NORM JUMP[TAPERX] $ 
+
+	.PAIR
+	UIOTRP[MUUO] $
+TAPERX:	;732 - (AC) IS START ADDR., E IS # OF WORDS TO READ.
+	D[17] MASK[33.] DEST[Q] SHORT $
+	  ;CLEAR ALL FLAG BITS IN A-MEM[7]
+	ALU[Q] DEST[7] DEST-A-MEM NORM PUSHJ[KNYRGO] $ ;GET TAPE STARTED.
+	D[17] MASK[3] -OBUS=0 C550 JUMP[INT-READ] $
+		;JUMP IF WE ARE TO DO THE INTERRUPT FLAVOR OF INSTRUCTION.
+	ALU[AC] ACSEL[AC] DEST[4] DEST-A-MEM PUSHJ[TRP2] NORM $ ;READ REC.
+	D[AR] ROT[16.] -OBUS<0 JUMP[TNRP3] $
+		;Was record longer than word count ?
+		;Jump unless FIFO RDY FOR BUF is on, indicating
+		;  that tape supplied more bytes after count ran out.
+	D[CONST 44] ROT[30.] ALU[DORQ] DEST[Q] NORM $ ;YES, SET BIT 3.
+TNRP3:	ALU[Q] DEST[AC] ACSEL[AC] JPOP[GOMAIN] NORM $  ;NO, NOT TOO LONG.
+		;MOVE STATUS INTO AC.
+
+;HERE FOR INTERRUPT FLAVOR OF TAPE READ INSTRUCTIONS, WHERE PI ASSIGNMENT
+; IS NON-ZERO.
+
+INT-READ:
+	D[17] MASK[34.] DEST[Q] NORM $
+		;GET PLACE WHERE TO SET READ FLAG, CLEAR INTERRUPT STATE FLAG
+		; IN BIT 1.
+	D[CONST 1] ROT[35.] ALU[DORQ] DEST[7] DEST-A-MEM JUMP[INT-WRITE] NORM $
+		;SET READ FLAG IN A-MEM[7].
+		;REST OF STUFF SAME AS FOR WRITE.
+
+	.PAIR
+UTAPWR:	UIOTRP[MUUO] $
+
+TAPEWR:	;731, AC/ADR, E/+COUNT.  WRITE RECORD OF +COUNT
+	; WORDS, DATA FROM ADR.
+	;SET AC:=0 IF OPERATION COMPLETED SUCCESSFULLY.
+	; SET AC:=<SETZ> + HIGHEST ADR READ IF REACHED
+	; EOT DURING OPERATION (CURRENTLY THIS IS THE ONLY
+	; ERROR CONDITION.)  OPERATION IS COMPLETED EVEN
+	; IF EOT IS PASSED.
+
+
+	D[17] MASK[33.] DEST[Q] NORM $
+		;Setup to clear the read, mtape, and interrupt state flags.
+	ALU[Q] DEST[7] DEST-A-MEM NORM PUSHJ[DCINIT] $
+		;Init. the data channel.
+	D[10 + TPMODE]  ROT[1] MASK[1] DEST[AR] NORM $
+		;Get the 32-bit mode flag.
+	D[AR] ROT[35. - 29.] DEST[Q] NORM $
+		;Position it for the hardware.
+	START-OUT D[CONST 1] ROT[35. - 28.] ALU[DORQ] DEST[IOD] NORM $
+		;Set the OUT bit.
+	MAPF[TP.WM] D[CONST 1] ROT[35. - 22.] DEST[Q] PUSHJ[KNYGOA] $
+		;Issue WRITE command to formatter.
+	D[17] MASK[3] -OBUS=0 C550 JUMP[INT-WRITE] $
+		;If non-zero PI assignment, do the interrupt form of the
+		; instruction.
+	ALU[AC] DEST[4] DEST-A-MEM NORM PUSHJ[STRTDC] $
+		;Get word count and start the channel.
+	D[MEM] ROT[32.] -OBUS<0 JUMP[TWERR] $ ;Test HARD ERR.
+	ALU[0] DEST[AC] NORM $ ;We return 0 in AC if no EOT.
+	D[MEM] ROT[34.] C550 OBUS<0 JUMP[GOMAIN] $
+	 ;If no EOT seen, all done.
+	D[CONST 60] ROT[35. - 5] ALU[DORAC] DEST[AC] NORM JUMP[GOMAIN] $
+	 ;Turn on bit 0 to indicate EOT seen during operation.
+
+;Here for the case where PI assignment is non-zero - just start the
+; transfer and return. Also come here at end of INT-READ.
+
+INT-WRITE:
+	ALU[AC] DEST[4] DEST-A-MEM PUSHJ[INT-STARTDC] NORM $
+	  ;PUT COUNT IN AMEM[4], START THE TRANSFER
+	JUMP[GOMAIN] NORM $
+	  ;AND RETURN FROM THIS INSTRUCTION WITHOUT CHANGING AC.
+
+TWERR:  ;;Error occurred during write.
+
+	NORM PUSHJ[KNYRS1] $ 
+	  ;Blast the tape formatter and drive 
+	D[CONST 50] ROT[30.] DEST[AC] JUMP[GOMAIN] $
+	  ;And give error return to program. We no longer
+	  ;do backspace erase gap rewrite at micro-level, MACRO level
+	  ; must do this.
+
+
+;TAPE MICRO-INTERRUPT ROUTINE.
+
+TAPINT:	START-OUT D[12] DEST[IOD] NORM $
+	MAPF[TP.WC] START-IN C600 $
+	  ;CLEAR ENABLES
+	MAPF[TP.RS] D[IOD] DEST[AR] C800 $
+	  ;GET STATUS IN AR FOR CHECKING.
+	D[17] ROT[1] OBUS<0 C550 JUMP[FMTDON] $
+	  ;JUMP IF EXPECTING A -FMT BUSY INTERRUPT
+	D[17] -OBUS<0 C550 JUMP[TAPINTWRT] $
+	  ;JUMP IF THIS XFER IS A WRITE.
+	START-OUT $
+	  ;THE MAPF[0] WRITES LAST WORD TO MEMORY.
+	MAPF[0] D[AR] ROT[7] OBUS<0 C550 JUMP[INT-RDDONE] $
+	  ;IF FORMATTER NO LONGER BUSY, THEN WE READ RECORD SHORTER
+	  ; THAN THE COUNT, SO FORGET REST OF TRANSFER.
+
+;HERE ALWAYS IF WRITE OR IF READ AND FORMATTER IS STILL GOING.
+; MAY EITHER BE END OF TRANSFER OR TIME TO CONTINUE CURRENT LONG RECORD.
+; TAPE COUNT GO HAS TO BE OFF SINCE ITS EITHER WRITE OR READ WITH FORMATTER
+; IDLE.
+
+TAPINTWRT:
+	D[15] OBUS=0 C550 JUMP[TAPEXFRDON] $
+	  ;IF WE HAVE EXHAUSED COUNT, TRANSFER IS DONE.
+	  ; COME BACK TO FMTDON WHEN -FMT BUSY COMES TRUE.
+	PUSHJ[DCGO] NORM $
+	  ;START UP NEXT PART OF THE TRANSFER
+	MAPF[0] D[CONST 12] ROT[12.] DEST[Q] JUMP[TAPINTENB] NORM $
+	  ;MAPF 0 for DCGO. Enable for -FMTR BSY and -TP CNT GO.
+TAPEXFRDON:
+	D[17] DEST[Q] SHORT $
+	  ;GET DATA TO OR IN WAITING FOR FORMAT DONE BIT
+	D[CONST 1] ROT[35. - 1] ALU[DORQ] DEST[7] DEST-A-MEM NORM $
+	  ;WE CONTINUE AT FMTDON ON NEXT INTERRUPT.
+	D[CONST 02] ROT[12.] DEST[Q] NORM JUMP[TAPINTENB] $
+	  ;BITS FOR JUST -FMT BUSY INTERRUPT ENABLE
+
+TAPINTENB:;HERE WITH BITS FOR INTERRUPT ENABLES IN Q.
+	D[12] ALU[DORQ] DEST[IOD] START-OUT NORM $
+	  ;ENABLE FOR BITS IN Q.
+	MAPF[TP.WC] C800 JUMP[UINT-DISMISS] $
+	  ;AND RETURN FROM THIS MICROINTERRUPT.
+
+FMTDON:	D[AR] ROT[7] -OBUS<0 C550 JUMP[.] $
+	  ;HANG IF FORMATTER IS STILL BUSY.
+	D[17] -OBUS<0 C550 JUMP[INT-WRTDONE] $
+	  ;JUMP IF ITS NOT A READ.
+
+;HERE ALSO IF FORMATTER SHUT DOWN BECAUSE NOT ENOUGH DATA ON TAPE TO SATISFY
+; THE CHANNEL'S COUNT.
+
+INT-RDDONE:
+	PUSHJ[ITRCHK] NORM $
+	  ;GET STATUS OF XFER INTO Q
+	D[17] ROT[2] OBUS<0 JUMP[INT-RDWCOK] C550 $
+	  ;IF NON-DATA OPERATION, DON'T CHECK FOR WORD COUNT.
+	D[AR] ROT[16.] -OBUS<0 JUMP[INT-RDWCOK] C550 $
+	  ;JUMP IF NO PROBLEM WITH WORD COUNT
+	D[CONST 44] ROT[30.] ALU[DORQ] DEST[Q] NORM $
+	  ;RECORD WAS LONGER THAN WORD COUNT, SET LENGTH ERROR.
+INT-RDWCOK:
+	ALU[Q] DEST[2] DEST-A-MEM NORM $
+	  ;STORE STATUS IN AMEM[2] FOR THE TRANSFER STATUS READING INST.
+TAPEPI:	D[17] DEST[Q] SHORT $
+	  ;GET CONI WORD.
+	D[CONST 10] ALU[DORQ] DEST[7] DEST-A-MEM NORM $
+	  ;SET INTERRUPT BIT FOR CONSO
+	D[17] DEST[Q AR] MASK[3] -OBUS=0 JUMP[PIGEN] C550 $
+	  ;IF PI CHANNEL ASSIGNED, GO INTERRUPT.
+	JUMP[UINT-DISMISS] NORM $
+	  ;CLEARED PI ASSIGNMENT OUT DURING XFER?
+
+INT-WRTDONE:
+	ALU[0] DEST[2 Q] DEST-A-MEM NORM $
+	  ;CLEAR OUT ACCUMULATED STATUS
+	D[AR] ROT[32.] OBUS<0 JUMP[. + 2] C550 $
+	  ;JUMP IF NO HARD ERROR
+	D[CONST 5] ROT[33.] ALU[DORQ] DEST[2 Q] DEST-A-MEM PUSHJ[KNYRS1] $
+	  ;HARD ERROR, SET 1B0 FOR ANY ERROR, 1B2 FOR HARD WRITE ERROR
+	D[AR] ROT[34.] OBUS<0 C550 JUMP[TAPEPI] $
+	  ;IF EOT NOT SET, JUST CAUSE PI ON PROPER CHANNEL.
+	D[CONST 6] ROT[33.] ALU[DORQ] DEST[2] DEST-A-MEM JUMP[TAPEPI] NORM $
+	  ;EOT, SET IT IN AMEM AND GO CAUSE PI
+
+	.PAIR
+	UIOTRP[MUUO] $
+;TPCONI INSTRUCTION, OPCODE 733.
+; 10 MEANS INTERRUPT HAS BEEN REQUESTED.
+; 33-35 PI ASSIGNMENT.
+
+
+TPCONIBTS:
+	MAPF[TP.RC] D[IOD] ALU[D&Q] DEST[Q] C800 START-IN $
+	  ;1B18 = OVERRUN, CLEARED ON MASTER RESET.
+	  ;1B19 = CONTROLLER BUSY.
+	MAPF[TP.RS] D[IOD] DEST[AR] C800 $
+	  ;GET FORMATTER STATUS IN AR
+	D[AR] ROT[7] OBUS<0 C550 POPJ $
+	  ;RETURN IF FORMATTER IS IDLE.
+	D[CONST 1] ROT[35. - 20.] ALU[DORQ] DEST[Q] NORM POPJ $
+	  ;FORMATTER IS BUSY, SET THE BIT.
+	  ;1B20 = FORMATTER BUSY
+
+TPCONI:	START-IN D[CONST 6] ROT[15.] DEST[Q] PUSHJ[TPCONIBTS] NORM $
+	  ;GET THE HI ORDER CONI BITS
+	D[17] MASK[15.] ALU[DORQ] DEST[MEMSTO] NORM COND[-MA-AC] LBJUMP[HIGHSMAIN] $
+	  ;STORE CONI BITS INTO EA.
+	  ;ALSO STORE INTERRUPT STATE BITS FOR DEBUGGING.
+
+
+	.PAIR
+	UIOTRP[MUUO] $
+;TPCONO INSTRUCTION, OPCODE 734.
+; 100 MEANS CLEAR FORMATTER.
+; 20 MEANS CLEAR INTERRUPT FLAG.
+; 33-35 ARE TO SET PI ASSIGNMENT.
+
+TPCONO:	D[IR] ROT[29.] OBUS<0 C550 PUSHJ[TAPCLR] $
+	  ;IF 100 BIT IS SET, CLEAR THE FORMATTER.
+	D[CONST 7] ALU[NOTD] DEST[Q] SHORT $
+	  ;MASK TO CLEAR PI ASSIGNMENT
+	D[IR] ROT[31.] -OBUS<0 C550 JUMP[. + 2] $
+	  ;JUMP IF NOT CLEARING IT
+	D[CONST 17] ALU[NOTD] DEST[Q] SHORT $
+	  ;CLEARING INTERRUPT FLAG, GET DIFFERENT MASK
+	D[17] ALU[D&Q] DEST[Q] SHORT $
+	  ;CLEAR OUT PI ASSIGNMENT AND MAYBE INTERRUPT FLAG
+	D[IR] MASK[3] ALU[DORQ] DEST[7] DEST-A-MEM NORM JUMP[GOMAIN] $
+	  ;STORE PI ASSIGNMENT IN A-MEM[7] AND RETURN FROM INSTRUCTION.
+
+TAPCLR:	PUSHJ[DCINIT] NORM $
+	  ;GET RID OF INTERRUPT ENABLES, RESET CHANNEL
+	JUMP[KNYCLR] NORM $
+	  ;AND CLEAR FORMATTER AND DRIVE.
+
+	.PAIR
+	UIOTRP[MUUO] $
+;TPCNSO - OPCODE 735.
+; SKIP IF BITS IN EA ARE SET.
+; SEE TPCONI FOR BIT ASSIGNMENTS.
+
+TPCNSO:	START-IN D[CONST 6] ROT[15.] DEST[Q] PUSHJ[TPCONIBTS] NORM $
+	  ;GET THE HI ORDER BITS INTO Q.
+	D[17] MASK[18.] ALU[DORQ] DEST[Q] SHORT $
+	  ;GET WHAT BITS ARE.
+	D[MA] ALU[D&Q] OBUS=0 C550 JUMP[MAIN] $
+	  ;IF NO MASKED BITS ARE 1, DON'T SKIP.
+	DOSKIP $
+	  ;ELSE SKIP.
+
+;LEAVE OUT TPCNSZ, DON'T WASTE THE SPACE.
+
+	.PAIR
+	UIOTRP[MUUO] $
+;TPDATI - OPCODE 736
+;RETURNS TRANSFER STATUS (BITS, ENDING ADDRESS) TO C(EA).
+
+TPDATI:	D[12] DEST[MEMSTO] COND[-MA-AC] LBJUMP[HIGHSMAIN] $
+	  ;STORE STATUS SAVED ON LAST XFER TO C(EA)
+
+
+
+
+;BOOTSTRAP LOADER FOR MACROCODE.
+
+ .ORG[5000]
+
+MBOOT:	JPOP[. + 1] $
+	 ;The . + 1 is to make the lights look familiar for the operator...
+	JUMP[MBOOTA] $
+	 ;MBOOTA takes us to MBOOTH, whether or not that is in high u-mem.
+
+.REPEAT XUCODE [ ;If 8K u-mem, put this code in upper 4K
+AREA50 = .
+ .USE[HIGHMEM]
+ ] ;XUCODE
+
+MBOOTH:	D[CONST 7] DEST[DEV-ADR] PUSHJ[KNYCLR] $ ;RESET TAPE CTRL
+	ALU[0] DEST[HI-ABS-MA] PUSHJ[CCLR] NORM $
+	D[CONST 1] ROT[18.] DEST[HI-ABS-MA] PUSHJ[CCLR] NORM $
+	D[CONST 2] ROT[18.] DEST[HI-ABS-MA] PUSHJ[CCLR] NORM $
+	D[CONST 3] ROT[18.] DEST[HI-ABS-MA] PUSHJ[CCLR] NORM $
+	D[CONST 7] DEST[DEV-ADR] CYLEN[LONG] PUSHJ[KNYRGO] $
+		;SELECT DEVICE 7, START READ.
+	NORM PUSHJ[KNYWAIT] $
+	MAPF[TP.RC] START-IN D[IOD] ALU[NOTD] DEST[HOLD] C800 PUSHJ[MBTBYX] $ 
+		;Read 1st byte of new record.
+	ALU[0] DEST[MA HI-ABS-MA] NORM JUMP[P2A] $
+		;Clear high-order MA and enter reading loop.
+
+P2:	D[MA] ALU[D+1] DEST[MA] PUSHJ[MBTBYTE] NORM $
+P2A:	D[MEM] ROT[34] DEST[Q] PUSHJ[MBTBYTE] NORM $
+	D[MEM] ROT[24] ALU[DORQ] DEST[Q] PUSHJ[MBTBYTE] NORM $
+	D[MEM] ROT[14] ALU[DORQ] DEST[Q] PUSHJ[MBTBYTE] NORM $
+	D[MEM] ROT[4] ALU[DORQ] DEST[Q] PUSHJ[MBTBYTE] NORM $
+	D[MEM] MASK[4]  ALU[DORQ] DEST[MEMSTO] NORM JUMP[P2] $
+
+CCLR:	ALU[0] DEST[MA] NORM $
+	ALU[0] DEST[MEMSTO] NORM $
+	D[MA] ALU[D+1] DEST[MA] NORM $
+	D[MA] MASK[18.] COND[-OBUS=0] JUMP[. - 2] C600 $
+	POPJ NORM $
+
+MBTBYTE:
+	START-IN D[CONST 35] ROT[1] LLOAD NORM $
+		;Ask tape for a byte and status thereof
+		;Set loop counter to do timeout
+		;(TIMEOUT ABOUT 78 USEC)
+MBTBY1:	MAPF[TP.RC] D[IOD] DEST[HOLD] C800 LOOP[MBTBY2] $
+		;Read byte and status.  Byte comes complemented.
+		;Result is put in HOLD to avoid synchronizer problems
+		;Do timeout check and branch if still waiting
+	START-IN NORM PUSHJ[MBTCHECK] $
+		;Byte wasn't ready in time.  Go find out why
+	PUSHJ[KNYRGO] $ ;START NEXT RECORD.
+	NORM PUSHJ[KNYWAIT] $
+	MAPF[TP.RC] START-IN D[IOD] ALU[NOTD] DEST[HOLD] C800 PUSHJ[MBTBYX] $ 
+		;Read 1st byte of new record.
+	NORM JPOP[P2A] $
+		;Go for another record
+;	---
+MBTBY2:
+	START-IN D[MEM] ROT[26.] -OBUS<0 C550 JUMP[MBTBY1] $
+		;Check for byte ready (this is a two instruction loop)
+		;Start getting byte and status again in case we have
+		;  to loop
+	START-IN MAPF[TP.RC] D[IOD] ALU[NOTD] DEST[HOLD] C800 $
+	        ;READ THE DATA AGAIN (NOW THAT IT'S STABLE !)
+MBTBYX:	MAPF[1] D[MEM] MASK[10] DEST[HOLD] C550 POPJ $
+		;MAPF[1] clears byte ready
+		;Extract data byte from other status information
+
+;	---
+
+KNYWAIT: ;Wait for first byte of read data (BOOTSTRAP mode only)
+	START-IN SHORT $
+	MAPF[1] START-IN D[CONST 77] ROT[12.] DEST[AR] NORM $
+		;Clear read data ready flag
+KNYW1:	MAPF[TP.RC] D[IOD] DEST[HOLD] C600 $
+	START-IN D[MEM] ROT[26.] OBUS<0 POPJ C550 $
+		;Return if READ DATA RDY is now on.
+	START-IN D[AR] ALU[D-1] DEST[AR] C550 -OBUS=0 JUMP[KNYW1] $
+	NORM POPJ $
+
+MBTCHECK:	START-IN NORM PUSHJ[FMNBWT] $
+	  ;WAIT FOR FORMATTER IDLE.
+	D[MEM] ROT[32.] C550 -OBUS<0 JUMP[MBTERR] $
+	  ;CHECK FOR ERROR STATUS.
+	D[MEM] ROT[33.] C550 OBUS<0 POPJ $
+	  ;IF END OF FILE NOT SEEN, RETURN FOR MORE, ELSE DONE.
+	ALU[0] DEST[Q] NORM $ ;CLEAR LIGHTS TO INDICATE NO ERRORS.
+MBTDNX: START-OUT ALU[0] DEST[DEV-ADR] JPOP[. + 1] $
+		;Setup to display code in lights
+	START-OUT MAPF[2] ALU[Q] JPOP[. + 1] $	;LOAD LIGHTS FROM Q, CLR SW FF'S
+D1:	MAPF[4] START-IN $
+	   ;CHECK START AND CONT SWITCHES.  RD NEXT FILE ON CONT
+	MAPF[4] D[IOD] DEST[AR] $
+	D[AR]  ROT[5] MASK[2] DEST[AR]
+		COND[OBUS=0] JUMP[D1] CYLEN[LONG] $
+		;WAIT FOR A SWITCH.
+	D[AR] MASK[1] COND[-OBUS=0] JUMP[GOMSTART] C550 $
+	   ;  ... START MAIN MICROCODE ON START SWITCH.
+	START-OUT NORM $  ;CLEAR SWITCH FF'S
+	MAPF[4] JPOP[MBOOTH] CYLEN[LONG] $
+
+GOMSTART: ;Branch to MSTART
+	GETADR[MSTART] JUMP[GOLOW] $
+
+MBTERR:	D[CONST 0] ALU[NOTD] DEST[Q] JUMP[MBTDNX] $
+;	---
+
+  .ORG[2150]
+
+	JUMP[TAPINT] $	;INTERRUPT FOR DEVICE 7 GO TO TAPINT.
+
+    .USE[OTHER]		;RETURN TO OLD LOC. CTR.
+
+MBOOTA:	GETADR[MBOOTH] JUMP[GOHIGH] $
+	
+ ?@\ˆ

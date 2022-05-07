@@ -1,0 +1,203 @@
+.:logfile rdist.log
+:define $substitution=$true
+sysno
+TYMSHARE X14-P035/D-9 1-12-88
+.run (xexec)minit
+
+.rdist *.*/master:33/host:14,17,32/check
+Master host: 33
+147 files on master system.
+Slave hosts: 14,17,32
+Checking host 14
+(F3CODE      :  14) ACCESS.MSG     2 30-Nov-88 16:13 -- bad checksum POMBAW
+                           should be 30-Nov-88 16:12 BIMNUX  ALL  RD  NO
+(F3CODE      :  14) RDIST.LOG      1 22-Jan-89 16:54 -- bad checksum NOPFUD
+                           should be 19-Jan-89 16:02 TUYZUX  ALL  RD  NO
+(F3CODE      :  14) RDIST.OUT      6 22-Jan-89 16:04 -- bad checksum DEJKOK
+                           should be 19-Jan-89 16:03 ZIGKUN  ALL  RD  NO
+(F3CODE      :  14) RDIST.SUN      6 22-Jan-89 16:04 -- extra not on master
+(F3CODE      :  14) FINDIT.TEC     2 10-Jan-89 13:05 -- extra not on master
+(F3CODE      :  14) ACCESS.LIS                       -- missing on slave
+Checking host 17
+
+?unable to build circuit to F3CODE:17
+?host unavailable
+
+?unable to build circuit to F3CODE:17
+?host unavailable
+
+?unable to build circuit to F3CODE:17
+?host unavailable
+
+?unable to build circuit to F3CODE:17
+?host unavailable
+
+?unable to build circuit to F3CODE:17
+?host unavailable
+Creaux failed to F3CODE:17
+Checking host 32
+##
+Findit: timeout
+(F3CODE      :  32) TSTSMG.TXT                       -- missing on slave
+(F3CODE      :  32) MAGSER.ORG                       -- missing on slave
+(F3CODE      :  32) REMIND.DTA                       -- missing on slave
+(F3CODE      :  32) F3BIN.CMD                        -- missing on slave
+(F3CODE      :  32) MODULE.CMD                       -- missing on slave
+(F3CODE      :  32) MODULE.CM1                       -- missing on slave
+(F3CODE      :  32) SLOEXP.SHR                       -- missing on slave
+(F3CODE      :  32) SLOEXP.LOW                       -- missing on slave
+(F3CODE      :  32) UC0311.BIN                       -- missing on slave
+(F3CODE      :  32) FILSCN.MAC                       -- missing on slave
+(F3CODE      :  32) UC0410.BIN                       -- missing on slave
+(F3CODE      :  32) UC0930.BIN                       -- missing on slave
+(F3CODE      :  32) UC0327.BIN                       -- missing on slave
+(F3CODE      :  32) UC327E.BIN                       -- missing on slave
+(F3CODE      :  32) SLOEXO.HGH                       -- missing on slave
+(F3CODE      :  32) SLOEXO.LOW                       -- missing on slave
+(F3CODE      :  32) F3TSER.20                        -- missing on slave
+(F3CODE      :  32) CFDEF.023                        -- missing on slave
+(F3CODE      :  32) F3TSER.ORG                       -- missing on slave
+(F3CODE      :  32) FDSYS.SAV                        -- missing on slave
+(F3CODE      :  32) CFDEF.130                        -- missing on slave
+(F3CODE      :  32) TAPE.130                         -- missing on slave
+(F3CODE      :  32) CFDEF.326                        -- missing on slave
+(F3CODE      :  32) CFDEF.324                        -- missing on slave
+(F3CODE      :  32) CFDEF.OLD                        -- missing on slave
+(F3CODE      :  32) CFDEF.311                        -- missing on slave
+(F3CODE      :  32) FOO1.LST                         -- missing on slave
+(F3CODE      :  32) TAPE.403                         -- missing on slave
+(F3CODE      :  32) TAPE.323                         -- missing on slave
+(F3CODE      :  32) CFDEF.323                        -- missing on slave
+(F3CODE      :  32) TAPMAK.324                       -- missing on slave
+(F3CODE      :  32) TAPMAK.SLO                       -- missing on slave
+(F3CODE      :  32) TAPMAK.OLD                       -- missing on slave
+(F3CODE      :  32) UC0407.BIN                       -- missing on slave
+(F3CODE      :  32) F33KLX.LOG                       -- missing on slave
+(F3CODE      :  32) UC0416.BIN                       -- missing on slave
+(F3CODE      :  32) TAPE.420                         -- missing on slave
+(F3CODE      :  32) TAPE.324                         -- missing on slave
+(F3CODE      :  32) TAPE.SLO                         -- missing on slave
+(F3CODE      :  32) TAPE.OLD                         -- missing on slave
+(F3CODE      :  32) TAPMAK.LST                       -- missing on slave
+(F3CODE      :  32) CFDEF.SLO                        -- missing on slave
+(F3CODE      :  32) MAIL.FWD                         -- missing on slave
+(F3CODE      :  32) IOCSS.ORG                        -- missing on slave
+(F3CODE      :  32) FLT.LOG                          -- missing on slave
+(F3CODE      :  32) MAC.DIR                          -- missing on slave
+(F3CODE      :  32) FOOMAK.SLO                       -- missing on slave
+(F3CODE      :  32) FOOMAK.324                       -- missing on slave
+(F3CODE      :  32) UC0210.BIN                       -- missing on slave
+(F3CODE      :  32) FOOMAK.LST                       -- missing on slave
+(F3CODE      :  32) OLDMAP.BIN                       -- missing on slave
+(F3CODE      :  32) F3NOTE.TXT                       -- missing on slave
+(F3CODE      :  32) UC0415.BIN                       -- missing on slave
+(F3CODE      :  32) F3.RNO                           -- missing on slave
+(F3CODE      :  32) F3.MEM                           -- missing on slave
+(F3CODE      :  32) MUCODE.325                       -- missing on slave
+(F3CODE      :  32) MUCODE.CTL                       -- missing on slave
+(F3CODE      :  32) MUCODE.LOG                       -- missing on slave
+(F3CODE      :  32) MUCODE.BIN                       -- missing on slave
+(F3CODE      :  32) MUCODE.SOR                       -- missing on slave
+(F3CODE      :  32) UC0325.BIN                       -- missing on slave
+(F3CODE      :  32) BACKUP.LOG                       -- missing on slave
+(F3CODE      :  32) SYMLOK.SAV                       -- missing on slave
+(F3CODE      :  32) DCTRL.DOC                        -- missing on slave
+(F3CODE      :  32) CFMAIN.ORG                       -- missing on slave
+(F3CODE      :  32) CFMAIN.626                       -- missing on slave
+(F3CODE      :  32) CFMAIN.FLT                       -- missing on slave
+(F3CODE      :  32) CFMAIN.130                       -- missing on slave
+(F3CODE      :  32) UC0306.BIN                       -- missing on slave
+(F3CODE      :  32) CFMAIN.311                       -- missing on slave
+(F3CODE      :  32) CFIO.319                         -- missing on slave
+(F3CODE      :  32) CFIO.323                         -- missing on slave
+(F3CODE      :  32) CFMAIN.WHA                       -- missing on slave
+(F3CODE      :  32) CFIO.OLD                         -- missing on slave
+(F3CODE      :  32) F33KLO.LOG                       -- missing on slave
+(F3CODE      :  32) CFIO.326                         -- missing on slave
+(F3CODE      :  32) CFIO.324                         -- missing on slave
+(F3CODE      :  32) CFIO.SLO                         -- missing on slave
+(F3CODE      :  32) UPDATE.328                       -- missing on slave
+(F3CODE      :  32) CFIO.DIF                         -- missing on slave
+(F3CODE      :  32) RDIST.THU                        -- missing on slave
+(F3CODE      :  32) RDIST.MON                        -- missing on slave
+(F3CODE      :  32) RDIST.OUT                        -- missing on slave
+(F3CODE      :  32) F3FUDG.SAV                       -- missing on slave
+(F3CODE      :  32) SWINIT.023                       -- missing on slave
+(F3CODE      :  32) MON22.CMD                        -- missing on slave
+(F3CODE      :  32) F33KLN.023                       -- missing on slave
+(F3CODE      :  32) F33KLN.FLT                       -- missing on slave
+(F3CODE      :  32) DELMAC.CMD                       -- missing on slave
+(F3CODE      :  32) F3USPC.TXT                       -- missing on slave
+(F3CODE      :  32) SWINIT.130                       -- missing on slave
+(F3CODE      :  32) SWINIT.NEW                       -- missing on slave
+(F3CODE      :  32) UTAPE.MAC                        -- missing on slave
+(F3CODE      :  32) UTAPE.SAV                        -- missing on slave
+(F3CODE      :  32) LOOK.CMD                         -- missing on slave
+(F3CODE      :  32) F33KLN.OLD                       -- missing on slave
+(F3CODE      :  32) UC0323.BIN                       -- missing on slave
+(F3CODE      :  32) F33KLN.323                       -- missing on slave
+(F3CODE      :  32) FOO.LST                          -- missing on slave
+(F3CODE      :  32) F33KLN.LOG                       -- missing on slave
+(F3CODE      :  32) SWINIT.OLD                       -- missing on slave
+(F3CODE      :  32) PROD.DIR                         -- missing on slave
+(F3CODE      :  32) SWINIT.324                       -- missing on slave
+(F3CODE      :  32) F33KLN.324                       -- missing on slave
+(F3CODE      :  32) SWINIT.SLO                       -- missing on slave
+(F3CODE      :  32) F33KLN.325                       -- missing on slave
+(F3CODE      :  32) F33KLN.326                       -- missing on slave
+(F3CODE      :  32) F33KLN.S                    -- missing on slave
+(F3CODE      :  32) UC1984.BIN                       -- missing on slave
+(F3CODE      :  32) UTAPE.LST                        -- missing on slave
+(F3CODE      :  32) RDIST.TUE                        -- missing on slave
+(F3CODE      :  32) RDIST.LOG                        -- missing on slave
+(F3CODE      :  32) RDIST.CTL                        -- missing on slave
+(F3CODE      :  32) RDIST.WED                        -- missing on slave
+(F3CODE      :  32) MONMK1.SAV                       -- missing on slave
+(F3CODE      :  32) APT10.SAV                        -- missing on slave
+(F3CODE      :  32) APT10.SAI                        -- missing on slave
+(F3CODE      :  32) MON37.CMD                        -- missing on slave
+(F3CODE      :  32) F3DSK.TXT                        -- missing on slave
+(F3CODE      :  32) F3COP.COM                        -- missing on slave
+(F3CODE      :  32) UC2DSK.MAC                       -- missing on slave
+(F3CODE      :  32) DSK2UC.MAC                       -- missing on slave
+(F3CODE      :  32) UC2DSK.SAV                       -- missing on slave
+(F3CODE      :  32) APT10.DOC                        -- missing on slave
+(F3CODE      :  32) UCODE.BIN                        -- missing on slave
+(F3CODE      :  32) MONED1.SAV                       -- missing on slave
+(F3CODE      :  32) CONVRT.OLD                       -- missing on slave
+(F3CODE      :  32) CONVRT.SAI                       -- missing on slave
+(F3CODE      :  32) CONVRT.SAV                       -- missing on slave
+(F3CODE      :  32) 34F.CMD                          -- missing on slave
+(F3CODE      :  32) LOGINN.34F                       -- missing on slave
+(F3CODE      :  32) LOGINN.SHR                       -- missing on slave
+(F3CODE      :  32) UC1023.BIN                       -- missing on slave
+(F3CODE      :  32) CFINST.319                       -- missing on slave
+(F3CODE      :  32) UC0319.BIN                       -- missing on slave
+(F3CODE      :  32) CFINST.323                       -- missing on slave
+(F3CODE      :  32) CFINST.OLD                       -- missing on slave
+(F3CODE      :  32) UC0409.BIN                       -- missing on slave
+(F3CODE      :  32) UC0420.BIN                       -- missing on slave
+(F3CODE      :  32) VUE.INI                          -- missing on slave
+(F3CODE      :  32) ACCESS.LIS                       -- missing on slave
+(F3CODE      :  32) CFINST.324                       -- missing on slave
+(F3CODE      :  32) CFINST.325                       -- missing on slave
+(F3CODE      :  32) CFINST.326                       -- missing on slave
+(F3CODE      :  32) CFINST.SLO                       -- missing on slave
+(F3CODE      :  32) RPG.INI                          -- missing on slave
+(F3CODE      :  32) ACCESS.MSG                       -- missing on slave
+
+End of SAIL execution
+.copy rdist.log,rdist.out
+
+.mung findit,rdist.out
+
+FINDIT.TEC V5 - Clean up log from MHX+(SPL)FINDIT and sort by file name
+153
+R SORT
+rdist.out=rdist.out/R80/K21.10/K54.6/K1.20
+SORTED 153 RECORDS
+
+EXIT
+
+.copy rdist.log,rdist.Sunday
+                                                                                                                                                                                                                                                                                                                                                             3

@@ -1,0 +1,506 @@
+[] [TYMAREA = .
+SLOE   Jan ***, 1859 00:00:03  file STRING:  --  of -- F33KLO
+
+34m0027                               	];.ENDORG
+34m0027                               	        .DEFINE .RELOC [] [.USE[TYMAREA]
+34m0027                               	];.RELOC
+34m0027                               	 LIST ]]
+34m0027 07606 645040010235010400000000	TCNO1:  D[MASK 32.] ROT[4] ALU[D&Q] DEST[Q] COND[USER] PUSHJ[UIOCHK] NORM $
+34m0027                               	                ;CHECK FOR NOT USER AND USER IOT
+34m0027 07607 000140234575000033002026	        D[IR] MASK[3] ALU[DORQ] DEST[1] DEST-A-MEM JUMP[MAIN] $
+34m0027                               	           ;Put new PI CHAN. in bits 33-35 of A-MEM[1].
+34m0027                               	
+34m0027 07610 645050044171000040000000	TCNI1:  D[11] MASK[4] DEST[Q AR] COND[USER] PUSHJ[UIOCHK] NORM $ ;get intrpt flag and pi
+34m0027                               	 chn
+34m0027 07611 640300034235000440000000	        D[IR] ALU[D&Q] DEST[Q] NORM POPJ $ ;this is for conso, z
+34m0027                               	
+34m0027 07612 645040004171000140000000	TDATO:  D[MEM] MASK[12.] DEST[Q] COND[USER] PUSHJ[UIOCHK] NORM $
+34m0027                               	           ;Get low 12 bits of new timer value...
+34m0027 07613 640702214575070013600000	        START-OUT D[CONST 1] ROT[35. - 7] ALU[DORQ] DEST[IOD] NORM $
+34m0027                               	           ;Place in hardware counter (the "TP TIMER").
+34m0027 07614 240700010171030300110000	        MAPF[TIM.DO] D[MASK 24.] ROT[12.] DEST[Q] C800 $
+34m0027 07615 640140604635000443002026	        D[MEM] ALU[D&Q] DEST[3] DEST-A-MEM NORM JUMP[MAIN] $
+34m0027                               	           ;Put other 24 bits into A-MEM[3] (the "TIMER REGISTER").
+34m0027                               	
+34m0027                               	TDTI:   MAPF[TIM.DI] START-IN D[IOD] ROT[12.] MASK[12.] DEST[AR] C600
+34m0027 07616 445050030571030143410000	           COND[USER] PUSHJ[UIOCHK] $
+34m0027                               	           ;Read hardware timer.
+34m0027 07617 440700030171030140010000	        MAPF[TIM.DI] D[IOD] ROT[12.] MASK[12.] DEST[Q] C600 $
+34m0027                               	           ;Read it again.
+34m0027 07620 530140000735000443407616	        START-IN D[AR] ALU[D#Q] C550 COND[-OBUS=0] JUMP[TDTI] $
+34m0027                               	           ;If it changed, try again (to ensure that we don't get a garbaged
+34m0027                               	           ; value because of reading it while it is changing).
+34m0027 07621 640310054575000440000000	        D[13] ALU[DORQ] DEST[AR] NORM POPJ $
+34m0027                               	           ;Combine high-order bits from A-MEM[3] with
+34m0027                               	           ; low-order bits from hardware counter.
+34m0027                               	
+34m0027                               	;ROUTINE TO CHECK FOR USER IOT BIT.
+34m0027                               	;CALL WITH COND[USER] PUSHJ[UIOCHK]
+34m0027                               	
+34m0027 07622 511300020571014440000000	UIOCHK: D[PC] ROT[6] COND[OBUS<0] C550 POPJ $
+34m0027                               	                ;IF USER IOT IS SET, ITS OK.
+34m0027 07623 640340000571000440002100	        JPOP[MUUO] SHORT $
+34m0027                               	                ;ELSE TRAP.
+34m0027                               	
+34m0027                               	
+34m0027                               	
+34m0027                               	
+34m0027                               	
+34m0027                               	
+SLOE   Jan ***, 1859 00:00:03  file DSK:CFIO.SLO[3,222635]  --  of -- F33KLO
+
+35m0027                               	;       IMP,VID,PAN,GRN,DLS,LPT,VC etc.
+35m0027                               	;------------------------------------------------------------------------------
+35m0027                               	;
+35m0027                               	;       Packet Switching Network Interface (IMP)
+35m0027                               	;
+35m0027                               	;------------------------------------------------------------------------------
+35m0027                               	.REPEAT IMP [
+35m0027                               	
+35m0027                               	;Insert main code body here
+35m0027                               	.INSERT IMP.SLO
+35m0027                               	
+35m0027                               	];IMP
+35m0027                               	
+35m0027                               	;------------------------------------------------------------------------------
+35m0027                               	;
+35m0027                               	;       Panofsky-Samson Interface
+35m0027                               	;
+35m0027                               	;------------------------------------------------------------------------------
+35m0027                               	.REPEAT STANSW [
+35m0027                               	
+35m0027                               	.INSERT PAN.SLO
+35m0027                               	.INSERT TMPGRN.SLO      ;Temporary Grinnell Interface
+35m0027                               	
+35m0027                               	];.REPEAT STANSW
+35m0027                               	
+35m0027                               	;------------------------------------------------------------------------------
+35m0027                               	;
+35m0027                               	;       Data Line Scanner (TTY scanner)
+35m0027                               	;
+35m0027                               	;------------------------------------------------------------------------------
+35m0027                               	.REPEAT DLS [
+35m0027                               	
+35m0027                               	.DEFINE ASRC[ X ] [D[10 + X]]
+35m0027                               	.DEFINE ADEST[ X ] [DEST[X] DEST-A-MEM]
+35m0027                               	
+35m0027                               	.REPEAT DLS2 [
+35m0027                               	.INSERT DLS.SLO
+35m0027                               	
+35m0027                               	.REPEAT DLSDEB [
+35m0027                               	.INSERT DLSDEB.SLO
+35m0027                               	];DLSDEB
+35m0027                               	] ;DLS2
+35m0027                               	.REPEAT 1 - DLS2 [
+35m0027                               	.INSERT ODLS.SLO
+35m0027                               	.REPEAT DLSDEB [
+35m0027                               	.INSERT ODLSDE.SLO
+35m0027                               	] ;DLSDEB
+35m0027                               	] ;1 - DLS2
+35m0027                               	
+35m0027                               	];DLS                   9 JAN 80  BO
+35m0027                               	
+35m0027                               	;------------------------------------------------------------------------------
+35m0027                               	;
+35m0027                               	;       Line Printer Interface (LPT)
+35m0027                               	;
+35m0027                               	;------------------------------------------------------------------------------
+35m0027                               	.REPEAT LPT [
+SLOE   Jan ***, 1859 00:00:03  file DSK:CFIO.SLO[3,222635]  --  of -- F33KLO
+
+35m0027                               	
+35m0027                               	.INSERT LPTX.SLO        
+35m0027                               	
+35m0027                               	];LPT
+35m0027                               	
+35m0027                               	;------------------------------------------------------------------------------
+35m0027                               	;
+35m0027                               	;       Versatec Interface (VC)
+35m0027                               	;
+35m0027                               	;------------------------------------------------------------------------------
+35m0027                               	.REPEAT VC [
+35m0027                               	
+35m0027                               	.INSERT VC.SLO
+35m0027                               	] ;VC
+35m0027                               	
+35m0027                               	
+35m0027                               	
+35m0027                               	
+35m0027                               	
+35m0027                               	
+SLOE   Jan ***, 1859 00:00:03  file DSK:CFIO.SLO[3,222635]  --  of -- F33KLO
+
+36m0027                               	; dsk stuff
+36m0027                               	
+36m0027                               	;a-mem useage:
+36m0027                               	;       0       dispatch addr for interrupts
+36m0027                               	;       1       pi chn (33: 35) and intrpt waiting flag (32)
+36m0027                               	;       2       copy of last cmd sent to controller (by opcode 721)
+36m0027                               	
+36m0027                               	        .OPCODE[740]     [XLIST 
+36m0027                               	        .ENDORG
+36m0027       7624	 [TYMAREA = .
+36m0028                          	]       :INST-DISP + 2 * 740
+36m0028                               	        .DEFINE .ENDORG [] [ LASTORG = .
+36m0028                               	];.ENDORG
+36m0027                               	 LIST            ];disk pseudo-iot dispatch table entries.
+36m0027                               	
+36m0027                               	 ; dcono -- 740
+36m0027 03700 645041614571000100007622	        d[const 10] dest[dev-adr] cond[user] pushj[uiochk] norm $
+36m0027 03701 640140234571000033000000	        d[ir] mask[3] dest[1] DEST-A-MEM norm jump[dcno1]$
+36m0027                               	; dconi -- 741
+36m0027 03702 640041614571000100000000	        d[const 10] dest[dev-adr] norm pushj[dcni1] $ ;get bits.
+36m0027 03703 662104200571000440005350	        d[ar] dest[memsto] memst  [COND[-MA-AC] LBJUMP[MSMAIN] NORM ]$ ;store them and
+36m0027                               	 return.
+36m0027                               	; dconso -- 742
+36m0027 03704 640041614571000100000000	        d[const 10] dest[dev-adr] norm pushj[dcni1] $ ;get bits.
+36m0027 03705 530100010635000220000000	        d[mask 22] alu[d&q] c550 cond[-obus=0] lbjump[dskp1] $
+36m0027                               	; dconsz -- 743
+36m0027 03706 640041614571000100000000	        d[const 10] dest[dev-adr] norm pushj[dcni1] $ ;get bits.
+36m0027 03707 510100010635000220000000	        d[mask 22] alu[d&q] c550 cond[obus=0] lbjump[dskp1] $
+36m0027                               	
+36m0027                               	        .RELOC
+36m0027                               	 [.USE[TYMAREA]
+36m0027                               	 [ XLIST
+36m0027                               	        .ENDORG
+36m0027       3710	 [ LASTORG = .
+36m0028                               	]       :TYMAREA
+36m0028                               	        .DEFINE .ENDORG [] [TYMAREA = .
+36m0028                               	];.ENDORG
+36m0028                               	        .DEFINE .RELOC [] [.USE[TYMAREA]
+36m0028                               	];.RELOC
+36m0028                               	 LIST ]]
+36m0028 07624 550140034571000030002026	dcno1:  d[ir] mask[3]  c500 cond[obus=0] jump[main] $
+36m0028                               	         ; if assigned pi channel is not 0, then
+36m0028                               	         ;  enable interrupt on "not active", by
+36m0028                               	         ;  re-loading last cmd with 10 bit on.
+36m0028 07625 640700014171000200000000	        D[CONST 20] DEST[Q] NORM $
+36m0028 07626 510140034635000440000000	        D[IR] ALU[D&Q] C550 OBUS=0 JUMP[DCNO2] $
+36m0028 07627 640140014171000400000000	        D[CONST 40] DEST[Q] NORM JUMP[DCNO3] $
+36m0028 07630 640700014171000100000000	DCNO2:  d[const 10] dest[q] short $
+36m0028 07631 640702250575000443600000	DCNO3:  d[12] alu[dorq] dest[iod] spec[iob-out] norm $
+36m0028 07632 440140000571000440042026	        mapf[4] cylen[iob-out] jump[main] $
+36m0028                               	
+36m0028 07633 645050044171000440007622	dcni1:  d[11] dest[q ar] cond[user] pushj[uiochk] norm $ 
+36m0028                               	                ;get intrpt flag and pi chn
+36m0028 07634 640300034235000440000000	        d[ir] alu[d&q] dest[q] norm popj $ ;this is for conso, z
+36m0028                               	
+36m0028                               	        .ORG[2156]       [ XLIST
+36m0028                               	        .ENDORG
+SLOE   Jan ***, 1859 00:00:03  file STRING:  --  of -- F33KLO
+
+36m0028       7635	 [TYMAREA = .
+36m0029                               	]       :2156
+36m0029                               	        .DEFINE .ENDORG [] [LSTORG = .
+36m0029                               	];.ENDORG
+36m0028                               	 LIST ];$*$*$ 
+36m0028                               	
+36m0028                               	        ;interrupts from disk (dev 10) come here.
+36m0028 02156 640140014371000500000000	        d[const 50] alu[notd] dest[q] norm jump[dskint] $
+36m0028                               	
+36m0028                               	        .RELOC
+36m0028                               	 [.USE[TYMAREA]
+36m0028                               	 [ XLIST
+36m0028                               	        .ENDORG
+36m0028       2157	 [LSTORG = .
+36m0029                               	]       :TYMAREA
+36m0029                               	        .DEFINE .ENDORG [] [TYMAREA = .
+36m0029                               	];.ENDORG
+36m0029                               	        .DEFINE .RELOC [] [.USE[TYMAREA]
+36m0029                               	];.RELOC
+36m0029                               	 LIST ]]        .PAIR
+36m0029                               	 [:. \ 2 + .
+36m0030                               	];$*$*$ This exists elsewhere by another name.  TVR-Apr80
+36m0030 07636 640140000571000440002026	dskp1:  jump[main] norm $       ;conso and consz lbjump to here.
+36m0030 07637 640164620433000440002030	        doskip $
+36m0030                               	
+36m0030 07640 640702250635000443600000	dskint: d[12] alu[d&q] dest[iod] spec[iob-out] norm $
+36m0030                               	          ;clear interrupt enable bit (amem[2] has last cmd)
+36m0030 07641 510150044171000440040000	        mapf[4] d[11] dest[q ar] c550 cond[obus=0] jump[ddis] $
+36m0030                               	        d[const 10] alu[dorq] dest[1] DEST-A-MEM norm
+36m0030 07642 640140214575000103004631	                jump[pigen] $ ;set flag and request intrpt.
+36m0030 07643 640142400571000440004363	ddis:   dest[clr-dev-from-intr] norm jump[uint-dismiss] $
+36m0030                               	
+36m0030 07644 640151614571000100000000	DSKWT1: D[CONST 10] DEST[DEV-ADR AR] NORM JUMP[DSKWT4] $
+36m0030 07645 511140004571076440000000	DSKWT3: D[MEM] ROT[31.] C550 COND[OBUS<0] JUMP[DSKWDN] $
+36m0030 07646 640740014571014010000000	        D[CONST 1] ROT[6] LLOAD NORM $
+36m0030 07647 500240000571000440007647	        C550 LOOP[.] $
+36m0030 07650 640700000571000443400000	DSKWT4: START-IN NORM $
+36m0030 07651 240144430571000440007645	        MAPF[0] D[IOD] DEST[HOLD] C800  JUMP[DSKWT3] $
+36m0030 07652 530150000531000440007650	DSKWDN: D[AR] ALU[D-1] DEST[AR] C550 COND[-OBUS=0] JUMP[DSKWT4] $
+36m0030 07653 000140000571000440002026	        JUMP[MAIN] $
+36m0030                               	
+36m0030                               	
+36m0030                               	
+36m0030                               	
+36m0030                               	
+SLOE   Jan ***, 1859 00:00:03  file DSK:CFIO.SLO[3,222635]  --  of -- F33KLO
+
+37m0030                               	
+37m0030                               	;
+37m0030                               	;ECC logging area
+37m0030                               	;
+37m0030                               	.REPEAT 1 - XUCODE [
+37m0030                               	: 7760
+37m0030                               	];[
+37m0030                               	: 7760
+37m0030                               	].REPEAT 1 - XUCODE
+37m0030                               	.REPEAT XUCODE [
+37m0030                               	: 17760
+37m0030                               	];.REPEAT XUCODE
+37m0030                               	
+37m0030                               	 .REPEAT 20 [NOP $
+37m0030                               	]
+37m0030 07760 000700000571000440000000	[NOP $
+37m0030 07761 000700000571000440000000	][NOP $
+37m0030 07762 000700000571000440000000	][NOP $
+37m0030 07763 000700000571000440000000	][NOP $
+37m0030 07764 000700000571000440000000	][NOP $
+37m0030 07765 000700000571000440000000	][NOP $
+37m0030 07766 000700000571000440000000	][NOP $
+37m0030 07767 000700000571000440000000	][NOP $
+37m0030 07770 000700000571000440000000	][NOP $
+37m0030 07771 000700000571000440000000	][NOP $
+37m0030 07772 000700000571000440000000	][NOP $
+37m0030 07773 000700000571000440000000	][NOP $
+37m0030 07774 000700000571000440000000	][NOP $
+37m0030 07775 000700000571000440000000	][NOP $
+37m0030 07776 000700000571000440000000	][NOP $
+37m0030 07777 000700000571000440000000	][NOP $
+37m0030                               	]
+37m0030                               	
+37m0030                               	
+37m0030                               	
+37m0030                               	
+SLOE   Jan ***, 1859 00:00:03  file DSK:CFIO.SLO[3,222635]  --  of -- F33KLO
+
+38m0030                               	;; this should be after everything else
+38m0030                               	: 0
+38m0030 00000 000140000571000440004000	        JUMP[MSTART] $          ;Auto-load micro code tapes someday.
+38m0030                               	
+
+SLOE   Jan ***, 1859 00:00:03  file DSK:F33KLO.SLO[3,222635]  --  of -- F33KLO
+
+01m0014                               	
+01m0014                               	LIST-LABELS
+
+labels
+  0   38     0 .               12   22  1603 ACBI1           30   24  3791 ADJBP
+  6    4  1162 ADJSP           29   22  3729 ADJSP1          29   22  3735 ADJSP2          19  105  1523 ANDCA1
+ 19  105  1524 ANDCA2          19  105  1525 ANDCA3          18    7  2524 APDINT          18    8  2533 APIOT
+ 18    7  2521 APRCHK          18    7  2525 APRCI           18    7  2525 APRCII          18    7  2522 APRCK1
+ 18    7  2506 APRCO           18    7  2512 APRCO1          18    7  2514 APRCO2          18    7  2516 APRCO3
+ 18    7  2520 APRCO4          18    7  2530 APRDI           18    6  2752 APRDSP           2    5  2421 APRRST
+  6    4  1137 AREA216         11   16  1410 AREA260         11   16  1427 AREA262         11   16  1442 AREA264
+ 11   16  1461 AREA266         11   16  1474 AREA270         11   17  1506 AREA274         14   48  1814 AREA342
+ 14   50  1828 AREA344         14   50  1848 AREA346         14   52  1860 AREA350         14   52  1878 AREA352
+ 14   54  1892 AREA354         14   54  1910 AREA356          1    3  1914 AREA52          18   93  2199 ASHC1
+ 18   93  2213 ASHC2           18   93  2209 ASHC4           18   93  2206 ASHC6           18   94  2216 ASHC7
+ 18   93  2204 ASHC8           18   93  2208 ASHC9           18   93  2183 ASHDO           18   91  1500 ASHDO1
+ 18   93  2187 ASHDOP          18   92  2176 ASHNEG          18   92  2177 ASHNN1          18   92  2174 ASHPLS
+ 11   17  1492 ASOS1           11   17  1490 ASOS2           11   17  1522 ASOS3           16   60  2070 BADPC
+ 18   93  2197 BIGAS2          18   93  2179 BIGASH          18   91  1493 BIGLSH          16   69  1449 BII
+ 16   68  1445 BII1            16   69  1452 BII2            16   68  1442 BIIH            33   24  3834 BITREV
+ 19  104  2235 BLT1            19  104  2242 BLT2            19  104  2241 BLT3            19  104  2250 BLT4
+ 19  104  2240 BLT5            19  104  2252 BLT6            19  104  2239 BLT7            19  104  2254 BLT8
+ 19  104  2244 BLT9            19  104  2269 BLTA1           19  104  2279 BLTA10          19  104  2290 BLTA12
+ 19  104  2234 BLTA2           19  104  2258 BLTA3           19  104  2267 BLTA4           19  104  2276 BLTAL2
+ 19  104  2264 BLTL1           19  104  2280 BLTL2           20  113  2364 BRPNT            9    5  2883 BWRTA1
+  1   13  2577 CCLR             2    5  2410 CLKCLR           2    5  2411 CLKENB          20   11  3290 CLKINT
+ 20   11  3294 CLKRDFLG         2    5  2410 CLKRST           2    5  2423 CLRDEVINT        8    7  2685 CLRPT
+ 20  113  2345 CONSW            1    3  2717 CTYCI            1    3  2721 CTYCI1           1    3  2720 CTYCI2
+  1    3  2729 CTYCI3           1    3  2727 CTYCI8           1    3  2725 CTYCI9           1    3  2715 CTYCO
+  1    3  2730 CTYCO1           1    3  2734 CTYCO3           1    3  2737 CTYCO4           1    3  2742 CTYCO5
+  1    5  2396 CTYCS            1    5  2394 CTYCZ            1    3  2699 CTYDI            1    3  2706 CTYDO
+  1    1  2624 CTYDSP           1    1  1124 CTYIN1           1    1  1112 CTYINT           1    2  2697 CTYIOT
+  1    3  1910 CTYRS1           1    3  2744 CTYRST           1   13  2604 D1               6    4  1176 DADD
+ 31   24  1860 DADD1            1    2  3347 DCG1             1    2  3344 DCGO             1    2  3360 DCGWR
+  1    2  3327 DCINIT          36   28  3995 dcni1           36   28  3988 dcno1           36   28  3992 DCNO2
+ 36   28  3993 DCNO3           36   30  4003 ddis            20  113  2354 DEPNSW          20  113  2355 DEPSW1
+ 20  113  2353 DEPTSW          33   25  3963 DEV6CL          33   25  3964 DEV6ST          33   25  3965 DEV6ST1
+ 33   25  3966 DEV6ST2          6    4  1202 DFN             28   18  3530 DFN1            17   78  2138 DIV1
+ 17   80  2142 DIV2            17   82  2146 DIV3             9   11  1337 DIV9             6    4  1184 DMOVE
+ 29   22  3740 DMOVE2           6    4  1192 DMOVEM          29   23  3748 DMOVM2           6    4  1186 DMOVN
+ 29   22  3743 DMOVN2           6    4  1194 DMOVNM          29   23  3751 DMVNM2          29   23  3754 DMVNM3
+ 29   23  3755 DMVNM4          29   23  3756 DMVNM5          17   84  2150 DODDIV          17   84  2155 DODIV
+ 17   84  2157 DODIV1          17   84  2161 DODIV2          17   84  2160 DODIV3          17   86  1144 DODIV4
+ 17   86  1148 DODIV6          17   85  1137 DODIV7          20  107  2312 DOHALT          17   71  2097 DOIMUL
+ 17   71  2102 DOMMUL          17   71  2106 DOMUL           17   71  2107 DOMUL1          17   72  2112 DOMUL4
+ 11   16  1426 DOSKP1           6    5  2827 DOTRPB           6    5  2826 DOTRPU           6    5  2818 DOTRPX
+  6    5  2823 DOTRX1           7    4  1214 DPB             16   64  1438 DPB1            16   67  1465 DPB2
+ 16   67  1466 DPB4            16   64  1439 DPB5            16   65  2071 DPB7            36   30  4000 dskint
+ 36   30  3998 DSKP1            2    5  2398 DSKRST          36   30  4010 DSKWDN          36   30  4004 DSKWT1
+ 36   30  4005 DSKWT3          36   30  4008 DSKWT4           6    4  1178 DSUB            31   26  3792 DSUB1
+ 19   11  3285 ECC-UNC          5    5  2504 END-OF-PI-CODE  20  113  2359 EXMNSW          20  113  2361 EXMSW1
+ 20  113  2358 EXMTSW          28   20  3633 EXPUF           33   56  3952 F5DIAG           7    4  1216 FAD
+ 28   20  3636 FADSU1          28   20  3635 FADSUB          28   18  3544 FAOS1           28   18  3546 FAOS2
+ 28   18  3548 FAOS3           28   18  3552 FAOS4           28   18  3544 FAOS5           28   22  3707 FD
+ 28   18  3564 FD1             28   18  3567 FD2             28   18  3576 FD2A            28   20  3596 FD2C
+ 28   20  3595 FD2D            28   20  3597 FD3             28   20  3600 FD4             28   22  3727 FDAD
+ 28   22  3701 FDS             28   22  3702 FDS1            28   22  3718 FDSHFT           7    4  1264 FDV
+ 29   23  3777 FIXER           29   23  3783 FIXER1          29   23  3784 FIXER2          29   23  3786 FIXER3
+  6    4  1196 FIXR            29   23  3762 FIXR1           29   23  3772 FIXR2           29   23  3766 FIXRN
+  6    4  1198 FLTR            29   23  3787 FLTR1           28   21  3682 FM              28   21  3685 FM1
+ 28   21  3688 FM2              1    2  3313 FMNBW1           1    2  3312 FMNBWT           7    4  1248 FMP
+ 28   18  3554 FMP1            28   18  3556 FMP2            28   18  3558 FMP3            28   18  3562 FMP4
+ 28   18  3554 FMP5             1    8  3483 FMTDON           1    2  3319 FMTHNG          28   21  3675 FPLOW
+ 28   21  3661 FPNAR           28   20  3603 FPNDIV          28   20  3638 FS1             28   20  3641 FS2
+ 28   20  3646 FS3             28   21  3656 FS4             28   21  3658 FS5              7    4  1232 FSB
+  6    4  1204 FSC             28   18  3536 FSC1            28   18  3540 FSC2            28   18  3535 FSCZAP
+ 26   12  3520 GOHIGH          26   15  3526 GOLOW           26   15  3524 GOMAIN           1   13  2610 GOMSTART
+ 10   16  2053 HFJSP           10   15  2835 HFJSR           10   15  2837 HFJSR1          10   15  2839 HFJSR2
+ 20  126  1852 HHS             26   15  3522 HIGHSMAIN       20  115  1815 HLAR            20  115  1816 HLLEM1
+ 20  121  1836 HLLES1          20  124  1848 HLLES2          20  130  1883 HLLM1           20  119  1832 HLLOS1
+ 20  114  1532 HLLZS1          20  115  1818 HLREM1          20  130  1884 HLRM1           20  114  1535 HLRZS1
+ 20  128  1878 HLSZ            20  125  1850 HMV             20  129  1881 HOL             20  128  1879 HOR
+ 20  115  1814 HRAR            20  115  1817 HRLEM1          20  130  1882 HRLM1           20  114  1533 HRLZS1
+ 20  115  1819 HRREM1          20  122  1838 HRRES1          20  130  1885 HRRM1           20  120  1834 HRROS1
+ 20  114  1534 HRRZS1          20  129  1880 HRSZ            20  117  1828 HSMAIN          20  118  1830 HSMN1
+  7    4  1206 IBP             16   71  2076 IBP0            16   71  2078 IBP1            16   71  2081 IBT1
+ 17   72  2114 IDIV1           17   74  2122 IDIV2           17   76  2130 IDIV3            9   11  1329 IDIV9
+  7    4  1212 IDPB            16   62  1416 IDPB1           16   62  1420 IDPB2           16   67  1462 IDPB3
+ 16   62  1421 IDPBH            7    4  1208 ILDB            16   61  1410 ILDB1           16   61  1414 ILDB2
+ 16   62  1422 ILDB3           16   61  1415 ILDBH           17   71  2083 IMUL1           17   71  2085 IMUL2
+ 17   71  2088 IMUL3           28   20  3627 INSEX1          28   20  3626 INSEXP           1    3  3409 INT-MT
+  1    8  3484 INT-RDDONE       1    8  3488 INT-RDWCOK       1    7  3448 INT-READ         1    2  3334 INT-STARTDC
+  1    8  3463 INT-WRITE        1    8  3493 INT-WRTDONE      1    2  3364 ITRCHK          20  131  2367 JFCL1
+ 20  130  1892 JFCL2           18   87  2166 JFFO1           18   87  2167 JFFO2           18   87  2170 JFFO3
+ 18   87  2173 JFFO4           18   87  2171 JFFO5           20  131  2376 JRA1            20  132  2842 JRST1
+ 20  132  2845 JRST2           20  132  2849 JRSTF           20  132  2853 JRSTF0          20  132  2854 JRSTF1
+ 20  132  2857 JRSTF1A         20  132  2858 JRSTF1B         20  132  2862 JRSTF2          20  132  2864 JRSTF3
+ 20  132  2866 JRSTF4          20  132  2847 JRSTH           20  131  2373 JSA1            10   16  2050 JSP0
+ 10   14  1387 JSP1            10   16  2051 JSP2            20  130  1895 JSR1            20  130  1897 JSR1A
+ 20  130  1899 JSR1B           20  130  1901 JSR2             6    4  1160 JSYS            29   23  3760 KAFIXN
+ 29   23  3758 KAFIXP           6    4  1188 KIFIX           29   23  3771 KIFIX1          29   23  3774 KIFIXN
+  9    6  2504 KLIFT1           1    1  3296 KNYCLR           1    2  3308 KNYGOA           1    3  3398 KNYMTP
+  1    2  3304 KNYRGO           1    1  3296 KNYRS1           1   13  2594 KNYW1            1   13  2592 KNYWAIT
+  7    4  1210 LDB             16   63  1428 LDB1            16   63  1435 LDB2            16   63  1437 LDB4
+ 16   63  1429 LDB5            19  105  1526 LOG2            19  105  1527 LOG3             1    1  2640 LPTDSP
+ 18   98  1514 LSHC1           18  100  1501 LSHC2           18   91  1497 LSHDO           18   91  1499 LSHDO1
+ 18   89  1483 LSHNEG          18   89  1484 LSHNN1          18   91  1494 LSHPDO          18   89  1481 LSHPLS
+  6    2  1046 MAIN             6    2  1048 MAIN1            6    3  2788 MAIN1HALF        6    2  1050 MAIN2
+  6    3  2785 MAINJRSTF       12    5  2918 MAP             12    5  2924 MAP1            12    5  2923 MAP2
+  8    7  2670 MAPCI            8    7  2663 MAPCO            8    7  2681 MAPDI           15    5  3025 MAPDN
+  8    7  2674 MAPDO           12    5  2901 MAPDO1          12    5  2912 MAPDO2          12    5  2892 MAPDO3
+ 12    5  2902 MAPDO4          12    5  2908 MAPDO5           8    7  2657 MAPIOT          15    5  3012 MAPOF
+ 10    5  2889 MAPOFF          15    5  3009 MAPON           15    5  3002 MAPRSL          15    5  3001 MAPRSS
+ 15    5  2999 MAPRST          15    5  3018 MAPUP            9    5  2884 MBLT2            9    5  3158 MBLT3
+  1   13  2560 MBOOT            1   14  3516 MBOOTA           1   13  2562 MBOOTH           1   13  2583 MBTBY1
+  1   13  2589 MBTBY2           1   13  2582 MBTBYTE          1   13  2591 MBTBYX           1   13  2598 MBTCHECK
+  1   13  2602 MBTDNX           1   13  2612 MBTERR          12    5  2977 MFI             12    5  2993 MFI1
+ 12    5  2994 MFI2             9    5  3145 MFOTH           12    5  2942 MFPH1           12    5  2941 MFPHE1
+ 12    5  2940 MFPHE2          12    5  2932 MFPHEX          12    5  2926 MFPHYS           9    5  3194 MFPP1
+  9    5  2882 MFPP2            9    5  2880 MFPP3            9    5  3144 MFRD             9    5  3140 MFT1
+  9    5  3141 MFT1A           12    5  2963 MFT1B            9    5  3142 MFT1D            9    5  3148 MFWRT
+  8    4  1280 MOVE             8    4  1281 MOVE1            8    4  1282 MOVEI            8    4  1284 MOVEM
+  8    4  1286 MOVES            8    4  1304 MOVM             8    5  1122 MOVM1            8    5  1306 MOVMI
+  8    5  1308 MOVMM            8    5  1310 MOVMS            8    7  1058 MOVMS1           8   11  1068 MOVMS2
+  8    8  1060 MOVMS3           8    9  1062 MOVMS4           8   10  1064 MOVMS5           8   11  1066 MOVMS6
+  8    4  1296 MOVN             8    4  1298 MOVNI            8    4  1300 MOVNM            8    4  1302 MOVNS
+ 20  114  1531 MOVNS1           8    4  1288 MOVS             8    4  1290 MOVSI            8    4  1292 MOVSM
+  8    4  1294 MOVSS           20  114  1530 MOVSS1          17   71  2100 MSETOV           6    3  2792 MSMAIN
+  6    3  2793 MSMAIN1         16   59  2048 MSTART          17   71  2101 MSTOV1          16   60  2054 MSTRT1
+ 20  132  2392 MUJSA           20  132  2387 MUJSP           20  132  2391 MUJSP1          20  132  2379 MUJSR
+ 20  132  2384 MUJSR0          17   71  2090 MUL1            17   71  2092 MUL2            17   71  2094 MUL3
+  6    3  1088 MUUO             6    5  2794 MUUO2            6    5  2806 MUUO3            6    4  1090 MUUO44
+  6    5  2807 MUUONT           6    5  2813 MUUOT            6    5  2817 MUUOT1           6    5  2809 MUUOU
+  0   38     0*NAF              1    2  3321 NCNTW1           1    2  3321 NCNTWT          28   20  3613 NEGNOR
+  6    2  1048 NMAIN1          28   20  3616 NN1              5    1     0*no-@            28   20  3619 NORMOV
+ 28   21  3671 NORND           20  106  1080 NORSW           20  107  2331 NORSW2          20  107  2291 NOSW
+  6    5  2832 NOTRP           28   20  3624 NOVNO           28   20  3622 NOVYES          28   20  3606 NRMLIZ
+ 12   24  1627 OCAI1           12   25  1651 OCBI1           12   25  1643 OCMI1           19  105  1528 ORCM2
+ 19  105  1529 ORCM3            1   13  2571 P2               1   13  2572 P2A             19   10  2546 PDLMEM
+ 19    9  2535 PDLO1           19    9  2536 PDLO1A          19    9  2537 PDLO1H          19    9  2542 PDLO2
+ 19    9  2539 PDLO3           19    9  2543 PDLO4           19    9  2542 PDLO5           19   10  2547 PDLO6
+ 19   10  2547 PDLOE            3    5  2430 PI-CHECK-RQS     4    5  2474 PI-DISMISS       3    5  2424 PI-GET-CHN
+  5    5  2501 PI-RESET         5    5  2496 PICONISUB        5    5  2477 PICONO          18    6  2768 PIDSP
+  4    5  2457 PIGEN            4    5  2462 PIGEN1           4    5  2467 PIGENWT          3    5  2428 PIGETMASK
+  3    5  2445 PIINTGO          3    5  2426 PIL1             3    5  2446 PIL11            3    5  2451 PIL12
+  5    5  2483 PIL3             5    5  2485 PIL4             5    5  2487 PIL5             5    5  2489 PIL6
+  5    5  2480 PIL9             6    4  1089 PIMUUO          18  106  2232 PMSMAIN         18  103  2219 POP1
+ 18  103  2222 POPJ1           28   20  3610 POSNOR          18  103  2217 PUSH1           18  103  2223 PUSHJ0
+ 18  104  2226 PUSHJ1          18  104  2227 PUSHJ2          18  103  2225 PUSHJA          18  105  2230 PUSHJMSMAIN
+  9    5  3175 QORCRY          20  107  2297 RESET           20  107  2302 RESLOP          20  107  2294 RESW1
+ 20  113  2340 RESW2           18   95  1506 ROTC1           18   96  1511 ROTC2           18   89  1479 ROTDO
+ 18   88  1476 ROTNEG          18   88  1477 ROTNN1          18   88  1474 ROTPLS           2    5  2403 SDSKO2
+ 19   10  3110 SECCS            2    5  2401 SET-DSK-OUT     19   11  3282 SETFAKOVF       28   20  3632 SETFOV
+ 20  132  2877 SETFPD           9    5  3178 SETHFU           9    5  3174 SETHLF          20  113  2360 SETLTS
+ 12   18  1560 SETM            18   93  2182 SETOV1          18  102  1051 SJMAIN          11   16  1459 SKIPX1
+ 14   48  1812 SKMAIN           6    2  1044 SMAIN            6    2  1045 SMAIN1          19   11  3280 SOEDOV
+ 19   10  3106 SOVRS            1    2  3339 STDC1           19   10  3105 STOPS           20  107  2313 STPLOP
+ 20  107  2325 STPLP1           1    2  3337 STRTDC          20  113  2344 STRTSW          20  106  1074 SWINT
+  1   10  3507 TAPCLR          26   12  3518 TAPDSP           1    3  3404 TAPEBR           1    3  3403 TAPEFR
+  1    3  3383 TAPEMT           1    6  3439 TAPENR           1    8  3489 TAPEPI           1    2  3299 TAPERD
+  1    5  3417 TAPERS           1    5  3424 TAPERS1          1    3  3402 TAPERW           1    7  3441 TAPERX
+  1    8  3451 TAPEWR           1    8  3478 TAPEXFRDON       1    8  3467 TAPINT           1    8  3481 TAPINTENB
+  1    8  3475 TAPINTWRT        2    5  2414 TAPRST          34   27  3976 TCNI1           34   27  3974 TCNO1
+ 34   27  3978 TDATO           14   52  1877 TDC1            14   54  1909 TDO1            34   27  3982 TDTI
+ 14   50  1846 TDZ1            14   50  1847 TDZ2             1    3  3396 TERAS1           1    3  3397 TERASE
+ 28   22  3699 TESMUL          15   54  2016 TIMER-IOTS      34   26  3968 TIMINT           2    5  2417 TIMRST
+ 14   46  1806 TLC1            14   44  1802 TLO1            14   42  1798 TLZ1            33   38  3868 TNBIDN
+ 33   40  3877 TNBIS0A         33   42  3880 TNBIS0C         33   43  4053 TNBIS1          33   43  4055 TNBIS2
+ 33   44  3886 TNBIS2A         33   44  3891 TNBORQ          33   44  3894 TNBOS0          33   47  4058 TNBOS1
+ 33   48  3902 TNBOS1A         33   51  3905 TNBOS2          33   53  3908 TNBOS2A         33   46  3900 TNBOST
+ 33   24  3832 TNCASODOF       33   24  3800 TNI             33   24  3810 TNI0            33   24  3811 TNI1
+ 33   24  3816 TNI2            33   31  4048 TNIC0           33   38  3869 TNIC0A          33   38  3871 TNIC0B
+ 33   32  3842 TNIC0X          33   34  4049 TNIC1           33   35  3852 TNIC1A          33   37  4050 TNIC2
+ 33   38  3858 TNIC2A          33   38  3865 TNICDN          33   32  3849 TNICRM          33   38  3875 TNIESC
+ 33   24  3831 TNIRF           33   24  4032 TNOC0           33   26  3835 TNOC0A          33   28  4034 TNOC2
+ 33   24  3826 TNORE           33   24  3829 TNRCW            1    7  3447 TNRP3           33   24  3819 TNSEND
+ 33   53  3919 TNSI            33   54  3924 TNSO            20  132  2872 TPCFI1          20  132  2875 TPCFI2
+ 20  132  2868 TPCFIX           1   11  3511 TPCNSO           1    9  3499 TPCONI           1   10  3501 TPCONO
+  1   12  3515 TPDATI           1    2  3379 TPMAOK           1    3  3407 TPSETDMP         1    3  3405 TPSETIND
+ 14   45  1804 TRC1             1    2  3371 TRCHA            1    2  3369 TRCHECK          1    2  3370 TRCHKB
+  1    2  3373 TRDONE           1    2  3380 TREOF            1    2  3381 TRERR           14   43  1800 TRO1
+  1    2  3366 TRP2            14   41  1796 TRZ1            14   50  1845 TSZ2             1    8  3465 TWERR
+  1    3  3395 TWREOF          33   53  3910 TYMCLK          33   56  3945 TYMNIN          33   56  3942 TYMNOUT
+ 33   56  3940 TYMNRESET       33   56  3935 TYMRS1          33   56  3936 TYMRS2           2    5  2408 TYMRST
+  2    5  2404 UDSKST           6    4  1200 UFA             28   18  3527 UFA1            28   21  3672 UFANOR
+ 20  107  2291 UINT-DISMISS    34   27  3986 UIOCHK          16    5  3031 UMOVX            1    8  3450 UTAPWR
+  6    3  1086 UUO0-7           6    1  1040 UUO1             6    1  1041 UUO2             6    1  2784 UUO3
+  6    3  1072 UUOGO            6    4  1097 UUOPJ            1    2  3343 WCDONE           1    2  3363 WCPOPJ
+ 17    6  3231 XBLTL           17    6  3198 XBY1            17    6  3214 XBY13           17    6  3207 XBY14
+ 17    6  3203 XBY15           17    6  3217 XBY3            17    6  3219 XBY3A           17    6  3201 XBY4
+ 17    6  3224 XBYH            17    5  3035 XCT1            17    5  3100 XCT10           17    5  3064 XCT13
+ 17    5  3065 XCT18           17    5  3071 XCT2            17    5  3059 XCT3            17    5  3054 XCT4
+ 17    5  3039 XCT5            17    5  3056 XCT6            17    5  3082 XCTAC           17    5  3072 XCTACP
+ 17    5  3102 XCTBLG          17    6  3230 XCTBLT          17    6  3197 XCTBYT          17    5  3053 XCTIX1
+ 17    5  3051 XCTQF1          17    5  3091 XCTQF2          17    5  3096 XCTSTK          17    5  3038 XCTUMV
+ 17    5  3070 XDISP           17    6  3226 XFIXMA          17    7  3275 XIOINST         17    5  3068 XISPT
+ 17    5  3067 XNOTPT          17    6  3249 XPDLO2          17    6  3255 XPOP1           17    6  3270 XPOP2
+ 17    6  3273 XPOP3           17    6  3272 XPOPAC          17    6  3242 XPUSH1          17    6  3251 XPUSH2
+ 28   21  3668 YESRND          28   21  3681 ZLOW           
+01m0013                               	LIST-CORMAP
+
+
+			Storage map
+
+
+     0	X...............................................................
+   100	................................................................
+   200	................................................................
+   300	................................................................
+   400	................................................................
+   500	................................................................
+   600	................................................................
+   700	................................................................
+  1000	................................................................
+  1100	................................................................
+  1200	................................................................
+  1300	................................................................
+  1400	................................................................
+  1500	................................................................
+  1600	................................................................
+  1700	................................................................
+  2000	XXXXXXXXXXX.XXXXXXXXXXXXXXXXX...X.XXXXXXXXXXX...X.XXXXXXXXXX..XX
+  2100	XXXXXXXXXX......X.......XXXXX...XXXXXXXXX.....X.XXXXXX..XXXXXX..
+  2200	XXXXXXXXX.XXXXXXXXXXXXXXXXXXXX..XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  2300	XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  2400	XXX.X.XXXXX.XXXXXXX.X.XXXXX.XXXXXXX.XXXXXXX.XXXXXXX.XXXXXXX.XXXX
+  2500	XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  2600	XXXXXXXXXXXXXXXXXXX.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.XXXXXXXX..
+  2700	XXXXXXXXXXXXXX..XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.XXXXXXXXXXXXXXXX
+  3000	X.X.X.X.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  3100	XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX.X.X.XX
+  3200	XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  3300	XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX|, hÜ

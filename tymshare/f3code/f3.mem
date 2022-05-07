@@ -1,0 +1,340 @@
+     1.0  F3 MICROCODE
+
+     1.1  SLOE
+
+     SLOE is the assembler for  the  F3  microcode.   It  is  a  general
+     purpose microcode assembler, not written specifically for the F3 or
+     any other machine.  The source to it is unavailable.  It does  have
+     a  copy  of DDT loaded with it, so some patches can be made.  I had
+     to make a patch to a location called  BUFSIZ.   It  originally  was
+     setup  to  2000., I changed it to 512.  BUFSIZ specifies the number
+     of 8 bit bytes in each record it writes to tape.  By  setting  this
+     to  512,  it  causes  the  code not to have to write a non-standard
+     record size - it will write a 128 word  record.   This  results  in
+     SLOE not having to do any MTOP.  calls that TOPS10 has and we don't
+     have.  The original  copy  of  SLOE  before  I  patched  it  is  in
+     SLOEXO.HGH  and  .LOW.  The working copy I use to make microcode is
+     SLOEXP.SHR and .LOW.  These are in (KL10:930).
+
+     SLOE has a strange characteristic that I managed to get around  but
+     never  found  the  cause of.  It will loop writing the listing file
+     after reading F33KLN.SLO but before reading  any  other  file.   To
+     avoid this,  delete  the listing file it will be writing (which has
+     the same name as the .SLO input file  you  give  it  in  the  :FILE
+     command) and create it again with an editor.  Then quickly exit the
+     editor and start the microcode compile.
+
+     SLOE has been known to have bugs, so beware.
+
+
+     1.2  Microcode Sources
+
+     There are six microcode source files.  They  are:   CFINST  (mostly
+     instruction  microcode,  plus  microcode instruction dispatch area)
+     CFIO (micorocode for complicated instructions  plus  IO  microcode)
+     TAPE (for tape service), SWINIT (initializes switch symbol values),
+     CFDEF (has field definitions to tell SLOE what names of fields  and
+     values are for the F3, also global macro definitions such as .PAIR,
+     etc.), and F33KLN, which contains all switch defintions to  compile
+     F3 KL10 type microcode and points to the rest of the source files.
+
+     CFINST and CFIO used to be one file called CFMAIN.  I split  CFMAIN
+     up  into  two  files  so  that  the editors we have would have less
+     trouble editing them.
+
+
+     1.3  Compiling Microcode
+
+     First, delete and re-create using an editor the file F33KLN.LST  (I
+     assume  for  this  example  that  your  microcode parameter file is
+     F33KLN.SLO).  Assign a tape drive to your job.   Then  run  SLOEXP.
+     At  the > prompt, type in :FILE F33KLN and return.  It should start
+     typing out the files it is reading--first F33kln, then SWINIT, then
+     CFDEF, then CFINST, then CFIO, then TAPE. The warning at the end of 
+F3 Project Information                                            Page 2
+     compile about no-@ being an undefined label can be ignored, it is a
+     SLOE  bug  of  some  sort.  Any other errors should not be ignored.
+     When  compile is  done, type :TAPE MTA0:  (assuming your tape drive
+     is MTA0).  This will write the microcode object file onto the tape.
+     This tape is now directly usable to bootstrap the F3 microcode.
+
+
+     1.4  Duplicating Microcode Tapes
+
+     SLOE cannot write the microcode object onto disk.  To be able to do
+     this,  I  wrote  a short program called UTAPE, which will both read
+     and write microcode objects between  disk  and  tape.   After  SLOE
+     writes  the  microcode  to  tape,  run UTAPE, which can be found in
+     (SOCCI:930).  It prompts with a *, and takes  a  PIP  type  command
+     string.   I  have been using the convention of naming the microcode
+     object files UCxxyy.BIN, where xx is the month and yy is the day of
+     month  that  the  microcode was generated.  So the microcode object
+     created on April 7, 1981 would be called UC0407.BIN.   The  command
+     string to copy the microcode object from tape  to disk would simply
+     be "UC0407.BIN=MTA0:".  To use UTAPE to create more tapes,one would
+     say  "MTA0:=UC0407.BIN".   UTAPE's  scanner takes usernames in case
+     you want to use them.
+
+     UTAPE reads and writes the tape in IBM compatibility mode, which is
+     the  format  the the F3 microcode bootstrap ROM needs to have them.
+     UTAPE  has  a  location  which  is  currently  set  to  128.   that
+     determines  the  record  size  it  reads and writes.  Since SLOE is
+     setup to write  512.   byte  (128.   word)  records,  this  setting
+     doesn't need to be changed for normal usage.
+
+
+     2.0  DOCUMENTATION
+
+     (KL10) is the directory in which  I  have  been  working  with  the
+     microcode  and  other  F3  specific things.  Currently, all monitor
+     sources for the F3 are in M33 except  for  the  latest  version  of
+     APXKON,  which  at  the  time  of my writing this is in (SOCCI:930)
+     waiting for a chance to  get  back  into  M33.   This  version  has
+     undergone primary testing and is ready to put into the monitor.
+
+     There  is  a  file  called  F3NOTE.TXT  which  has  all  sorts   of
+     miscellaneous  tidbits of information about the F3 that I have been
+     told or have discovered as I worked on the project.
+
+     F3USPC.TXT has a summary of how the microcode space  is  organized.
+     It  seems  to be a fine art to re-arrange the macros that determine
+     where in microcode address space everything gets assembled so  that
+     everything  fits,  and F3USPC.TXT should help the future microcoder
+     to do so.
+
+     F3DSK.TXT has a summary of the  disk  opcodes  and  formats.   This
+     information  is duplicated in the beginning of APXKON.MAC, which is
+     what I use to read the disk bit stuff.
+F3 Project Information                                            Page 3
+
+
+     DCTRL.DOC is a file taken from POOLE's directory on OFFICE-4  which
+     has  a description of the disk instruction formats and a little bit
+     about the data format (32 bit mode vs 36 bit mode.  32 bit mode not
+     used for the disk as far as I know).
+
+     There is a document that I don't  have  in  machine  readable  form
+     called  MICRO.DOC,  which  goes  through  some  necessary  but  not
+     sufficient  information  for  microcoders.   Also  not  in  machine
+     readable  form is the data path diagram for the F3 and the chart of
+     the microcode fields and  value  assignments.   I  will  leave  the
+     orange  FOONLY folder with whoever wants to keep it, which contains
+     all this stuff.
+
+
+     3.0  DIAGNOSTICS
+
+     The only diagnostic I have worked with on the F3 is called  DSKTST,
+     which is a MACRO-10 level diagnostic to check out the disks.  It is
+     also used to format a disk.  F3NOTE.TXT contains just about  all  I
+     know  about  how  it operates.  I never did get the sources for it,
+     which are written in FAIL and are in the possession of  FOONLY  and
+     the AUGMENT group.  The other diagnostic I know about for the F3 is
+     the microcode level CPU diagnostic,  which  I  have  no  experience
+     with.
+
+
+     4.0  DISK DRIVER
+
+     4.1  Contiguous Transfers
+
+     The disk driver is  setup  to  be  able  to  handle  multiple  page
+     transfers  in  such a way that the time between one transfer ending
+     and the start of the next transfer  is  minimized  as  much  as  is
+     possible.   This is so that we don't have to wait a full revolution
+     before starting the next page in.  I have measured  the  amount  of
+     time  from the end of a transfer to the beginning of the next to be
+     80 usecs - 40 for the PI cycle, and another 40 to start up the next
+     transfer.   Even  though  this  is  true,  and  Poole  told me that
+     anything under  100  usecs  should  catch  the  next  page,  timing
+     transfer  speed  seems  to  indicate that we are still missing that
+     next page.  I told Poole about this and he said maybe  the  problem
+     is  that  the  CDC  drives we are using are taking too long to do a
+     null seek (seek command to the same cylinder  that  the  heads  are
+     on),  and  that  the  100  usec number was true for the older Ampex
+     removable pack drives.   This  problem  is  still  unresolved,  and
+     performance problems will probably result until this is fixed.  One
+     possible solution Poole said he'd look into  is  to  fix  the  disk
+     controller  in  the F3 so that it doesn't do the seek if it doesn't
+     have to.
+F3 Project Information                                            Page 4
+
+
+     4.2  Error Reporting
+
+     CHKPNT and ERRCHK still need to be  modified  to  read  UNISBH  and
+     UNISBS  areas  in the unit data blocks for the disk.  SYSTAT is not
+     reporting any of the CONI or DATA bits either, although  I  do  set
+     them  up  in  APXKON.   They  are  arguments to FILIO.  See routine
+     CONERR in APXKON for the mapping of F3 disk error bits to fake CONI
+     bits.  The fake DATAI is simply the result of a RDA instruction.
+
+
+     4.3  Different Drive Types
+
+     Currently the disk driver has to be assembled fther AMPEX type
+     removable  drives  or  CDC  type  winchester drives.  I didn't have
+     APXCPY determine at run time what the  drive  type  was  because  I
+     didn't know of any easy way to determine this.  It will probably be
+     necessary to change the driver to do this.   Currently  the  driver
+     uses assembled in symbols instead of those from the UDB.  This will
+     have to be changed.  I was concerned that if  I  used  the  UDB,  I
+     would  waste  enough  time  to  miss  the  next  page in a multiple
+     transfer group, and if this turns out to be true each KDB will have
+     to  point  to a special routine to do the block to CYL, TRK, SECTOR
+     calculation.
+
+
+     4.4  Seek Errors
+
+     As of this writing I have tested that the disk driver  successfully
+     recovers  from  seek  errors,  which  I  generated by sending a bad
+     cylinder number to  the  disk  control.   It  takes  a  recalibrate
+     command  to clear SUSE (selected unit seek error), the normal clear
+     command will not clear this error.   However,  I  have  seen  cases
+     where  seek  error  comes  up  and the recalibrate sequence doesn't
+     clear the SUSE bit.  The only thing that seems to clear this is  to
+     power  the  drive  down and up again.  Recently, and ECO to the CDC
+     drives was installed in  APA1  to  correct  a  microprocessor  hang
+     condition  associated  with  disk  drive  faults, and this may have
+     corrected this problem.
+
+
+     4.5  Fairness Count
+
+     I noticed that the fairness count (number of transfers we do on one
+     cylinder  before  going  to  the  next  cylinder) winds up to be 10
+     pages.  It might be  worthwhile  seeing  if  changing  this  number
+     improves  performance  by  causing  less seeks.  I noticed that for
+     programs that do contiguous transfers, like ASP, there is more head
+     motion  than  you  would think necessary, and the fairness count is
+     the reason.  When testing disk I/O, the fact that the  I/O  doesn't
+     happen  because the disk page is already in core is a nuisance.  To
+     get around this, make VREMOV always take pages out of  the  CHT  by
+     REMV36/JRST REMOV5 and REMOV3+1/JRST REMOV5.
+F3 Project Information                                            Page 5
+
+
+     4.6  Overlapped Seeks
+
+     As far as I  know,  overlapped  seeks  seem  to  work,  although  I
+     couldn't  get  any  timing  differences  running  DSKCLN with our 3
+     drives by disabling overlapped  seeks.   I  did  verify  that  seek
+     interrupts   take  a  while  to  come  in,  rather  than  happening
+     immediately.  The documentation for the  disk  instruction  formats
+     doesn't  include  the  new  DCONO  bit  that  enables for seek done
+     (actually enables for any attention condition).  This bit is called
+     ATBENB  in  APXKON.  I have measured seek time on the CDC drives as
+     being between 5 and 50 milliseconds.  The way that seeks  are  done
+     on  the  F3 disks is a real hack - you start up a transfer and then
+     blast the control to abort the  transfer,  which  leaves  the  seek
+     going.   Then  you  enable for attention, and get an interrupt when
+     the seek finishes.  Unfortunately, starting a transfer or resetting
+     the   control  will  cause  you  to  lose  any  pending  seek  done
+     interrupts, so after this is done it is required to check to see if
+     any  seeks  have  completed.  Poole says a lot of this stuff should
+     have been in microcode (for example, the sequence of turning the SU
+     bit  off  and on in the LDA instrucion) but has to be in MACRO code
+     for now.
+
+
+     4.7  PDL Overflow Bug
+
+     As of this writing, the version of APXKON in M33 has  a  bug  which
+     causes  PDL  overflow.   This  was  because  the  APXPOS and APXRCL
+     routines had to check for completed seek interrupts lost because of
+     blasting  the control, and if any were found PUSHJed back to FILIO,
+     but FILIO is who PUSHJs to APXPOS or APXRCL, so this  could  happen
+     indefinitely.   The  fix  was to generate an interrupt if any seeks
+     were found, and let FILIO handle them then.
+
+
+     5.0  TAPE DRIVER
+
+     5.1  Error Recovery
+
+     I am not too happy about the percentage of  times  the  read  error
+     recovery  seems  to  fail.   After getting a read parity error, the
+     error recovery code backs up one record to get to the beginning  of
+     the  bad  record.  If this results in a parity error too, the error
+     recovery is aborted.  This seems to happen a lot.  If I had had the
+     time  I  would  have  researched this to find out if its a hardware
+     deficiency, or if its to be  expected  and  ignored,  or  whatever.
+     Someone needs to talk to Poole for advice about this.
+F3 Project Information                                            Page 6
+
+
+     5.2  MAGSER Bugs Found
+
+     F3TSER was based on MAGSER, and I found  several  bugs  which  also
+     existed  in  MAGSER  all  of  which  I don't remember.  To help fix
+     these, I kept around MAGSER.ORG  and  F3TSER.20,  which  is  pretty
+     close  to  the undebugged version of F3TSER before fixing the bugs.
+     These files are in (KL10).  One of  these  MAGSER  bugs  is  fairly
+     serious,  and  is  uncorrected  as of this date:  DR mode, which is
+     supposed to split the data into 128.  word records, instead  splits
+     the  records  on  the  2020  according  to  where the physical page
+     boundaries are.  This results in the tapes written in  DR  mode  on
+     the  2020  being  incompatible  with  those  on any other machines.
+     SAVGET uses DR mode, therefore you cannot run a program off tape on
+     the 2020 which hasn't been written on a 2020, etc.
+
+
+     5.3  Hung Tape Drives
+
+     Rich Funk used to be able to hang the  tape  drive  on  the  F3  by
+     trying  to  read  in a tape with MAGCON.  I never got to check into
+     this, so be on the lookout for it.
+
+
+     5.4  Old Vs New Tape Channel Spec
+
+     Poole was supposed to implement a scatter read/write type interface
+     for  the  tape.   Right  now,  it  cannot  split  a  record between
+     discontigous  physical  pages,  i.e.   the  transfer  has   to   be
+     physically  contiguous.  If the buffer is virtually contigous inthe
+     user's address  space  but  not  physically  contiguous,  which  is
+     normally   the  case,  the  hardware  cannot  handle  the  transfer
+     directly.  Therefore, F3TSER always does its transfers to and  from
+     a  32  page  (thats the maximum record size we support) buffer, and
+     then BLTs the data to and from this buffer from and to user address
+     space.   A  section  of  exec  address  space is used to map in the
+     user's pages, which are locked with PGYDIO.  When the new  spec  is
+     implemented, it should be fairly easy to convert the tape driver to
+     use it, since I coded the tape driver according to the new spec  (I
+     have  a  copy  of it in my FOONLY folder, and Jeff Peters of FOONLY
+     can provide additional copies) and then wrote  conversion  routines
+     to  convert the new spec calls to the old spec calls.  All the code
+     that does this conversion is at the end of F3TSER.MAC.
+
+
+     6.0  MICROCYCLE CLOCK AND INTERVAL TIMER
+
+     Currently the F3 has no microcycle clock or timebase with which  to
+     simulate  one.  What will have to be done is to use the F3 interval
+     timer to simulate both an interval timer for SNOOPY and a time base
+     which can be used to simulate microcycles.  The macros for the 2020
+     can probably be used (TBSAVE, etc) to do this.  When  "turning  the
+     microcycle  clock  off"  or entering interrupt level, just remember
+F3 Project Information                                            Page 7
+
+
+     the current value of the time  base,  and  when  leaving  interrupt
+     level  or  turning  the  microcycle  clock back on, reset the "time
+     base" to the old value.  It might be a little tricky to do this  in
+     such  a way as to not take up a lot of overhead doing it and making
+     sure the interval timer for SNOOPY, if its running, is  not  messed
+     up.
+
+
+     7.0  DEBUGGING HINTS
+
+     Watch out for the EPTACP pointer.  If its set incorrectly, you  can
+     get  weird  page fails and/or machine hangups (at microcode address
+     6000).  Whenever the FOONLY microcode makes  a  reference  that  it
+     doesn't  expect  a  page  fail  for  and  it  gets  one anyway, the
+     microcode will loop at microcode location 6000.   Normally,  EPTACP
+     is  set to the address where the microcode keeps the non-current AC
+     block sets (currently, the symbol for this location is EPTACB,  and
+     the address is EPT+EPTACB).
+2@dc

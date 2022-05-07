@@ -1,0 +1,3800 @@
+COMMENT \	FOONLY F2-F3 MICRO-CODE
+
+
+Recent history:
+
+21 Mar 80 TVR	Added DMOVE, DMOVEM and ADJSP instructions.  Changed opcode of
+		XMOVE to 107, as it conflicted with ADJSP.  Experimental boot
+		switches in preparation for auto-loading tapes.
+22 Mar 80 TVR	Fixed some typos with above.  
+26 Mar 80 TVR	Added WAITS switch to modify pager to make references to user
+		ACs go to user shadow memory (instead of special place pointed
+		to by AC Base Register in BBN Pager).  Since the addresses
+		supplied to the random instructions must be larger than 17
+		to prevent references to ACs in 2901, a page was stolen from
+		the EXEC address space, currently 770xxx, and that page table
+		entry in the hardware is copied from entry 0 of the user page
+		table in core.
+		Also, for Stanford only, defined ILGIOT to reference the PAN
+		interface, so that CONSZ will skip when no device is present
+		and new devices can be added to that bus without microcode
+		changes.
+		Fixed dispatch for UUO0 to look at opcode field only.  Made
+		indirect dispatch test for the stop switch, so that stop will
+		stop indirection loops
+		Fixed DATAO PI, to page fault properly.
+27 Mar 80 TVR	Pager mods and tape hack for CCRMA were both buggy.  Fixed.
+		Fixed bug in pager: PC was being over-decremented on page
+		fill cycle when indirection failed in XCTR'ed instruction.
+29 Mar 80 TVR	Flushed a spurious DEST-A-MEM which prevented WAITS from
+		working at XCTAC+1.
+02 Apr 80 TVR	Added code to trap IOT references if not Exec or IOT-User
+		mode.  New macro, UIOTRP, jumps if in IOT-USER mode.
+		ILGIOT still is a no-op for non-Stanford microcode for
+		the moment.
+		For Stanford only, the PAN interface has its micro-interrupts
+		re-enabled on PI-CHECK-RQS.
+		Bummed an instruction out of IOTDIS. Indirect bit is guaranteed
+		zero so one can double by shifting instead of doing an add.
+03 Apr 80 TVR	Fixed ADJSP.  XCT n,[PUSH x,y] failed if x was a user AC
+		reference.  Added code to emulate PUSH/POP.
+04 Apr 80 TVR	XCT 1,[POP x,AC] didn't have a chance of working.  It gets
+		emulated as well.  Added code for KAFIX.
+11 Apr 80 TVR	Changed PAN interrupt enables in PI-CHECK-RQS.  Added reset
+		code and IOT dispatch for temp. Grinnell code (under STANSW).
+		Looked at DIV code to try to fix divide-by-zero.  Gave up in
+		disgust.  I won't touch that code with a 10 ft battle axe!
+		Fixed another stupid typo in ADJSP.
+22 Apr 80 TVR	Fixed two bugs in DPB (and one in LDB).  DPB sets half flag
+		if it gets a page fault on the pointer reference.  The monitor
+		doesn't care much, but some user programs look at the fault
+		PC and flags to decide what kind of Pager and CPU they are
+		running under.  The other bug was that in LDB and DPB; they
+		do not handle bytes which 'wrap-around', i.e. 36-P<S.  If this
+		is the case, i think the right thing is S:=P.
+		Fixed bug in DMOVEM references to ACs.  One more time on ADJSP.
+		Added code (MAPRST) the clear entire map (not just valid bits)
+		on 'power-up' to prevent immediate mode references from going
+		to non-ex memory and/or causing spurious ECC traps.
+		Wrote some code for DMOVN, DMOVNM, and KIFIX.
+		Re-arranged a few things to make things fix (%$%@*#& orgs).
+26 Apr 80 TVR	Merged with DWP's version, which did not contain indications
+		of alterations.  Unfortunately, i did not have the most recent
+		CCRMA version available, so another merge will be necessary.
+		Many comments added.
+30 Apr 80 TVR	Attempted merge with CCRMA version.  That tape was not complete
+		so only some of the code will be merged.  Enough to proceed
+		with cleanup.
+		Replaced most :<expression> with macro calls in order to use
+		microcode memory in a more reasonable fashion.
+		More comments added.
+07 May 80 TVR	The assembler is a loser!  It redefines macros alright, some of
+		the time.  At any rate, the macros were rewritten and all
+		(shudder) of the macro calls changed.
+10 May 80 TVR	Merged in the rest of the CCRMA changes.
+11 May 80 TVR	Grumble, curse, moan!!!  No, the assembler isn't THAT bad.
+		The REAL loser not the assembler, but the person who wrote oet
+		the old version (which had a different name) onto
+		SCI:<POOLE>SLOEXP.SAV and which contains various and sundry
+		bugs, one of which appears to be macro re-definition and
+		another being an unusable storage map.  So, everything was
+		delayed a week while i tried to get around bugs which had
+		already been fixed.
+		Fortunately, this time it could be converted back to the
+		original form with the aid of a TECO macro.
+		Adjusted memory usage and it now assembles except for
+		re-usage of 5300 and 5301.
+12 May 80 TVR	Adjusted some of memory usage to make the silly thing assemble
+		WAITS version in preparation for making larger adjustments.
+		PAN interrupts are come out in the status word as low true. PAN
+		interrupt code has been corrected for that.
+		Fixed a rather obscure bug in SETHLF.  Because SETHLF stores
+		into CRYOV, the EXEC mode shift register (what COND[USER] is
+		based on) gets forced to be the current space.  Thus,
+		page faults from User pages in Exec mode on certain
+		instructions (like IDPB) were being processed as being Exec
+		mode page faults.
+13 May 80 TVR	Added .QUAD macro and put it in places jumped to by SLOOP
+		which were previously controlled by :<absolute number>.
+		Adjusted memory usage to make the one area using .QUAD fit.
+		Fixed misfeature in experimental boot.
+		LDB/DPB for bytes that wrap around just isn't right at all!
+		BYTE-OVERF is condition BEFORE incrementing, not after.  So,
+		i will have to rethink this one to come up with something
+		that handles that case properly without slowing byte
+		instructions down significantly.
+
+Changes at CCRMA follow:
+
+15 May 80 TVR	Fixed bug in DMOVNM.  Changed mechanism for PAN interrupts.
+		The PAN microinterrupt enable is turned off when the interrupt
+		for that channel is recieved and turned on by PI-CHECK-RQS
+		by setting all of the microinterrupt enables for the PAN to
+		the complement of PI IN PROGRESS and PI REQUEST.  This means
+		that the PAN can only request interrupts whenever something
+		else isn't using those channels.  This implies that any PAN
+		devices must be on the end of CONSZ chains, or else they will
+		steal interrupts from other, interrupt counting devices.
+24 May 80 TVR	Grinnell interrupt bug fixes.  Starting putting names on
+		opcodes and stuff to make it easier to use with E.
+26 May 80 TVR	Fixed problem in JRST1+1 falling thru to nothingness.  A few
+		more editorial changes.
+07 Jul 80 TVR	Changed CONO APR, code to turn on AR INT ENB and also made
+		symbols some references to APR A-MEM relating to APR.
+		Fixed bugs in F2 version of overflow interrupt.
+		*** Did not look at F3 code for same. ***
+		More comments added.
+08 Jul 80 TVR	Made attempt to fix [I]DIV by zero and no divide.
+		As part of that, commented the setup part of DODIV, and added
+		code to try to restore AC after finding no divide case.  I'm
+		not sure the DIV case will work properly, but we'll see...
+		Fixed bug in FDVR of negative number which set the flags wrong.
+		It had the wrong MASK when complementing a negative dividend
+		exponent.
+		Many comments added to divide and KA floating point as a result
+		of chasing these.  Some have (???) being i'm not sure that either
+		the code and/or the comments are right.
+15 Jul 80 TVR	Installed LPT device.  Microcode for LPT is still being tested.
+		Fixed bug in PAN enabling, so that PI channels that are not
+		turned on do not have their micro interrupts enabled.
+22 Jul 80 TVR	Fixed bug in [I]DIV which clobbered PC on divide by zero.
+		Sets overflow on KIFIX now.  Also, sets overflow on KAFIX, which
+		should not cause any problems.
+25 Jul 80 TVR	Added FIXR and FLTR.
+23 Aug 80 TVR	Fixed bugs in LDB/DPB having to do with bytes which overflow
+		word boundaries.
+		Ran out of micro-code space and re-adjusted .USEs to recover
+		some wasted space.
+		More work on LPT device.
+20 Sep 80 TVR	Added a new switch, MUM2.  At the moment, this only causes
+		ECC logging information to go to 1776x instead of 0776x.
+		Under WAITS switch, changed APR CONI, and clock interrupt
+		decision, to implement special feature of SAIL's KA, which
+		turns on bit 27 in APR CONI when it is NOT interrupting.
+25 Sep 80 TVR	Began merge of CCRMA version with DWP version.  MUM2 became
+		XUCODE.
+		Tape code got moved to separate files in order to make SRCCOM
+		feasible.
+		New symbol TYMORG defines where absolute part of TYMNET code
+		is assembled. It only need be changed in the future.
+
+Changes at Foonly follow:
+
+
+15 Aug 80 BO	Added Versatec to unused half of CTY IOT dispatch,
+		device code 124.
+		Removed the 16 NOP's at the very end of memory.  VC code
+		is broken up to fit available space.
+		Used absolute locations 5340-5437 (5340 defined as
+		VCORG1) and 7733-7777 (VCORG2) defined in VC.SLO
+		
+25 Sep 80 TVR	Following changes were not documented but evident from source
+		comparison:
+
+		MASK[18] was added to dispatch code at 2002. Presumably, this
+			done to make the interrupt bug trap work properly.
+		CONSZ to DLS when no code is assembled now always s so
+			that TENEX can tell if the DLS exists.
+		New device, VID, added.  This is Gossett's new display.
+		uDevice numbers for the DLS, VC are now variables.
+		Code for DMA tape controller was added.
+		Two new switches were added, OTP and NTP, which stand for
+			Old Tape and New Tape controllers.  NTP is for
+			the DMA tape controller and all others are OTP.
+		Changes to CTY code and TYMNet code to account for differences
+			in MAPF fields for new tape controller.
+		Some adjustment of .ORG and .USE were done to make things fit.
+		FDVL was fixed.  This involved making changes to A-MEM usage
+			in floating divide code.
+		SLOEXP was modified to truncate jump addresses to 12 bits without
+			complaint.
+		New switch, XUCODE, was added.  If XUCODE=1, then some I/O devices
+			are assembled into the upper 4K of microcode memory.
+		A new macro, .GETADR(X), constructs a 12 bit number in Q.
+		Tape code is optionally moved into upper 4K of microcode memory
+			if XUCODE=1.  Dispatches for tape code were moved.
+		
+Versions merged.  This version is designated 1.02 by fiat of TVR.
+
+25 Sep 80 TVR	Completed merge.
+		*** VC needs a new device code.  It had used the slot assigned
+		historically to the LPT.
+		Some other minor formatting/comment changes were made to make
+		the source merge program work properly.
+		There were strong differences between the two in the floating
+		divide code.  Hopefully, all of the A-MEM changes made it
+		across.  I have checked them by hand.
+
+26 Sep 80 TVR	Assigned device 520 to VC (Versatec interface), and modified
+		VC.SLO to accomdate that.
+22 Oct 80 EVS	Merged in TYMSHARE changes - KL map, etc. Following
+		is the history for those changes:
+4 JUNE 80 PG	ADDED STUFF FOR KL PAGER EMULATION. AS YET UNTESTED. 
+		ASSEMBLY SWITCH "KL".
+28 JULY 80 EVS	ADDED KL TRAP MECHANISM, KL STYLE APR AND PI CONI CONO
+		FORMATS. FIXED BUGS IN KL PAGER CODE THAT DIDN'T MASK
+		OFF UPT ADDRESS PROPERLY (GOT AC BLOCK FIELDS ORED INTO
+		LOW ORDER BITS).
+		HAD TO MAKE JSR AS INTERRUPT INSTRUCTION STORE PC IN ABSOLUTE SPACE RATHER THAN
+		VIRTUAL BECAUSE CANNOT RESTART AN INTERRUPT CYCLE
+		IN CASE WE GET PAGE REFILL ON STORING PC.
+28 JULY 80 EVS	Fixed bug in KL version of PUSHJ - do not set PC
+		in same microinstruction as MAPF[PPOP] - else
+		after page refill won't reexecute instruction.
+30 July 80 EVS	Fixed various bugs in XCT mapped. Changed XCTAC
+		to SET-TEMP-EXEC because address of previous ACs
+		is in exec space.
+		Stopped IR from getting smashed in MUJSR because
+		state of map is saved in it by MAPOF
+		Took out MASK[4] from instruction at XCT10+1
+		so that instruction could fetch and/or store previous
+		ac data. I hope this doesn't break the TENEX map.
+		Fixed place that checked IR for which XCT ac bits
+		after they had been xferred to Q to check Q instead,
+		at XCT5+1.
+		Fixed some places that forgot to check call from monitor
+		condition in 4000 bit in KL's PC.
+		Fixed code that continues PUSH and POP when they
+		are under XCT mapped to have the right MAPF
+		code, so that stack PTR doesn't get incremented
+		or decremented on page refills and page fails if
+		it isn't supposed to.
+14 Aug 80 EVS	Fixed problem with LUUO - if page refill or page fail
+		occurs for the store into 40, PC has been decremented,
+		and prog gets restarted at LUUO place-1.
+		Fixed XCT mapped of DMOVEM, not enough bits set into
+		the MAP-EXEC-SR to cover two stores.
+		Fixed bug in page refill which happened when W bit was
+		on but A bit was off - still allowed access to the
+		page.
+26 Aug 80 EVS	Fixed code for KL map under NEWMAP switch.
+		Watched Poole install new microcode for
+		the DMA tape control, under switch NTP.
+		Took out extra JUMP[MAIN] at location 2150.
+3 Sep 80  EVS	Put in new block I/O code in TYMNET base emulation code.
+		Put code into DCONO to allow enabling for attention
+		instead of idle - DCONO 20+PI.
+03 SEP 80 EVS	CHANGED INTERRUPT DISPATCH CODE TO BE AT 7500 INSTEAD
+		OF 7400 BECAUSE OF CODE AT "OTHER" EXPANDING. CHANGED
+		MPOFF1 TO BE OUTSIDE OF 1 - KL CONDITIONAL BECAUSE
+		TYMNET CODE NEEDS IT.
+5 SEP 80 EVS	DO NOT CLEAR HI-ABS-MA WHEN TRYING TO DO MEM OPERATIONS
+		TO UPT+501 AND 502 ON A PAGE FAULT TRAP.
+29 Sep 80 EVS	Various fixes to new block I/O network interface microcode.
+		Put in CLR-DEV-FROM-INTR before calling TYMCLK.
+		For KL map, put in init of MAP-DISP register.
+23 Oct 80 EVS	Fixed bug in block I/O which caused output word
+		to be sent to the -11 before it was ready to
+		accept it, after the last xfer of a block output.
+
+03 Feb 81 EVS	Merged changes received from Poole on 30 Jan 81 into
+		this source file. Changes to floating point
+		and fixed point arithmetic instructions show up
+		in file compare but have no entries in change
+		history. (Fixed point change looks like it took
+		a bunch of ACSEL[AC]s out). Instruction to clear disk interrupt
+		enable bit was moved. Illegal device interrupt check
+		code under F3SW REPEAT 0ed out.
+4 Nov 80 PG	Added new display service for FooVision (VID.SLO). This
+		stuff makes use of high memory, since it is quite large. Note
+		that the ,INSERT must be right after the tape code, since
+		(due to kludgery) .USE[OTHER] doesn't work properly for getting
+		you back to low memory (see TYMFOO). For your information:
+		.USE[HIGHMEM]	gets you to high memory
+		.USE[OTHER]	gets you back to low memory
+		GETADR[FOO] JUMP[GOHIGH] $	jumps to high memory 10000+FOO
+						(Note that this expands
+						to 2 microcode words.)
+		JUMP[GOMAIN] $			jumps to MAIN in low memory
+
+21 Nov 80 - PG	Added new output instruction to TYMNET for F5 diagnostics.
+		Takes the data in the effective address, using the right
+		16. bits of the right half as data to go out;
+		AC=1 => STB DATA, and AC=2 => STB CTRL.
+18 Feb 81 EVS	Put time field specifications into MFI routine.
+		Changed MAPUP and MAPDN to enable and disable arithmetic
+		overflow traps. Changed JRSTF to not allow user mode to set
+		user IOT bit in PC. Took out special memory test opcodes 106
+		and 107, made them trap as MUUOs. Also made 100-103 into
+		MUUOs. Discovered that combination of time used by microcode
+		and macrocode doesn't allow reads or writes to/from consecutive
+		sectors on disk without incurring full revolution latency.
+18 Feb 81 EVS	Put code in to make overflow work the way it does on KI and KL.
+		Use bit 4 in APR AMEM[2] to OR into PC whenever it is stored
+		by an instruction or trap. On micro-interrupt for overflow,
+		turn off hardware overflow flag so trap won't happen again,
+		and turn on overflow flag in AMEM. JRSTF never sets hardware
+		overflow, only AMEM overflow flag. All this necessary because
+		microtrap happens as long as its enabled and PC overflow
+		flag is set, but on KL and KI trap only happens when
+		trap flags are set, not because overflow is on.
+23 Feb 81 EVS	Fixed routine DOTRPX so that it properly clears out the FPD
+		bit in AMEM if HALF was on at time of trap cycle (was clearing
+		bit 10., not bit 3 in AMEM). Symptom was that first part done
+		mysteriously appeared on in PC after an arithmetic trap.
+23 Feb 81 EVS	Forgot about JFCL when putting in stuff for overflow
+		bit faking. Make JFCL jump on AMEM flag and clear when
+		doing overflow.
+23 Feb 81 EVS	New Feature: Make examine and deposit switches turn off map
+		before examining and depositing EXCEPT when address switch
+		for bit 13. is on, in which case duplicate the old behavior,
+		which is to examine whatever address space the machine happens
+		to be in at the time (which is God knows what if the machine
+		is running).
+03 Mar 81 EVS	Bug: If micro-interrupt or page fail during effective address
+		calculation happens at dispatch of a trap instruction,
+		PC is wrong because DOTRPX decremented it anticipating
+		the dispatch to increment it on successful opcode dispatch
+		of the trap instruction. If micro-routine winds up back
+		at MAIN instead of generating a macro PI, PC has been permanently
+		decremented, and because of another bug (described below)
+		the trap is lost as well, except in the case of page refill
+		on an indirect word of the trap instruction (the refill
+		code is smart enough to regenerate the trap, but PC is still
+		wrong.)
+		Fix: All exits from places that have interrupted the execution
+		of a trap instruction must increment PC before restarting
+		the trap instruction or before storing PC for macro level.
+		This includes page fail, page refill, microinterrupts
+		that cause macro interrupts, and microinterrupts that
+		just dismiss back to main instruction loop.
+
+		Bug: Microinterrupts that don't generate Macro-interrupts
+		(that is, jump back to MAIN) which occur from the dispatch
+		for the trap instruction will cause the trap not to get
+		re-executed, since the trap flags will be cleared at
+		MAIN1.
+		Fix: All micro-interrupt routines that jump back to
+		MAIN without generating macro interrupt now jump to
+		a new place called UINTR-DISMISS, which re-generates
+		the aborted trap.
+03 Mar 81 EVS	Bug: If successfully execute a trap instruction and
+		the next instruction fetch page fails, MAIN1 hasn't
+		cleared the trap flags yet, so the trap instruction
+		will re-execute the trap.
+		Fix: Use MAPF code 15 (used for JSYS in non Kl version)
+		to indicate instruction fetch, do what MAIN1 does
+		in the event of page fail and HALF set to clear
+		the trap flags.
+18 MAR 81 EVS	ADDED ADJBP INSTRUCTION.
+
+19 Mar 81 EVS	Following opcodes now only legal if -USER or user iot set:
+		740-743 (disk control opcodes, DCONO et al)
+		726-727 (tape opcodes that used to be legal in usermode)
+		760-765 (TCONO, etc, for interval timer)
+		775 (used to be CAMx which hung ucode if didn't skip)
+		Fix bug in overflow trapping - UINT-DISMISS needed to do
+		CLR-DEV-FROM-INTR in order to use proper block of AMEM
+		to check trap flags from.
+		Fix another bug in overflow trapping - instructin that sets
+		the real overflow flag then gets macro PI that stores PC
+		caused real PC overflow flag to get cleared, and JEN
+		doesn't set it, only sets the fake flag. Thus trap cycle
+		never happens because SOEDOV never gets micro-trapped to.
+		Fix bugs in ADJBP.
+		In TAPE.SLO: put in .PAIR UIOTRP before TAPERS so 727
+		would be illegal in user non-iot mode.
+23 Mar 81 EVS	Put in DADD and DSUB instructions.
+7 Apr 81 EVS	Added interrupt capability to tape microcode.
+		Removed NRZI kludge mode, which ignored tape parity
+		errors on EOFs.
+		Tape microcode no longer clears out portion of read
+		buffer which did not have tape record data written into it.
+		New opcodes: TPCONI 733, TPCONO 734, TPCNSO 735, TPDATI 736.
+		See TAPE.SLO for details on formats for these instructions.
+(End history)
+\
+
+
+
+
+
+;Implementation of Traps in F3 microcode.
+;
+;Since the F3 has no hardware PC flags corresponding to the
+;trap bits found on KI and KL model processors (or at least, it is
+;missing one) and has no hardware support for the arithmetic
+;and PDL trap mechanism found on these models, this must be implemented
+;in the microcode. What has been done is that the HALF bit in the PC
+;has been used to indicate one of several bits that may or may not
+;be set in AMEM[2] which represent the trap bits and the first part done
+;bit which HALF used to be. Also, HALF covers a bit indicating that
+;a JRSTF with trap flags set has been done, so that the microcode
+;can perform the trap before executing the instruction at the new
+;PC (else TI will get lost by being cleared at MAIN1.)
+;
+;
+;TRAP:	Set TI1 and TI2 (overwrite previous values)
+;	FPD _ FPD .and. HALF		;Clear AMEM FPD bit since turning on HALF if HALF was clear
+;	HALF _ 1
+;	PC _ PC - 1
+;	Turn Map off
+;	Fetch trap instruction from UPT or EPT
+;	Turn Map on
+;	GOTO MAIN2 to dispatch.
+;
+;MAIN:	If HALF [If debreak, debreak _ 0, GOTO TRAP1]
+;		;To make sure that JRSTF that sets trap flags traps
+;MAIN1:	(Page fail trap for next instruction may happen here, before check on HALF)
+
+;	If HALF [Clear TIx, HALF _ FPD]
+;MAIN2:	Dispatch (PC _ PC + 1 if successful)
+;	(Microinterrupts, page fail for indirect words can happen here.)
+;
+;Page fail microtrap prologue code
+;	If from instruction fetch at MAIN1 [
+;		If hardware overflow flag set [
+;			Set AMEM overflow flag
+;			Clear Hardware overflow flag
+;			Set TI1
+;			GOTO TRAP
+;		Else
+;			If HALF [Clear TIx, HALF _ FPD]
+;			Continue with rest of page fail microcode
+;
+;Page Refill and microinterrupts which don't cause macro-interrupts
+;
+;	IF HALF [
+;		IF TIx [
+;			Increment PC (decremented it assuming fault was from
+;			  from inst at PC-1, but was from trap inst.
+;			This restores PC to value it was when starting the trap.
+;			GOTO TRAP (causes trap instruction to get restarted)
+;		ELSE
+;			GOTO MAIN (causes instruction at PC to get reincremented)
+;		]
+;
+;Page Fail
+;(ind loop or XCT chain in trap instruction)
+;	Decrement PC if normal read or write,
+;	  not if for XCT fetch, indirect word fetch
+;	If HALF [
+;		IF TIx [
+;		 Increment PC (Page fail during trap cycle has PC pointing
+;		  to one before next instruction to get executed because
+;		  either PC is decremented by TRAP if page fail is during
+;		  indirect fetch or by beginning of page fail routine
+;		  if failure is after dispatch on trap instruction and during
+;		  that instruction
+;		 Store PC with TPx _ TIx
+;		 Clear TIx
+;		 HALF _ FPD .and. HALF
+;			]
+;		]
+;
+;
+;Macro-PI
+;
+;	Clear USER
+;	Turn Map off
+;	Fetch PI instruction (EPT + 40 + 2N)
+;	Turn Map on
+;	If Inst # JSx [
+;		PC _ PC - 1	;Dispatch increments it
+;		GOTO MAIN2
+;	Else;Inst = JSx
+;		If HALF [
+;		   If TIx and Debreak not set [
+;			PC _ PC + 1	;Because PC is decremented either
+;					; because TRAP decremented it and dispatch
+;					; hasn't completed yet or the trap instruction
+;					; is interruptable and decremented PC
+;					; before dispatching to interrupt so that
+;					; the instruction could be re-executed.
+;					;Watch out for debreak, if its set
+;					; don't increment PC since came from
+;					;JRSTF thru PI dismiss, and PC not decremented
+;		   ]
+;		]
+;		Interpret JSx: Store TPx _ TIx, FPD
+;		Debreak _ 0	;Because PI code goes to MAIN2
+;				;HALF gets cleared by subroutine instructions.
+;		Jump into middle of the JSx instruction
+;		;PUSHJ not legal as PI instruction
+;
+;JSx instructions, PUSHJ (all PC storing instructions):
+;	If HALF [
+;		Store FPD .and. HALF into PC
+;		];else store zero (=HALF)
+;
+;PDL OV: Goes directly to TRAP - doesn't go thru MAIN2, so have
+;	to overwrite existing values of TIx.
+;
+;Arithmetic Overflow:
+; (implemented on F3 as a microinterrupt which traps on instruction dispatch
+;  as long as PC overflow flag is on)
+;	Goes directly to TRAP. PC points to next instruction.
+;MUUO:
+;	If HALF [
+;		If TIx [
+;			Fetch new PC from TRAP new PC
+;			Store FPD instead of HALF in PC.
+;	]
+;	Setting new PC clears HALF. TIx will get cleared or set next time someone sets HALF flag
+;
+;JRSTF: If TPx [ then TIx _ TPx, FPD _ FPD from new PC, set HALF, set Debreak
+;	 proceed with rest of JRST code.
+;	Else
+;		HALF _ FPD from new PC
+;		FPD _ FPD from new PC
+;	]
+;
+;Instructions that do CLR-HALF do not have to clear FPD in AMEM - therefore
+;these bits in AMEM do not mean anything unless HALF is on.
+;
+;Anyone who sets HALF must set FPD to old value of HALF .AND. FPD.
+;This means clearing FPD if HALF was off. This is so instructions
+;that do CLR-HALF don't have to clear FPD.
+;
+;MUUO whose new PC sets HALF (silly thing to do) will not work correctly,
+;since MUUO code doesn't set FPD. However, in normal case of FPD off
+;in new PC, whoever turns HALF on must set FPD properly.
+;
+;Instructions that set HALF now will set HALF and FPD in AMEM via
+; subroutine SETFPD:
+;	IF HALF [
+;		Set FPD in AMEM
+;	ELSE (not HALF)
+;		Clear TIx, Debreak, set FPD
+;		Set HALF
+;	]
+;
+;Instructions that check HALF:
+;	If HALF [
+;		If FPD [ Do second part
+;		]
+;	]
+;
+;TIx - Trap in progress flags stored in AMEM[2]
+;TPx - Trap bits stored in PC word
+;FPD - First Part Done flag stored in AMEM[2]
+;
+;FPD and TIx only valid if HALF is on.
+
+
+
+
+COMMENT \
+
+The following definitions are intended to make locations fixed by
+microcode after location 4000 all appear in one place, making it easier to see
+what is where.  THIS IDEA WILL NOT WORK UNLESS ALL AREAS FIXED BY
+FIRMWARE ARE DEFINED HERE AND NOWHERE ELSE!
+/EVS 1-22-81
+
+\
+
+RESTART-ORG = 4000		;So that starting at 4000 restarts microcode
+NORMAL = 4001			;Start of large general purpose microcode area
+BOOTSTRAP-ORG = 5000		;Macro code bootstrap from tape
+CTYIOTDISP-ORG = 5100		;So code can use SDISP for CTY and LPT dispatches
+  CTYIOTDISP-ORGARG = 51	;TO FEED TO IOTDISP MACRO
+LPTIOTDISP-ORG = 5120		;Not used because contiguous with CTY, but define anyway
+AREA51 = LPTIOTDISP-ORG + 20
+				;AREA51 begins right after LPT dispatch
+BBNMAPIOTDISP-ORG = 5200	;For BBN CONO PAG dispatch
+CTYMAPDISP-ORG = 5210		;Not sure why this one is here
+APRIOTDISP-ORG = 5300		;For SDISP dispatch on APR IOT
+  APRIOTDISP-ORGARG = 53	;To feed to IOTDISP macro
+PIIOTDISP-ORG = 5320		;For PI IOT dispatch - not used because contiguous with APR
+AREA53 = PIIOTDISP-ORG + 20
+				;Beginning of relatively large free area
+MAPTRAP-ORG = 6100		;For MAPF field dispatches
+OTHER = MAPTRAP-ORG + 17 * 4 + 1
+				;Beginning of large general purpose
+				; microcode space after Map trap dispatch area.
+TNDISP = 7700			;For TYMNET state SDISP dispatches
+ECCLOG-ORG = 7760		;For soft ECC logging
+SPURIOUS-INTERRUPT-ORG = 7777	;A JUMP[.] for spurious interrupt reporting
+
+
+
+
+COMMENT \
+
+********************************************************
+
+	USEFUL MICROCODE WORD DEFINITIONS
+
+********************************************************
+\
+
+F3SW = 1 - F2SW
+
+OTP = 1 - NTP
+
+
+FIXM1 = ACSEL[MA] ALU[AC] DEST[FIXMAC-MAPF-RD] MAPF[NORM-RD] CYLEN[FIXM] $
+FIXML = ACSEL[MA] ALU[AC] DEST[FIXMAC-MAPF-RD] MAPF[NORM-RD] CYLEN[LONG] $
+FIXM2 = ACSEL[MA] ALU[AC] DEST[FIXMAC-MAPF-WRT] MAPF[NORM-WRT] CYLEN[FIXM] $
+FIXM0 = ACSEL[MA] ALU[AC] DEST[FIXMAC-MAPF-RD] MAPF[0] CYLEN[FIXM] $
+.DEFINE MEMST [] [COND[-MA-AC] LBJUMP[MSMAIN] NORM ]
+  ;  NOTE:  BECAUSE OF XCT MAPPED, MEMST IS SAME AS MEMSTMA
+ ; .DEFINE MEMST [] [COND[-MA-AC] LBJUMP[SMAIN] NORM ]
+.DEFINE MEMSTMA [] [COND[-MA-AC] LBJUMP[MSMAIN] NORM ]
+
+DOSKIP = D[PC] ALU[D+1] DEST[MA PC] JUMP[MAIN1] NORM $
+DONTSKIP = DEST[MA] SPEC[MA_PC] JUMP[MAIN1] $
+DOJUMP = D[IR] DEST[MA PC] JUMP[MAIN1] NORM $
+DOM1	= SPEC[MA_PC] JUMP[MAIN1] NORM $
+
+CLRR	= ROT 22 D[MASK 22] ALU[D&AC] ACSEL[AC] DEST[AC] $
+CLRL	= 	 D[MASK 22] ALU[D&AC] ACSEL[AC] DEST[AC] $
+
+;SLFFXM - Self FIXM (?)
+;Finish read fetch of read-modify-write type cycle.
+;Check to make sure effective address is writable.
+;Jump if AC field in IR is non-zero
+.DEFINE SLFFXM[ JDST ] 
+[	ACSEL[MA] ALU[AC] DEST[FIXMAC-MAPF-WRT] MAPF[NORM-WRT] CYLEN[FIXM] COND[-AC=0] JUMP[ JDST ] $
+]
+
+;;;;;;APR-A-MEM DEFINITIONS -- THERE SHOULD BE 7 MORE OF THESE !
+
+A-MEM-ECC-DATA = 1	;Data on last ECC error -- readable by op. 750
+
+;;;;;;;
+
+BADLOC = JUMP[MAIN] $;NOP FOR NOWJUMP BADPC $		;FOR WORDS WE SHOULDN'T USE
+;;;;;ILGIOT = NORM JUMP[2000] $
+
+;The standard case for IOTs without devices
+.REPEAT 1 - STANSW [
+.DEFINE ILGIOT[ ]
+[  JUMP [MAIN] ]
+];.REPEAT 1 - STANSW
+
+;At Stanford, any devices we don't know about go to the PAN interface.  It
+;may have something plugged into it that will respond to that address in a
+;PDP-10ish manner.
+.REPEAT STANSW [
+.DEFINE ILGIOT[ ]
+[ COND[-USER] LBJUMP[PANIOT] NORM ]
+];.REPEAT STANSW
+
+;Jump not IOT-USER mode
+.DEFINE UIOTRP[ XXX ]
+[	D[PC] ROT[6 + 1] MASK[1] COND[OBUS=0] JUMP[XXX] $
+];DEFINE
+
+.DEFINE GETADR[ADR] [  ;Place the 12-bit value of ADR in Q.
+ 	D[CONST (77 & (ADR / 100))] ROT[6] DEST[Q] NORM $ ;High-order 6 bits
+	D[CONST (ADR \ 100)] ALU[DORQ] DEST[Q] C600 ]  ;Low-order 6 bits
+	 ;NOTICE that a "$" is REQUIRED after a call of GETADR.
+
+UUOLOC = D[CONST 40] JUMP[UUO1] NORM $
+
+.REPEAT 1 - KL [
+   .DEFINE MUUO1 [][ D[PC] DEST[Q AR] JUMP[MUUO2] NORM $
+   .DEFINE UAOP1 [][ D[PC] DEST[Q AR] JUMP[UAOP] NORM $ ]
+]
+];.REPEAT 1 - KL
+.REPEAT KL [
+   .DEFINE MUUO1 [][D[IR] DEST[AR] JUMP[MUUO2] NORM $
+]
+   .DEFINE UAOP1 [] [MUUO1
+]
+];.REPEAT KL
+
+SET-TEMP-USER = D[CONST 17] ROT[11] DEST[MAP-EXEC-SR] NORM $
+SET-TEMP-EXEC = D[CONST 0] ROT[11] DEST[MAP-EXEC-SR] NORM $
+
+;
+; THESE OUTLANDISHLY EXPLICIT DEFINITIONS OF NOP ASSURE THAT THE
+; DECODER WILL PRINT 'NOP' ONLY WHEN YOU REALLY MEAN IT.
+;
+NOP =    COND[0] DEST[0] CONT ALU[D]
+	ACSEL[AC] NO-MA-STB NO-AR-STB ROT[0] MASK[-1] ALU-D[NONE] $
+
+DONOP  = COND 0 DEST[ 0] ALU[D]
+	 ROT[0] MASK[-1] ACSEL[AC] JUMP[MAIN] ALU-D[NONE] NORM $
+
+DODISP	= D[MEM] DEST[IR-ALL MA AR] SPEC[PC+1-IF&] DISP[2374] CYLEN[DISP] $
+
+;------------------------------------------------------------------------------
+;
+;	CPU special registers				uDevice 0
+;
+;------------------------------------------------------------------------------
+;
+; Dev  Subsel	    Read			    Write
+;
+;  0	 1					Address Break Register
+;	 2	Data switches			Data lights
+;	 4	Address and console switches	Clear latched switches (no data)
+;	10	PC History (unimplemented)	Set AR,ECC enables, MAP ON, etc.
+;
+;  1	 1	ECC status
+;	 2	MAP status			MAP (address in MA, LOCAL USER)
+;	 4	(Same as 1)
+;	10	(Same as 1)
+;
+
+;------------------------------------------------------------------------------
+;
+;	A-Mem usage					uDevice 0 & 1
+;	(Note: Not all references are symbolic as yet.
+;
+;------------------------------------------------------------------------------
+;Device 0
+A-MEM-ECC-DATA = 1	;Data on last ECC error -- readable by op. 750
+APRSTS = 2	;Firmware status bits for APR
+APRENB = 7	;Used to save ECC,AR interrupt enables, MAP ON, etc. during map
+		;trap processing
+;Device 1
+ECCSVP = 3	;Pointer to next place to remember ECC interrupt in microcode
+		;memory
+
+
+
+
+
+COMMENT \
+
+*****************************************************
+
+		REAL CODE
+
+*****************************************************
+\
+
+INST-DISP = 2000	;Address of instruction dispatch.
+  .REPEAT XUCODE [
+HIGHMEM = 10001		;Upper 4K of 8K u-mem.
+    ]
+
+			;**** Next macro blows up with multiply defined symbol.			;**** Note that it usually does not complain!!!
+	.OPCODE[000];	UUO 0 COMES HERE (ALONG WITH UUO 1 - 7 )
+
+	NORM JUMP[UUO0-7] $
+
+;; Location 2001 is used elsewhere !!!
+
+.REPEAT F3SW [
+	; INDIRECTING TRAPS HERE
+: 2002	ACSEL[MA] ALU[AC] DEST[FIXMAC-MAPF-RD] MAPF[1] CYLEN[FIXM] $
+	D[MEM] DEST[IR-23 MA AR] DISP[2000] SPEC[PC+1-IF] CYLEN[DISP] $
+;STOP SWITCH, OV, & ECC TRAPS HERE (4 & 5)
+: 2004	DEST[CLR-DEV-FROM-INTR] JUMP[SOED] NORM $
+: 2005	DEST[CLR-DEV-FROM-INTR] JUMP[SOED] NORM $
+	; INDEXING TRAPS HERE
+: 2006	ALU[IX+D] D[IR] MASK[18.] DEST[AR IR-ADR MA] DISP[2000] SPEC[PC+1-IF] CYLEN[DISP]$
+
+	;INTERRUPTS TRAP HERE
+: 2007	D[10] SDISP C600       $
+.REPEAT 0 [
+: 2007	JUMP[7500] $;7500 will probably be used if this is ever turned on again!
+: 7500
+	D[10] MASK[18.] DEST[Q AR] C550 $
+	D[CONST 21] ROT[6] ALU[D#Q] DEST[Q] C550 $
+	D[CONST 30] ALU[D#Q] COND[OBUS=0] JUMP[INTOK] C550 $
+	D[CONST 34] ALU[D#Q] COND[OBUS=0] JUMP[INTOK] C550 $
+	D[CONST 41] ALU[D#Q] COND[OBUS=0] JUMP[INTOK] C550 $
+	D[CONST 50] ALU[D#Q] COND[OBUS=0] JUMP[INTOK] C550 $
+	D[CONST 56] ALU[D#Q] COND[OBUS=0] JUMP[INTOK] C550 $
+
+	D[CONST 1] ROT[6] ALU[D#Q] DEST[Q] C550 $
+	D[CONST 62] ALU[D#Q] COND[OBUS=0] JUMP[INTOK] C550 $
+	D[AR] DEST[CLR-DEV-FROM-INTR] JUMP[.] C550 $
+INTOK:	D[10] SDISP C600 $
+
+] ;.REPEAT 0
+ ];.REPEAT F3SW
+
+.REPEAT F2SW [
+.REPEAT 0 [
+: 2002 ;I/O INTERRUPTS TRAP HERE
+	JUMP[7500] $
+: 7500
+	D[10] MASK[18.] DEST[Q AR] C550 $
+	D[CONST 21] ROT[6] ALU[D#Q] DEST[Q] C550 $
+	D[CONST 30] ALU[D#Q] COND[OBUS=0] JUMP[INTOK] C550 $
+	D[CONST 34] ALU[D#Q] COND[OBUS=0] JUMP[INTOK] C550 $
+	D[CONST 41] ALU[D#Q] COND[OBUS=0] JUMP[INTOK] C550 $
+	D[CONST 50] ALU[D#Q] COND[OBUS=0] JUMP[INTOK] C550 $
+	D[CONST 56] ALU[D#Q] COND[OBUS=0] JUMP[INTOK] C550 $
+
+	D[CONST 1] ROT[6] ALU[D#Q] DEST[Q] C550 $
+	D[CONST 62] ALU[D#Q] COND[OBUS=0] JUMP[INTOK] C550 $
+	D[AR] DEST[CLR-DEV-FROM-INTR] JUMP[UINT-DISMISS] C550 $
+INTOK:	D[10] SDISP C600 $
+];1 - DLS	9 JAN 80 BO
+
+:2002	;I/O INTERRUPTS TRAP HERE
+	D[10] SDISP C600 $
+		;Just dispatch to ucode intrpt. routine for device.
+: 2003 ;STOP SWITCH TRAPS HERE
+	DEST[CLR-DEV-FROM-INTR] JUMP[STOPS] NORM $
+: 2004	;CAN'T GET HERE FROM THERE...
+	JUMP[.] $ ;HANG FOR NOW.
+: 2005	;ECC ERRORS TRAP HERE
+	DEST[CLR-DEV-FROM-INTR] JUMP[SECCS] NORM $
+: 2006	;PC OV TRAPS HERE
+;;;	DEST[CLR-DEV-FROM-INTR] JUMP[SOVRS] NORM $
+	D[CONST 1] DEST[DEV-ADR] JUMP[SOVRS] NORM $
+		;Start setting up to read AR enabling
+: 2007 ;BOTH ECC AND OV (AT THE SAME TIME) TRAPS HERE
+	DEST[CLR-DEV-FROM-INTR] JUMP[SECCS] NORM $
+: 2010 ;NORMAL INDIRECT TRAPS HERE
+	ACSEL[MA] ALU[AC] DEST[FIXMAC-MAPF-RD] MAPF[1] CYLEN[FIXM] $
+	D[MEM] DEST[IR-23 MA AR] DISP[2374] SPEC[PC+1-IF] CYLEN[DISP] $
+		;WHEN EXTEND HAPPENS, DISP[2176]? NO-- HOW WOULD WE SEE
+		;EXTENDED AREA OF IX REG?
+		;Changed from 2174 to 2374 to allow stop switch to stop
+		;indirection loops.  TVR-Mar80
+: 2012	;NORMAL INDEXING TRAPS HERE
+	ALU[IX+D] D[IR] MASK[18.] DEST[AR IR-ADR MA] DISP[2024] SPEC[PC+1-IF] CYLEN[DISP]$
+		;WHEN EXTEND HAPPENS, DISP[2026]
+: 2014	;EXTENDED INDIRECT TRAPS HERE
+; SOMETHING MAKES THIS DIFFERENT FROM 2010 -- MAYBE LOADING H.O. MA??
+ JUMP[.] $	;FOR NOW ;;;ACSEL[MA] ALU[AC] DEST[FIXMAC-MAPF-RD] MAPF[1] CYLEN[FIXM] $
+	D[MEM] DEST[IR-23 MA AR] DISP[2176] SPEC[PC+1-IF] CYLEN[DISP] $
+: 2016	;EXTENDED INDEXING TRAPS HERE
+ JUMP[.] $	;FOR NOW ;;;D[AR] ROT[6] MASK[4] DEST[AC-SEL] NORM $
+	D[AR] ALU[D+AC] ACSEL[REG] DEST[IR-ADR MA AR] SPEC[PC+1-IF] DISP[2026] CYLEN[DISP] $
+  ]
+
+
+
+
+
+;UUO1 UUO2 SMAIN SMAIN1 MAIN NMAIN1 MAIN1 MAIN2 MSMAIN MSMAIN1 MUUO MUUO2 MUUO3 MUUO4 PIMUUO MUUO44
+; UUOPJ MUUO5X MUUO5Y UAOP AREA216 UMOVE JSYS JSYS3 ADJSP XMOVEM1 DMOVE DMOVN KIFIX DMOVEM DMOVNM FIXR FLTR UFA DFN FSC
+;------------------------------------------------------------------------------
+;	User UUO Trap
+;
+;	Traps thru location 40 of the current space
+;
+;	Instruction is stored in 40 (with effective address computed and
+;		index/indirection removed)
+;	Instruction in location 41 is executed, in the current space.  It
+;		customarily either jumps, saving the PC and flags, or halts.
+;------------------------------------------------------------------------------
+	.OPCODE[010]	;User UUOs 010:017
+UUO1:	D[CONST 40] DEST[MA] PUSHJ[UUOPJ] NORM  $
+		;Setup MA for trap area and make mask for removing index/indir.
+UUO2:	D[IR] ALU[D&Q] DEST[MEMSTO] NORM $
+		;Store instruction which caused trap.
+.REPEAT 1 - KL [;IF BBN MAP, ALL THIS WORKS DIFFERENTLY
+	D[PC] ALU[D-1] DEST[PC] MAPF[MASTO] CYLEN[MEMSTO] $
+		;Ordinary page fault if not writable.  (*** Is PC correct???)
+		;Backup the PC to point at the offensive instruction
+];.REPEAT 1 - KL
+.REPEAT KL [;IF KL MAP, NEED TO DO THE MAPF FIRST, THEN DECREMENT PC
+;ELSE PAGE FAIL OR PAGE REFILL WILL BACK UP PC AGAIN.
+	MAPF[MASTO] CYLEN[MEMSTO] $
+		;WAIT FOR TRAP TO HAPPEN
+	D[PC] ALU[D-1] DEST[PC] JUMP[UUO3] NORM $
+		;OK, DECREMENT PC NOW THAT NO TRAP WILL HAPPEN
+
+	.USE[AREA53]
+];.REPEAT KL
+UUO3:	D[CONST 41] DEST[MA] JUMP[NMAIN1] NORM $
+		;Execute contents of (same space) location 41, usually a JSR or
+		;a HALT instruction
+
+	.ORG[2024]
+SMAIN: ACSEL[MA] D[MEM] DEST[AC AR MA] SPEC[MA_PC] JUMP[NMAIN1] CYLEN[MEMSTO] MAPF[STO] $
+SMAIN1:	D[MEM] SPEC[MA_PC] DEST[AR MA] JUMP[NMAIN1] CYLEN[MEMSTO] MAPF[STO] $
+
+.REPEAT 1 - KL [
+MAIN:	SPEC[MA_PC] DEST[MA CLR-DEV-FROM-INTR] NORM JPOP[MAIN1] $
+	   ;START THE INSTR. FETCH (AND POP THE STACK A LITTLE...)
+	   ;Also, clear forcing of interrupt device code, if still present
+
+NMAIN1:
+MAIN1:	ACSEL[MA] ALU[AC] DEST[FIXMAC-MAPF-RD] MAPF[1] 
+	 JPOP[MAIN2] CYLEN[FIXM] $ ; I.E. FIXM ### AND FLUSH STACK ####
+
+MAIN2:	D[MEM] DEST[IR-ALL MA AR] SPEC[PC+1-IF&] DISP[2374] CYLEN[DISP] $
+
+AREA202 = .
+];.REPEAT 1 - KL
+.REPEAT KL [
+MAIN:	SPEC[MA_PC] DEST[MA CLR-DEV-FROM-INTR] NORM COND[-HALF] JPOP[MAIN1] $
+	   ;START THE INSTR. FETCH (AND POP THE STACK A LITTLE...)
+	   ;Also, clear forcing of interrupt device code, if still present
+	D[12] ROT[2] SPEC[A-MEM-APR] DEST[AR] COND[OBUS<0] C550 JPOP[MAINJRSTF] $
+		;HALF IS ON, IF THE JRSTF TRAP FLAG IS ON, GO CLEAR IT AND TAKE A TRAP
+
+NMAIN1:
+MAIN1:	ACSEL[MA] ALU[AC] DEST[FIXMAC-MAPF-RD] MAPF[KLIFETCH] COND[-HALF]
+	 JPOP[MAIN2] CYLEN[FIXM] $ ; I.E. FIXM ### AND FLUSH STACK ####
+
+	D[12] MASK[36. - 3.] SPEC[A-MEM-APR] DEST[AR Q CLR-DEV-FROM-INTR] JPOP[MAIN1HALF] NORM $
+		;GET AMEM STUFF IN AR AND Q AND GO CLEAR THE TRAP IN PROGRESS FLAGS
+		;CLR-DEV-FROM-INTR WILL HAPPEN SO A-MEM-APR WILL HAPPEN.
+
+MAIN2:	D[MEM] DEST[IR-ALL MA AR] SPEC[PC+1-IF&] DISP[2374] CYLEN[DISP] $
+AREA202 = .			;A FEW LOCS LEFT
+	.USE[AREA53]
+;HERE FROM MAIN IF HALF WAS ON AND THE JRSTF TRAP FLAG IS ON.
+; NEED TO CLEAR THE FLAG AND GENERATE THE PROPER TRAP BASED ON
+; THE TRAP IN PROGRESS FLAGS IN AMEM.
+
+MAINJRSTF:
+	D[AR] MASK[35.] DEST[AR] NORM $
+		;CLEAR THE JRSTF TRAP FLAG
+	D[AR] ROT[36. - 2.] DEST[AR 2] SPEC[A-MEM-APR&DEST-A-MEM] NORM $
+		;STORE BACK INTO AMEM
+	D[AR] ROT[2] MASK[2] DEST[AR] JUMP[DOTRPX] NORM $
+		;GET TRAP IN PROGRESS BITS IN AR, DOTRPX WILL GENERATE
+		; A TRAP.
+
+;HERE FROM MAIN1 IF HALF FLAG WAS ON, WITH AMEM[2] IN AR AND Q WITH TP1, TP2, JRSTT
+; CLEARED OUT.
+;SET THE PC HALF FLAG FROM FPD BIT AND STORE THE BITS IN AMEM[2].
+
+MAIN1HALF:
+	D[AR] DEST[2] SPEC[A-MEM-APR&DEST-A-MEM] NORM $
+		;STORE BITS BACK INTO AMEM
+	D[AR] ROT[3] COND[OBUS<0] C550 JUMP[MAIN2] $
+		;IF FPD BIT ON IN AMEM, THEN LEAVE HALF SET
+	SPEC[CLR-HALF] JUMP[MAIN2] SHORT $
+		;ELSE CLEAR HARDWARE HALF FLAG AND REJOIN MAIN INSTRUCTION LOOP
+];.REPEAT KL
+
+	.PAIR
+MSMAIN:	ACSEL[MA] D[MEM] DEST[AC] JUMP[MAIN] CYLEN[MEMSTO] MAPF[MASTO] $
+MSMAIN1:	MAPF[MASTO] JUMP[MAIN] CYLEN[MEMSTO] $
+
+	.OPCODE[020];	User UUOs 020-027
+	UUOLOC $
+AREA204 = .
+	.OPCODE[030];	User UUOs 030-037
+UUOGO:	UUOLOC $
+
+AREA206 = .
+
+;$*$*$*$ This should go somewhere else!!!
+  .OPCODE[37]  ;Set loc. to 2 before MUUO (opcode 37 doesn't come here).
+	       ;We come here (from 2000) on opcodes 0-7.
+UUO0-7:	D[IR] ROT[9.] MASK[9.] COND[OBUS=0] JUMP[MUUO] C550 $;J IF 0 UUO
+	UUOLOC $
+
+	.OPCODE[040];	Monitor UUOs 040-047 (CALL,INIT,CALLI)
+MUUO:	MUUO1
+.REPEAT 1 - KL [
+;The following need not be contiguous with MUUO, it is merely here for clarity.
+;It may be moved to another area if necessary.	TVR-Apr80
+
+;------------------------------------------------------------------------------
+;	Monitor UUO Trap
+;
+;	Traps thru location 40 of the current space, typically to handle user 
+;		request to the Monitor
+;
+;	Instruction is stored in 40 (with effective address computed and
+;		index/indirection removed)
+;	Instruction in Monitor 41 is executed, in the Monitor space.  It
+;		should save PC and flags, and handle the user's request.
+;------------------------------------------------------------------------------
+MUUO2:	D[MASK 43] ROT[37] ALU[D&Q] DEST[CRYOV] NORM $
+		;Clear USER
+	D[CONST 40] DEST[MA] PUSHJ[UUOPJ] NORM $
+		;Setup MA for trap area and make mask for removing index/indir.
+;	\ /
+;Common code for instruction traps
+MUUO3:	D[IR] ALU[D&Q] DEST[MEMSTO] NORM $
+		;Store instruction which caused trap.
+	D[MA] ALU[D+1] DEST[MA] CYLEN[MEMSTO] $
+		;Now, get dispatch instruction
+;------------------------------------------------------------------------------
+;***  CAUTION:	If write fails, micro-machine hangs at 6100.  This should be
+;***		fixed when a more general page-fault mechanism is added.  The
+;***		best thing would be to just halt the macro machine.
+;------------------------------------------------------------------------------
+MUUO4:
+PIMUUO:	D[CONST 55] ROT[2] DEST[Q FIXMAC-MAPF-RD] CYLEN[FIXM] $; JSR OPCODE
+		;TVR-Apr80:  I don't have the foggiest notion what that FIXMAC
+		;is supposed to do here.  The FIXM is needed for memory timing,
+		;but aren't we guaranteed not to be fetching from ACs here????
+];.REPEAT 1 - KL
+.REPEAT KL [
+
+PIMUUO:	D[CONST 55] ROT[2] DEST[Q] PUSHJ[MAPON] CYLEN[FIXM] $
+		;SETUP JSR OPCODE, TURN MAP BACK ON
+];.REPEAT KL
+MUUO44:	D[MEM] ROT[11] MASK[11] ALU[D#Q] COND[OBUS=0] JUMP[MUJSR] CYLEN[C650] $
+		;Jump if trap instruction is a JSR (opcode 264 = 55*4)
+	ALU[Q+1] DEST[Q] SHORT $
+	D[MEM] ROT[11] MASK[11] ALU[D#Q] COND[OBUS=0] JUMP[MUJSP] C550 $
+		;Jump if trap instruction is a JSP (opcode 265)
+	ALU[Q+1] DEST[Q] SHORT $
+	D[MEM] ROT[11] MASK[11] ALU[D#Q] COND[OBUS=0] JUMP[MUJSA] C550 $
+		;Jump if trap instruction is a JSA (opcode 266)
+.REPEAT 1 - KL [;JSYS NOT SPECIAL ON KL
+	D[CONST 42] ROT[1] DEST[Q] SHORT $; JSYS OP
+	D[MEM] ROT[11] MASK[11] ALU[D#Q] COND[OBUS=0] JUMP[MUJSYS] C550 $
+		;Jump if trap instruction is a JSYS (opcode 104 = 42*2)
+];.REPEAT 1 - KL
+	D[PC] ALU[D-1] DEST[PC] SHORT $
+		;Any other opcode will be XCTed and the regular code will
+		;resume.
+;------------------------------------------------------------------------------
+;***  CAUTION:  No special dispensation has been made for BLKI/BLKO.  They
+;***		MUST be handled specially, as if they DON'T skip, the
+;***		second trap location should be executed and should be a JSR
+;***		or some other instruction which saves flags.	TVR-Apr80
+;------------------------------------------------------------------------------
+	D[AR] DEST[CRYOV] JUMP[MAIN2] $
+		;Else restore flags and dispatch
+;------------------------------------------------------------------------------
+;***  CAUTION:	This probably will not work proper if reference is being made
+;***		to EXEC memory and trap was from USER.  What really needs to
+;***		happen here is that the instruction should be XCTRed instead,
+;***		It may be sufficient to SET-TEMP-EXEC.  I haven't looked at
+;***		the problem seriously.				TVR-Apr80
+;------------------------------------------------------------------------------
+
+;Construct a mask which excludes indexing and indirection.  Used by UUO trap
+;routines (and currently no where else)
+UUOPJ:	D[MASK 37] ROT[27] DEST[Q] POPJ NORM $
+
+;(NO SPACE IS LEFT.  You will have plant jumps to another area to expand the
+; above code!)
+
+	.OPCODE[050];	Monitor UUOs 050-057 (OPEN,INIT,RENAME,IN,OUT)
+
+.REPEAT 1 - KL [
+MUUO5X:	D[IR] ROT[7] MASK[1] DEST[Q] NORM $
+		;Special check for UUOs actually used by monitors we care about
+	D[IR] ROT[10] MASK[1] ALU[D#Q] COND[OBUS=0] JUMP[MUUO] C550 $
+		;Jump if UUO 50,51,56, OR 57
+	ALU[Q] COND[OBUS=0] JUMP[MUUO5Y] CYLEN[C450] $
+		;Jump if 52 OR 53 ("Reserved for DEC")
+	D[IR] ROT[11] MASK[1] COND[-OBUS=0] JUMP[MUUO] C550 $
+		;Jump if 55
+MUUO5Y:	D[PC] DEST[Q AR] SHORT $
+;	\ /
+;------------------------------------------------------------------------------
+;	Illegal Instruction Trap
+;
+;	Traps thru Monitor 60
+;
+;	Instruction is stored in 60 (with effective address computed and
+;		index/indirection removed)
+;	Instruction in Monitor 61 is executed, in the Monitor space.  It
+;		should save PC and flags, and stop the offensive process.
+;------------------------------------------------------------------------------
+UAOP:	D[MASK 43] ROT[37] ALU[D&Q] DEST[CRYOV] NORM $; CLR USER
+	D[MASK 37] ROT[27] DEST[Q] NORM $
+	D[CONST 60] DEST[MA] JUMP[MUUO3] NORM $
+
+];.REPEAT 1 - KL
+.REPEAT KL [
+	MUUO1 $		;ON KL, NO ILLEGAL INSTRUCTION TRAP.
+];.REPEAT KL
+
+AREA212 = .	;$*$** Stupid interrupt code makes this unusable!
+.REPEAT KL [
+	.USE[AREA53]
+MUUO2:	D[CONST 42] ROT[3] DEST[Q] PUSHJ[MAPOF] NORM $
+		;GET READY TO COMPUTE RELATIVE ADDRESS TO UPT
+		; AND TURN MAP OFF
+	D[CONST 1] DEST[DEV-ADR] NORM $
+		;UPT COMES FROM DEVICE 1
+	D[16] MASK[13.] DEST[MA] NORM $
+		;UPT PHYSICAL ADDRESS
+	D[MA] ROT[9.] DEST[HI-ABS-MA MA] NORM $
+		;CONVERT FROM 13 BIT PAGE NUMBER TO 22 BIT ADDRESS
+	D[CONST 4] ALU[D+Q] DEST[Q] NORM $
+		;Q NOW HAS 424, MA HAS UPT ADDRESS
+	D[MA] ALU[D+Q] DEST[MA] PUSHJ[UUOPJ] NORM $
+		;NOW MA HAS UPT+424, GET MASK IN Q TO CLEAR IND AND @
+	D[AR] ALU[D&Q] DEST[MEMSTO] NORM $
+		;START STORE OF INSTRUCTION THAT TRAPPED
+	D[MA] ALU[D+1] DEST[MA AR] CYLEN[MEMSTO] $
+		;OLD PC GOES INTO UPT+425, WAIT FOR WRITE TO COMPLETE OF 424
+	D[12] SPEC[A-MEM-APR] ROT[4] COND[-OBUS<0] C550 JUMP[MUUO3] $
+		;JUMP IF DON'T NEED TO OR IN AMEM OVERFLOW FLAG
+	D[CONST 1] ROT[35. - 0] DEST[Q] SHORT $
+		;THE BIT TO OR IN
+	D[PC] ALU[DORQ] DEST[MEMSTO AR] COND[-HALF] JUMP[MUUONT] NORM $
+		;OR IN OVERFLOW TO PC, STORE IT IN AR AND MEMORY.
+	JUMP[MUUOT] SHORT $
+		;TRAP, GO DO IT.
+MUUO3:	D[PC] DEST[MEMSTO AR] COND[HALF] JUMP[MUUOT] NORM $
+		;STORE PC INTO UPT+425, JUMP IF HALF ON, MAY BE TRAP
+MUUONT:	D[CONST 436 - 425] DEST[Q] COND[USER] JUMP[MUUOU] CYLEN[MEMSTO] $
+		;GET CONSTANT TO ADD TO MA TO GET UPT+436
+		;(MAKE USER MUUO A CYCLE FASTER)
+	D[CONST 6] ALU[Q-D] DEST[Q] NORM $
+		;WAS EXEC, TURN 436-7 INTO 430-1
+MUUOU:	D[MA] ALU[D+Q] DEST[MA] NORM $
+		;START THE NEW PC WORD IN
+	ALU[0] DEST[HI-ABS-MA] CYLEN[FIXM] $
+		;CLEAR HI PART OF MA OUT AND WAIT FOR PC WORD TO COME IN
+	D[MEM] DEST[PC] PUSHJ[MAPON] NORM $
+	D[MEM] DEST[CRYOV] JUMP[MAIN] NORM $
+
+
+MUUOT:	D[12] SPEC[A-MEM-APR] ROT[2] MASK[2] COND[OBUS=0] C550 JUMP[MUUONT] $
+		;HALF ON IF HERE, IF NO TRAP IN PROGRESS, JUST REJOIN.
+		; ASSUME FPD MUST BE SET, SINCE JRSTT ONLY ON
+		; AFTER JRST THAT SETS TRAP BITS
+	D[12] SPEC[A-MEM-APR] ROT[3] COND[OBUS<0] C550 JUMP[MUUOT1] $
+		;PC WAS CORRECTLY STORED IF FPD IS ON
+	D[AR] ROT[4] MASK[35.] DEST[AR] NORM $
+		;CLEAR OUT FPD BIT IN PC AND
+	D[AR] ROT[36. - 4] DEST[MEMSTO] NORM $
+		;WRITE IT INTO UPT+425
+MUUOT1:	D[MA] ALU[D+1] DEST[MA] JUMP[MUUONT] CYLEN[MEMSTO] $
+		;INCREMENT MA TO CAUSE NEW PC TO COME FROM 431 OR 437
+		; BECAUSE THIS MUUO IS A TRAP INSTRUCTION.
+;-------------------------------------------------------------------
+;
+;AMEM[2] BLOCK 0 CONTAINS THE FOLLOWING BITS:
+;
+;0	TP0
+;1	TP1	TRAP IN PROGRESS FLAGS - EITHER 0,1,2, OR 3.
+;2	JRSTT	IF SET, A FLAG RESTORING JRST HAS SET TRAP BITS
+;		AND FETCH OF INSTRUCTION AT NEW PC IS ABORTED IN FAVOR OF THE TRAP
+;3	FPD	FIRST PART DONE STORED HERE WHEN HALF FLAG IN HARDWARE PC REG IS ON
+;4	OVF	SAYS THAT OVERFLOW FLAG GOT SET WHEN PAGING AND TRAPS WERE ENABLED.
+;		ALL EVENTS THAT STORE PC OR THIS INTO PC BIT 0. NECESSARY
+;		BECAUSE MUST TURN OFF REAL OVERFLOW FLAG TO KEEP OVERFLOW MICRO
+;		INTERRUPT ENABLED WITHOUT GETTING CONSTANT MICROINTERRUPTS.
+;		NOTE THAT IF THIS IS OFF, REAL OVERFLOW FLAG MUST HAVE SAME EFFECT
+;		AS IT USED TO ON THINGS, TO HANDLE CASE OF PAGER AND TRAPS BEING TURNED OFF.
+;-------------------------------------------------------------------
+DOTRPX:	D[12] SPEC[A-MEM-APR] MASK[36. - 3.] DEST[Q] NORM $
+		;CLEAR OUT TRAP IN PROGRESS 1,2, AND JRSTT, LEAVE FPD SET FOR NOW
+	D[CONST 1] DEST[DEV-ADR] NORM $
+	D[17] ROT[22.] COND[-OBUS<0] C550 JUMP[NOTRP] $
+		;IF TRAP ENABLE IS CLEAR, DON'T DO TRAP, JUST FIX UP PC AND AMEM
+	D[AR] ROT[36. - 2.] ALU[DORQ] DEST[2 Q] SPEC[A-MEM-APR&DEST-A-MEM]
+	  COND[HALF] JUMP[DOTRX1] NORM $
+		;SET THE APPROPRIATE TRAP BITS, LEAVE FPD ALONE IF HALF SET.
+		; NORM CYCLE OK SINCE HALF IS SET AT BEG OF CYCLE
+	D[CONST 1] ROT[35. - 3.] ALU[-D&Q] DEST[2] SPEC[A-MEM-APR&DEST-A-MEM] NORM $
+		;CLEAR OUT FPD SINCE HALF WAS OFF.
+DOTRX1:	D[PC] ALU[D-1] DEST[PC] PUSHJ[SETHLF] NORM $
+		;BACKUP PC (DISP AT MAIN2 AND PI CODE WILL INCREMENT IT AGAIN)
+		; AND SET THE HALF FLAG SINCE TRAP FLAGS ARE ON.
+	D[CONST 1] DEST[DEV-ADR] COND[USER] JUMP[DOTRPU] NORM $
+		;GET READY TO READ UPT OR EPT ADDRESS, DISPATCH ON USER
+	D[17] MASK[13.] DEST[HOLD] JUMP[DOTRPB] NORM $
+		;EXEC, GET EPT PAGE NUMBER IN MEM
+DOTRPU:	D[16] MASK[13.] DEST[HOLD] NORM $
+		;EXEC, GET EPT PAGE NUMBER IN AR
+DOTRPB:	D[MEM] ROT[9.] DEST[Q] NORM $
+		;CONVERT TO ADDRESS, PUT INTO Q
+	D[AR] ALU[D+Q] DEST[Q] PUSHJ[MAPOF] NORM $
+		;ADD OFFSET OF TRAP INTO EPT OR UPT ADDRESS
+	D[CONST 42] ROT[3] ALU[D+Q] DEST[HI-ABS-MA MA] NORM $
+		;AND STORE FINAL ADDRESS INTO MA TO START THE READ
+	ALU[0] DEST[HI-ABS-MA] PUSHJ[MAPON] CYLEN[FIXM] $
+		;CLEAR OUT HI MA PART, TURN ON MAP, AND
+		;WAIT FOR DATA TO GET INTO MEM AND THEN GO DO THE INSTRUCTION
+	JUMP[MAIN2] SHORT $
+		; MIGHT PAGE FAULT OR GET INTERRUPT.
+
+;HERE IF TRAP ENABLE IS OFF, AMEM[2] WITH TIX AND JRSTT CLEARED IN Q.
+; MUST SET HALF FLAG TO HALF .AND. FPD IN CASE JRSTF SET HALF FLAG.
+
+NOTRP:	ALU[Q] SPEC[A-MEM-APR&DEST-A-MEM] DEST[AR 2] COND[-HALF] JUMP[MAIN] NORM $
+		;SET AMEM[2] PROPERLY, AND EXECUTE NEXT INSTRUCTION IF HALF IS OFF.
+;HALF IS ON, COULD EITHER BE LEGIT OR SET BY JRSTF BECAUSE IT SET
+; THE TRAP FLAGS WHICH WE NOW HAVE CLEARED. SET HALF TO SETTING OF
+; FPD.
+	D[AR] ROT[4] COND[OBUS<0] C550 JUMP[MAIN] $
+		;JUMP IF FPD IS ON IN AMEM.
+	SPEC[CLR-HALF] JUMP[MAIN] NORM $
+		;WASN'T ON, SO TURN HALF OFF AGAIN.
+		;AND EXECUTE NEXT INSTRUCTION
+];.REPEAT KL
+
+	.OPCODE[060];	Monitor UUOs 060-067
+			;(SETSTS,STATO,GETSTS,STATZ,INBUF,OUTBUF,INPUT,OUTPUT)
+	MUUO1 $
+;;;AREA214 = .
+area214 = 2142		;Sigh... Another fixed location
+	.OPCODE[070];	Monitor UUOs 070-077
+			;(CLOSE,RELEAS,MTAPE,UGETF,USETI,USETO,LOOKUP,ENTER)
+	MUUO1 $
+AREA216:
+
+	.OPCODE[100];	UMOVE
+.REPEAT 1 - KL [
+UMOVE:	D[PC] ALU[D-1] DEST[MA PC] NORM $ ;RE-FETCH INSTR.
+	FIXM1 JUMP[UMOVX] $	;WAIT FOR FETCH.
+
+; UMOVEI, UMOVEM, UMOVES
+	.REPEAT 3 [ JUMP[UMOVE] NORM $
+			NOP $ 
+  		]
+];.REPEAT 1 - KL
+.REPEAT KL [
+  .REPEAT 4 [
+	MUUO1 $
+	NOP $
+  ];.REPEAT 4
+];.REPEAT KL
+
+	.OPCODE[104];	JSYS
+JSYS:
+.REPEAT 1 - KL [
+.REPEAT 1 - WAITS [
+	D[IR] ROT[33] MASK[11] COND[-OBUS=0] JUMP[JSYS1] C550 $; J IF NOT EX JSYS
+];.REPEAT 1 - WAITS
+.REPEAT WAITS [
+;EX JSYS is disabled in WAITS' BBN pager.  We simulate the same.
+	JUMP[JSYS1] NORM $
+];.REPEAT WAITS
+JSYS3:	D[PC] DEST[Q AR] JUMP[JSYS2] $; GET PC & FLAGS
+];.REPEAT 1 - KL
+.REPEAT KL [;NO JSYS ON KL
+	MUUO1
+];.REPEAT KL
+
+	.OPCODE[105];	ADJSP
+ADJSP:	D[IR] ROT[22] MASK[0] ALU[D+AC] SPEC[LEFT] DEST[Q]
+			COND[OBUS<0] JUMP[ADJSP1] C550$
+		;Jump if left result is negative
+	D[IR] MASK[22] ALU[D+AC] DEST[AR] JUMP[ADJSP2] NORM $	;Add right half
+	;(Continued just before TYMNET code)
+
+	.OPCODE[106]	;XMOVEM
+.REPEAT 0 [;NEEDS TO HAVE MAPF FIELD OF SOME SORT
+	ALU[AC] ACSEL[AC+1] DEST[HI-ABS-MA MA] NORM $
+	ALU[AC] DEST[MEMSTO] NORM JUMP[XMOVEM1] $
+	.USE[AREA204]
+XMOVEM1: ALU[0] DEST[HI-ABS-MA] NORM JUMP[MAIN] $
+];.REPEAT 0
+.REPEAT 1 [
+	MUUO1 $
+	NOP $
+];.REPEAT 1
+
+	.OPCODE[107]	;XMOVE
+.REPEAT 0 [
+	ALU[AC] ACSEL[AC+1] DEST[HI-ABS-MA MA] NORM $
+	ALU[0] DEST[HI-ABS-MA] JUMP[2401] NORM $
+];.REPEAT 0
+.REPEAT 1 [
+	MUUO1 $
+	NOP $
+];.REPEAT 1
+
+;Illegal instructions (?)
+	.REPEAT 113 - 110 + 1
+[	UAOP1 $
+	NOP $
+	]
+.REPEAT 1 - KL [
+	.REPEAT 117 - 114 + 1
+[	UAOP1 $
+	NOP $
+	]
+];.REPEAT 1 - KL
+.REPEAT KL [
+	.OPCODE[114]	;DADD
+
+DADD:	FIXM1 $		;FINISH FETCH OF HI ORDER WORD
+	D[MEM] DEST[AR] JUMP[DADD1] NORM $
+		;SAVE IT FOR LATER.
+DSUB:	FIXM1 $
+	D[MEM] DEST[AR] JUMP[DSUB1] NORM $
+
+	.REPEAT 117 - 116 [
+	UAOP1 $
+	NOP $
+	]
+];.REPEAT KL
+
+	.OPCODE[120]	;DMOVE
+DMOVE:	FIXM1 $			; Fetch first word
+	ACSEL[AC] D[MEM] DEST[AC] JUMP[DMOVE2] CYLEN[FIXM+1] $
+		;Put it in an AC [*** Is CYLEN right? ***]
+	;(Continued just before TYMNET code)
+
+	.OPCODE[121]	;DMOVN
+DMOVN:	FIXM1 $	;Fetch first word
+	ACSEL[AC] D[MEM] ALU[NOTD] DEST[AC] SPEC[CRYOV]
+			JUMP[DMOVN2] CYLEN[FIXM+1] $
+		;Ones complement high order word.  Set result flags
+	;(Continued just before TYMNET code)
+
+	.OPCODE[122]	;KIFIX
+KIFIX:	FIXM1 $	;Fetch first word
+	D[CONST 33] DEST[Q] JUMP[KIFIX1] NORM $
+		;Start making magic constant
+	;(Continued just before TYMNET code)
+
+;123
+	UAOP1 $
+	NOP $
+
+	.OPCODE[124]	;DMOVEM
+;*** Note: Like on the KI10, DMOVEM AC,AC+1 will lose.
+DMOVEM:	FIXM2 $			; Make sure first word is in core
+	ACSEL[AC] ALU[AC] DEST[MEMSTO] COND[-MA-AC] LBJUMP[DMOVM2] NORM $
+		;Store first word.  Decide where it really goes.
+	;(Continued just before TYMNET code)
+	.OPCODE[125]	;DMOVNM
+;*** Note: Like on the KI10, DMOVNM AC,AC+1 will lose.
+DMOVNM:	FIXM2 $			; Make sure first word is in core
+	ACSEL[AC] ALU[NOTAC] DEST[AR] SPEC[CRYOV] JUMP[DMVNM2] NORM $
+		;Ones complement high order word, leave result in IR
+	;(Continued just before TYMNET code)
+
+	.OPCODE[126]	;FIXR
+FIXR:	FIXM1 $	;Fetch first word
+	D[CONST 04] ROT[24.] DEST[Q] JUMP[FIXR1] NORM $
+		;Start making constant 0.5
+	;(Continued just before TYMNET code)
+
+	.OPCODE[127]	;FLTR
+FLTR:	FIXM1 $	;Fetch first word
+	D[MEM] DEST[AR] JUMP[FLTR1] $
+		;Setup for normalize
+
+	.OPCODE[130]	;UFA
+UFA:	FIXM1 $
+	D[CONST 11] DEST[DEV-ADR] JUMP[UFA1] $
+
+	.OPCODE[131]	;DFN
+DFN:	FIXM2 $
+	D[MEM] MASK[27.] ALU[0-D] DEST[AR] COND[OBUS=0] LBJUMP[DFN1] C600 $
+
+	.OPCODE[132]	;FSC
+FSC:	D[MASK 27.] ALU[D&AC] ACSEL[AC] COND[OBUS=0] JUMP[FSCZAP] C550 $
+	ACSEL[AC] ALU[AC] DEST[AR] JUMP[FSC1] NORM $
+
+
+
+
+
+;IBP ILDB LDB IDPB DPB FAD FSB FMP FDV
+;------------------------------------------------------------------------------
+;
+;	Byte Manipulation Instructions
+;
+;------------------------------------------------------------------------------
+	.OPCODE[133]	;IBP (and ADJBP)
+IBP:
+.REPEAT 1 - KL [;IF NOT KL, HALF FLAG IS SAME AS PC FPD
+	FIXM2 COND[HALF] JUMP[MAIN] $
+];.REPEAT 1 - KL
+.REPEAT KL [;IF KL, FIRST PART DONE IS HALF .AND. FPD IN AMEM
+	FIXM2 COND[HALF] JUMP[IBP0] $
+		;JUMP IF NEED TO CHECK FPD IN AMEM
+];.REPEAT KL
+		;A no-op if we're already incremented.
+	D[MEM] DEST[Q AR] COND[AC=0] LBJUMP[IBP1] NORM $
+		;Get byte pointer and decide if it's an ADJBP or a IBP
+
+	.OPCODE[134]	;ILDB
+ILDB:	FIXM2 $
+	D[MEM] DEST[Q AR] COND[-HALF] LBJUMP[ILDB1] NORM $
+
+	.OPCODE[135]	;LDB
+LDB:	FIXM1 $
+	D[MEM] DEST[Q AR MA] COND[-MEM-IDX-IND] LBJUMP[LDB1] CYLEN[C500] $
+
+IDPB:	.OPCODE[136]	;IDPB
+	FIXM2 $
+	D[MEM] DEST[Q AR] COND[-HALF] LBJUMP[IDPB1] NORM $
+
+	.OPCODE[137]	;DPB
+DPB:	FIXM1 $
+	D[MEM] DEST[Q AR MA] LBJUMP[DPB1] COND[-MEM-IDX-IND] CYLEN[C500]  $
+
+;------------------------------------------------------------------------------
+;
+;	Single Procession Floating Point
+;
+;------------------------------------------------------------------------------
+
+;
+;FAD FADL FADM FADB FADR FADRI FADRM FADRB
+;
+	.OPCODE[140]		;Opcodes 140-147
+FAD:	FIXM1 JUMP[FAOS1] $ NOP $
+	FIXM1 JUMP[FAOS2] $ NOP $
+	FIXM2 JUMP[FAOS3] $ NOP $
+	FIXM2 JUMP[FAOS4] $ NOP $
+	FIXM1 JUMP[FAOS1] $ NOP $
+	D[MA] ROT[18.] DEST[HOLD] SPEC[LEFT] JUMP[FAOS5] NORM $ NOP $
+	FIXM2 JUMP[FAOS3] $ NOP $
+	FIXM2 JUMP[FAOS4] $ NOP $
+
+;
+;FSB FSBL FSBM FSBB FSBR FSBRI FSBRM FSBRB
+;
+.DEFINE FSBMAC[X] [
+	D[MEM] ALU[0-D] DEST[HOLD] JUMP[X] NORM 
+]
+	.OPCODE[150]		;Opcodes 150-157
+FSB:	FIXM1 $ FSBMAC[FAOS1] $
+	FIXM1 $ FSBMAC[FAOS2] $
+	FIXM2 $ FSBMAC[FAOS3] $
+	FIXM2 $ FSBMAC[FAOS4] $
+	FIXM1 $ FSBMAC[FAOS1] $
+	D[MA] ROT[18.] DEST[HOLD] ALU[0-D] SPEC[LEFT] JUMP[FAOS5] NORM $ NOP $
+	FIXM2 $ FSBMAC[FAOS3] $
+	FIXM2 $ FSBMAC[FAOS4] $
+
+;
+;FMP FMPL FMPM FMPB FMPR FMPRI FMPRM FMPRB
+;
+	.OPCODE[160]		;Opcodes 160-167
+FMP:	FIXM1 JUMP[FMP1] $ NOP $
+	FIXM1 JUMP[FMP2] $ NOP $
+	FIXM2 JUMP[FMP3] $ NOP $
+	FIXM2 JUMP[FMP4] $ NOP $
+	FIXM1 JUMP[FMP1] $ NOP $
+	D[MA] ROT[18.] DEST[HOLD] SPEC[LEFT] JUMP[FMP5] NORM $ NOP $
+	FIXM2 JUMP[FMP3] $ NOP $
+	FIXM2 JUMP[FMP4] $ NOP $
+
+;FDV FDVL FDVM FDVB FDVR FDVRI FDVRM FDVRB
+.DEFINE DIVMAC[X] [
+	D[CONST 11] DEST[DEV-ADR] JUMP[X] NORM
+]
+	.OPCODE[170]		;Opcodes 170-177
+FDV:	FIXM1 $ DIVMAC[FD1] $
+	FIXM1 $ DIVMAC[FD2] $
+	FIXM2 $ DIVMAC[FD3] $
+	FIXM2 $ DIVMAC[FD4] $
+	FIXM1 $ DIVMAC[FD1] $
+	D[MA] ROT[18.] DEST[HOLD] SPEC[LEFT] NORM $ DIVMAC[FD1] $
+	FIXM2 $ DIVMAC[FD3] $
+	FIXM2 $ DIVMAC[FD4] $
+
+
+
+
+;MOVE MOVE1 MOVEI MOVEM MOVES MOVS MOVSI MOVSM MOVSS MOVN MOVNI MOVNM MOVNS MOVM MOVM1 MOVMI MOVMM MOVMS MOVMS1 MOVMS3 MOVMS4 MOVMS5 MOVMS6 MOVMS2
+;------------------------------------------------------------------------------
+;
+;	MOVE Group
+;
+;------------------------------------------------------------------------------
+
+	.OPCODE[200]	;MOVE
+MOVE:	FIXM1 $
+		;Wait for memory, handle page faults, and fixup AC references
+MOVE1:	ACSEL[AC] D[MEM] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] CYLEN[FIXM+1] $
+		;Store result of read in AC
+		;Start next instruction fetch (DEST[MA] refers to SPEC[MA_PC])
+		;We are referring to the AC specified by the AC field in the IR
+
+	.OPCODE[201]	;MOVEI
+MOVEI:	ACSEL[AC] D[IR] MASK[18.] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+		;Store effective address into AC
+		;Ignore any page faults or other memory related problems.  Read
+		;will be ignored (except for ECC checking)
+		;Start next instruction fetch (DEST[MA] refers to SPEC[MA_PC])
+		;We are referring to the AC specified by the AC field in the IR
+
+	.OPCODE[202]	;MOVEM
+MOVEM:	ACSEL[AC] ALU[AC] DEST[MEMSTO]  MEMST $
+		;Start writing AC (selected by AC field in IR) into memory.
+		;MEMST macro will send us to MSMAIN (if we're writing to
+		;another AC) or MSMAIN1 (if it's a real memory reference)
+		;to complete to store.
+
+	.OPCODE[203]	;MOVES
+MOVES:	FIXM1 COND[-AC=0] JUMP[MOVE1]  $
+		;If AC field (in IR) is non-zero, we treat this as if it
+		;were a MOVE instruction (a slight fudge).
+		;*** Shouldn't this be a FIXM2?  Then it would do the right
+		;*** thing for the clever person trying to fetch and dirty
+		;*** a page.   TVR-Apr80
+	D[MEM] DEST[MEMSTO] MEMST $
+		;If AC field is zero, this is a no-op which writes memory.
+
+	.OPCODE[204]	;MOVS
+MOVS:	FIXM1 $
+	ACSEL[AC] D[MEM] ROT[18.] DEST[AC MA] SPEC[MA_PC]
+			JUMP[MAIN1] CYLEN[FIXM+1] $
+		;Rotating by 18 swaps halves.  Otherwise, it's just like a MOVE
+
+	.OPCODE[205]	;MOVSI
+MOVSI:	ACSEL[AC] D[IR] ROT[18.] DEST[AC MA] SPEC[LEFT&MA_PC] JUMP[MAIN1] NORM$
+		;Just like a MOVEI except it puts the result in the left half
+		;of the AC.  (SPEC[LEFT] makes a mask of -1,,0)
+
+	.OPCODE[206]	;MOVSM
+MOVSM:	ALU[AC] ACSEL[AC] DEST[AR] NORM $
+	D[AR] ROT[18.] DEST[MEMSTO] MEMST $
+		;Swap halves and write it into memory like a MOVEM
+
+	.OPCODE[207]	;MOVSS
+MOVSS:	SLFFXM[MOVSS1] $
+		;Finish read fetch of read-modify-write type cycle.
+		;Check to make sure effective address is writable.
+		;Jump if AC field in IR is non-zero
+	D[MEM] ROT[18.] DEST[MEMSTO] MEMST $
+		;Swap halves and write backing into same place in memory.
+
+;*$*$*$ Move MOVSS1 here, a single instruction
+
+	.OPCODE[210]	;MOVN
+MOVN:	FIXM1 $
+	ACSEL[AC] D[MEM] ALU[0-D] DEST[AC MA] SPEC[CRYOV&MA_PC]
+			JUMP[MAIN1] CYLEN[FIXM+1] $
+		;Like MOVE except it negates the number it loads.
+		;Set flags.  400000,,0 will overflow.
+
+	.OPCODE[211]	;MOVNI
+MOVNI:	ACSEL[AC] D[IR] ALU[0-D] MASK[18.] DEST[AC MA] SPEC[CRYOV&MA_PC]
+			JUMP[MAIN1] NORM $
+		;Like MOVEI except that it load a negative number
+		;Set flags.  Cannot overflow.
+
+	.OPCODE[212]	;MOVNM
+MOVNM:	ACSEL[AC] ALU[0-AC] DEST[MEMSTO] SPEC[CRYOV] MEMST $
+		;Write negative of AC into memory.
+		;Set flags.  400000,,0 will overflow.
+
+	.OPCODE[213]	;MOVNS
+MOVNS:	SLFFXM[MOVNS1] $
+		;Complete fetch of read-modify-write
+		;Jump if AC field (of IR) is non-zero, i.e. it loads an AC
+	D[MEM] ALU[0-D] DEST[MEMSTO] SPEC[CRYOV] MEMST $
+		;Write negative of number read back into memory.
+
+;
+; MOVM - Move Magnitude (Absolute value)
+;
+	.OPCODE[214]	;MOVM
+MOVM:	FIXM1 $	;Complete data fetch
+	ACSEL[AC] D[MEM] DEST[AC] COND[OBUS<0] LBJUMP[MOVM1] C600 $
+		;Load number.
+		;If negative, negate it to make it positive.
+		;In either case, start fetch of next instruction
+	.USE[AREA214]	;$*$*$ Random hole
+	.PAIR
+MOVM1:	SPEC[MA_PC] DEST[MA] JUMP[MAIN1] NORM $
+		;Number is positive, leave it alone
+		;Start next instruction fetch
+	ACSEL[AC] ALU[0-AC] DEST[AC MA] SPEC[CRYOV&MA_PC] JUMP[MAIN1] NORM$
+		;Number is negative, make it positive.
+		;Start next instruction fetch
+
+	.OPCODE[215]	;MOVMI
+MOVMI:	ACSEL[AC] D[IR] MASK[18.] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+		;Immediate implies it's positive.  Equivalent to MOVEI
+
+	.OPCODE[216]	;MOVMM
+MOVMM:	ACSEL[AC] ALU[AC] COND[OBUS<0] JUMP[MOVNM] CYLEN[C450] $
+		;If AC is negative, store its negation and set flags
+		;Note:  It will set overflow if AC contains 400000,,0
+	ACSEL[AC] ALU[AC] DEST[MEMSTO] SPEC[CRYOV] MEMST $
+		;Otherwise, store positive form.  (Both paths take same amount
+		;of time.)
+		;Also, set flags.
+
+	.OPCODE[217]	;MOVMS
+MOVMS:	COND[MA-AC] JUMP[MOVMS2]
+			DEST[FIXMAC-MAPF-WRT] MAPF[NORM-WRT] CYLEN[FIXM]$
+		;Finish fetch of read-modify-write
+		;Jump if we have to deal with two ACs
+	COND[AC=0] LBJUMP[MOVMS1] NORM $
+		;Split off case where we load AC as side effect
+	.USE[AREA204]
+	.PAIR
+MOVMS1:	D[MEM] COND[OBUS<0] LBJUMP[MOVMS3] C550 $
+		;AC field of IR is non-zero, AC is loaded as side effect
+	D[MEM] COND[OBUS<0] LBJUMP[MOVMS4] C550 $
+		;Reference is only to memory
+	.PAIR
+MOVMS3:	D[MEM] ACSEL[AC] SPEC[MA_PC] DEST[MA AC] JUMP[MAIN1] NORM $
+		;Memory location is positive, just load AC
+	D[MEM] ALU[0-D] ACSEL[AC] DEST[MEMSTO AC] SPEC[CRYOV] MEMST $
+		;Load AC with negative of memory and write negative back
+		;into memory.
+		;Set flags.  Will overflow if memory contains 400000,,0
+	.PAIR
+MOVMS4:	SPEC[MA_PC] DEST[MA] JUMP[MAIN1] NORM $
+		;Memory is positive.  Don't have to do anything here.
+	D[MEM] ALU[0-D] DEST[MEMSTO] SPEC[CRYOV] JUMP[MSMAIN1] NORM $
+		;Memory is negative.  Store negation.
+		;Set flags.  Will overflow if memory contains 400000,,0
+;Special cases for references to two ACs
+	.PAIR
+MOVMS5:	ACSEL[MA] ALU[0-AC] DEST[AC AR] SPEC[CRYOV]
+			COND[AC=0] LBJUMP[MOVMS6] NORM $
+		;'memory' AC is negative, negate it and put it somewhere
+		;the other AC loaded from.
+		;Then, decide whether to load it into another AC
+	ACSEL[MA] ALU[AC] DEST[AR] COND[AC=0] LBJUMP[MOVMS6] NORM $
+		;'memory' AC is positive.  Put it somewhere the other AC
+		;can reference.
+		;Decide whether to load it into	another AC
+	.PAIR
+MOVMS6:	ACSEL[AC] D[AR] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+		;AC field (of IR) is non-zero, load corresponding AC from
+		;saved value of 'memory' AC.
+		;Start next instruction fetch
+	SPEC[MA_PC] DEST[MA] JUMP[MAIN1] NORM $
+		;AC field (of IR) is zero, just start next instruction fetch
+;	---
+;MA refers to an AC.  Decide which special case we're dealing with.
+MOVMS2:	ACSEL[MA] ALU[AC] COND[-OBUS<0] LBJUMP[MOVMS5] CYLEN[C500] $
+		;Decide sign of 'memory' AC
+
+
+
+
+
+;------------------------------------------------------------------------------
+;
+;	Integer Multiply
+;
+;------------------------------------------------------------------------------
+
+	.OPCODE[220]	;IMUL
+	FIXM1 $
+	D[MEM] DEST[Q] JUMP[IMUL1] NORM $
+
+	.OPCODE[221]	;IMULI
+	D[IR] MASK[18.] DEST[Q] JUMP[IMUL1] NORM $
+
+	.OPCODE[222]	;IMULM
+	FIXM2 $
+	D[MEM] DEST[Q] JUMP[IMUL2] NORM $
+
+	.OPCODE[223]	;IMULB
+	FIXM2 $
+	D[MEM] DEST[Q] JUMP[IMUL3] NORM $
+
+	.OPCODE[224]	;MUL
+	FIXM1 $
+	D[MEM] DEST[Q] JUMP[MUL1] NORM $
+
+	.OPCODE[225]	;MULI
+	D[IR] MASK[18.] DEST[Q] JUMP[MUL1] NORM $
+
+	.OPCODE[226]	;MULM
+	FIXM2 $
+	D[MEM] DEST[Q] JUMP[MUL2] NORM $
+
+	.OPCODE[227]	;MULB
+	FIXM2 $
+	D[MEM] DEST[Q] JUMP[MUL3] NORM $
+
+;*$*$* Move rest of multiply code here
+
+;------------------------------------------------------------------------------
+;
+;	Integer Divide
+;
+;------------------------------------------------------------------------------
+
+	.OPCODE[230]	;IDIV
+	FIXM1 $
+IDIV9:	ACSEL[AC] ALU[AC] DEST[Q AR] COND[-OBUS<0] LBJUMP[IDIV1] CYLEN[C500] $
+		;LO PART TO Q, CHECK SIGN
+
+	.OPCODE[231]	;IDIVI
+	D[IR] MASK[18.] DEST[HOLD] JUMP[IDIV9]  NORM $ ;IMMD
+
+	.OPCODE[232]	;IDIVM
+	FIXM2 $
+	ALU[AC] ACSEL[AC] DEST[Q AR] COND[-OBUS<0] LBJUMP[IDIV2]  CYLEN[C500] $
+		;LO PART TO Q, SAVE AC, CHECK SIGN
+
+	.OPCODE[233]	;IDIVB
+	FIXM2 $
+	ACSEL[AC] ALU[AC] DEST[Q AR] COND[-OBUS<0] LBJUMP[IDIV3] CYLEN[C500] $
+
+	.OPCODE[234]	;DIV
+	FIXM1 $
+DIV9:	ACSEL[AC+1] ALU[AC] DEST[Q] JUMP[DIV1] $ ;LO PART
+
+	.OPCODE[235]	;DIVI
+	D[IR] MASK[18.] DEST[HOLD] JUMP[DIV9] $ ;IMMD
+
+	.OPCODE[236]	;DIVM
+	FIXM2 $
+	ALU[AC] ACSEL[AC+1] DEST[Q] JUMP[DIV2] $
+
+	.OPCODE[237]	;DIVB
+	FIXM2 $
+	ALU[AC] ACSEL[AC+1] DEST[Q] JUMP[DIV3] $
+
+;$*$*$	Move rest of divide code here
+
+;------------------------------------------------------------------------------
+;
+;	Shifts and Rotates
+;
+;	Two branches are taken for each shift/rotate, depending on direction.
+;	The macro SH1ST handles that.  The positive case gets ROTR loaded by
+;	that macro and other negative case will have to load it itself.
+;
+;	Note that by the time we get here, indexing and indirection have
+;	already been done, so the left half of the IR contains an honest
+;	shift count, albeit not necessarily in the range -35..35
+;
+;------------------------------------------------------------------------------
+   .DEFINE SH1ST [LAB1 LAB2]
+[	D[IR] COND[OBUS18] DEST[Q] JUMP[LAB1] C550 $
+	D[IR] MASK[10] DEST[Q ROTR] JUMP[LAB2] NORM $
+]
+
+	.OPCODE[240]	;ASH
+	SH1ST [ASHNEG ASHPLS]
+
+	.OPCODE[241]	;ROT
+	SH1ST [ROTNEG ROTPLS]
+
+	.OPCODE[242]	;LSH
+	SH1ST [LSHNEG LSHPLS]
+
+	.OPCODE[243]	;JFFO (a funny kind of shift instruction)
+	ACSEL[AC] ALU[AC] COND[OBUS=0] JUMP[JFFO1] DEST[AR] CYLEN[C450] $
+	ACSEL[AC+1] ALU[0] DEST[AC] JUMP[JFFO2] NORM $
+
+	.OPCODE[244]	;ASHC
+	ACSEL[AC+1] D[MASK 43] ALU[D&AC]   DEST[AR] NORM $
+	D[AR] ROT[1] DEST[Q] JUMP[ASHC1] NORM $
+
+	.OPCODE[245]	;ROTC
+	ACSEL[AC+1] ALU[AC] DEST[Q]   NORM $
+	D[IR] COND[-OBUS18] LBJUMP[ROTC1] C550 $
+
+	.OPCODE[246]	;LSHC
+	ACSEL[AC+1] ALU[AC] DEST[Q]   NORM $
+	D[IR] COND[-OBUS18] LBJUMP[LSHC1] C550 $
+
+	.OPCODE[247]	;(KAFIX at SAIL: "A. Kotok should have done this")
+	ACSEL[AC] ALU[AC] DEST[HOLD AR] COND[-OBUS<0] JUMP[KAFIXP] C550 $
+		;Load up things for FIXER, check for positive mantissa
+	ACSEL[AC] ALU[0-AC] DEST[AR] JUMP[KAFIXN] NORM $
+		;Negate AR so that its exponent can be used.
+
+
+
+
+;------------------------------------------------------------------------------
+;	Exchange AC and memory
+;------------------------------------------------------------------------------
+	.OPCODE[250]	;EXCH
+	FIXM2 $
+		;Finish fetch of read-modify-write, checking for faults
+	ACSEL[AC] D[MEM] DEST[MEMSTO O_AC] MEMST $
+		;Store result of fetch into AC, writing the old contents of
+		;that AC into memory (O_AC means store new AC and output old
+		;contents).
+
+;------------------------------------------------------------------------------
+;	Block Transfer Instruction
+;------------------------------------------------------------------------------
+	.OPCODE[251]	;BLT
+	D[MASK 16] ROT[4] ACSEL[AC] ALU[D&AC] COND[OBUS=0] JUMP[BLTA1] C550 $ ;J IF DEST IS AC
+	D[MASK 16] ROT[26] ACSEL[AC] ALU[D&AC] COND[-OBUS=0] LBJUMP[BLTA2] C600 $ ; J ON SRC NOT AC
+
+;------------------------------------------------------------------------------
+;	Conditional jumps which add one to both halves
+;
+;  Caution:	With these instructions, overflow from the right half will be
+;		added to the left half, as on a KA.
+;------------------------------------------------------------------------------
+	.OPCODE[252]	;AOBJP
+	D[CONST 1,,1] ACSEL[AC] ALU[D+AC] DEST[AC]
+			COND[OBUS<0] JUMP[MAIN] C600 $
+		;Add to both halves.  If result is negative, do not jump
+	DOJUMP $
+
+	.OPCODE[253]	;AOBJN
+	D[CONST 1,,1] ACSEL[AC] ALU[D+AC]   DEST[AC]
+	  COND[-OBUS<0] JUMP[MAIN] C600 $
+	DOJUMP $
+
+;------------------------------------------------------------------------------
+;	Jump Instructions (and halts)
+;
+;  Caution:	Halts set PC to effective address instead of the instruction
+;		that caused the halt.  This is especially bad because most
+;		programs which do not use UUOs place a halt in location 40,
+;		and the location of the UUO is then lost on an F2.  This
+;		might be cured by replicating the instruction fetch seqeunce
+;		herein with the copying of the IR into the PC happening later
+;		during that sequence.
+;------------------------------------------------------------------------------
+	.OPCODE[254]	;JRST
+	D[IR] DEST[MA PC] COND[AC=0] JUMP[MAIN1] NORM $
+		;Make ordinary jumps as fast as possible.  Always load the PC
+		;from the effective address, even on halts!?!
+	D[IR] ROT[12] MASK[1] COND[OBUS=0] LBJUMP[JRST1] C550 $
+		;Seperate according to the 10 bit of the AC field.
+
+	.OPCODE[255]	;JFCL
+	D[IR] ROT[15] MASK[4] DEST[AR] COND[AC=0] JUMP[MAIN] NORM $
+		;Check AC field and jump to instruction fetch if zero.
+		;JFCL 0,  is the fastest no-op on a KA
+	D[PC] DEST[Q] JUMP[JFCL1] NORM $
+
+	.OPCODE[256]	;XCT
+	FIXM1 COND[-AC=0] JUMP[XCT1] $
+	D[PC] ALU[D-1] DEST[PC] JUMP[XCT2] NORM $
+
+	.OPCODE[257]	;A No-Op on KA's not having special features
+.REPEAT 1 - KL [
+	JUMP[MAIN] NORM $
+];.REPEAT 1 - KL
+.REPEAT KL [
+	JUMP[MAP] NORM $
+];.REPEAT KL
+
+;------------------------------------------------------------------------------
+;
+;	Stack Instructions
+;
+;  Caution:	If a stack crosses zero (i.e. a carry from the right half
+;		occurs, the left half will be off by one, as on a KA
+;		(People who wrap their stacks around and thru ACs deserve to
+;		lose!)
+;------------------------------------------------------------------------------
+	.OPCODE[260]	;PUSHJ
+.REPEAT 1 - KL [
+	ACSEL[AC] D[CONST 1,,1] ALU[D+AC]   DEST[AC MA]
+	  COND[CRY0] JUMP[PDLO1] C600 $
+		;Increment stack pointer.
+		;Jump on overflow (overflow code will complete instruction)
+	D[PC] DEST[MEMSTO] JUMP[PUSHJ1] NORM $
+		;Store the PC and flags on the stack
+];.REPEAT 1 - KL
+.REPEAT KL [
+	ACSEL[AC] D[CONST 1,,1] ALU[D+AC]   DEST[AC MA]
+	  COND[CRY0] JUMP[PDLO1] C600 $
+		;Increment stack pointer.
+		;Jump on overflow (overflow code will complete instruction)
+	D[PC] DEST[Q] JUMP[PUSHJ0] SHORT $
+		;On KL, need to OR in the fake overflow flag in AMEM.
+		; (Could have saved if real flag was on here, but whats
+		; the use, its always off if map is turned on anyway)
+		;Store the PC and flags on the stack
+		;(NOTE Q ADDED HERE)
+];.REPEAT KL
+
+	.OPCODE[261]	;PUSH
+	FIXM1 $
+		;Complete fetch of thing to push
+	D[MEM] DEST[AR] JUMP[PUSH1] NORM $
+		;Move it somewhere else so we set MA to point to stack.
+		;(Setting the MA implies a read, which would destroy the thing
+		;to push).
+		;*$*$* Go elsewhere to finish instruction
+
+	.OPCODE[262]	;POP
+	ACSEL[AC] D[CONST 1,,1] ALU[AC-D] DEST[MA O_AC]
+			COND[-CRY0] JUMP[PDLO3] C600 $
+		;Decrement stack pointer, but setting the MA to the old top of
+		;stack.
+		;If stack underflow, jump.  (Underflow code will finish the
+		;instruction).
+	 MAPF[PPOP] ACSEL[MA] ALU[AC] DEST[FIXMAC-MAPF-RD]
+			JUMP[POP1] CYLEN[FIXM] $
+		;If page fault, trap to special code to handle POP
+		;*$*$* Go elsewhere to finish instruction
+
+	.OPCODE[263]	;POPJ
+	ACSEL[AC] D[CONST 1,,1] ALU[AC-D] DEST[MA O_AC]
+			COND[-CRY0] JUMP[PDLO4] C600 $
+		;Decrement stack pointer, but setting the MA to the old top of
+		;stack.
+		;If stack underflow, jump.  (Underflow code will finish the
+		;instruction).
+	MAPF[PPOP] ACSEL[MA] ALU[AC] DEST[FIXMAC-MAPF-RD]
+			JUMP[POPJ1] CYLEN[FIXM] $
+		;If page fault, trap to special code to handle POP
+		;*$*$* Go elsewhere to finish instruction
+
+	.OPCODE[264]	;JSR
+.REPEAT 1 - KL [
+	FIXM2 JUMP[JSR1] $
+];.REPEAT 1 - KL
+.REPEAT KL [
+	FIXM2 COND[-HALF] JUMP[JSR1] $
+	D[PC] DEST[Q] SHORT JUMP[HFJSR] $
+		;PUT PC INTO Q FOR MODIFICATION IF NECESSARY.
+	.USE[AREA53]
+
+HFJSR:	D[12] SPEC[A-MEM-APR] ROT[3] COND[OBUS<0] C550 JUMP[HFJSR1] $
+		;JUMP IF FPD ON IN AMEM (THEN HALF SET IN PC OK)
+	D[CONST 1] ROT[35. - 4] ALU[-D&Q] DEST[Q] SHORT $
+		;NOT REALLY SUPPOSED TO BE ON, CLEAR IT.
+HFJSR1:	D[12] SPEC[A-MEM-APR] ROT[4] COND[-OBUS<0] C550 JUMP[HFJSR2] $
+		;JUMP IF FAKE OVERFLOW BIT IS OFF. ELSE
+	D[CONST 1] ROT[35. - 0] ALU[DORQ] DEST[Q] NORM $
+		;SET IT IN PC.
+HFJSR2:	ALU[Q] DEST[MEMSTO] COND[MA-AC] JUMP[JSR2] NORM $
+	D[MA] ALU[D+1] DEST[MA PC] MAPF[STO] SPEC[CLR-HALF] JUMP[MAIN1] CYLEN[MEMSTO] $
+
+];.REPEAT KL
+
+	.OPCODE[265]	;JSP
+.REPEAT 1 - KL [
+	D[PC] ACSEL[AC] DEST[AC] NORM $
+		;Store PC (and flags) in AC
+];.REPEAT 1 - KL
+.REPEAT KL [
+	D[PC] ACSEL[AC] DEST[AC] COND[-HALF] LBJUMP[JSP0] NORM $
+		;For KL, need to check fake overflow bit.
+];.REPEAT KL
+JSP1:	D[MA] DEST[PC] JUMP[MAIN1] SPEC[CLR-HALF] NORM $
+		;Jump to effective address
+		;Make sure some nurd hasn't left the BIS flag on. (*** i assume
+		;  that's what going on here.  TVR-Apr80)
+.REPEAT KL [
+	.USE[NORMAL]
+	.PAIR
+JSP0:	D[12] SPEC[A-MEM-APR] ROT[3] COND[-OBUS<0] JUMP[HFJSP] C550 $
+		;JUMP IF FPD NOT ON IN AMEM, ELSE FALL INTO NORMAL CASE
+JSP2:	D[12] SPEC[A-MEM-APR] ROT[4] COND[-OBUS<0] C550 JUMP[JSP1] $
+		;Jump if fake overflow not on.
+	D[CONST 1] ROT[35. - 0] ACSEL[AC] ALU[DORAC] DEST[AC] JUMP[JSP1] NORM $
+		;fake overflow bit on, turn it on in PC.
+		;STORE PC AND FLAGS IN AC, JUMP IF NEED TO SEE IF FPD IS CORRECT
+HFJSP:	D[CONST 1] ROT[35. - 4.] ACSEL[AC] ALU[-D&AC] DEST[AC] JUMP[JSP2] SHORT $
+		;TURN OFF FPD IN PC AND COMPLETE THE INSTRUCTION.
+	
+];.REPEAT KL
+
+	.OPCODE[266]	;JSA
+	FIXM2 $
+	D[PC] MASK[18.] DEST[O_AC AR] ACSEL[AC] JUMP[JSA1] NORM $
+		;Copy PC into left half of AC and save old contents of AC in AR
+		; DID SAVE A CYCLE WITH O_AC ****
+		;*$*$* (Finish instruction elsewhere)
+
+	.OPCODE[267]	;JRA
+	ACSEL[AC] ALU[AC] DEST[AR] NORM  $
+		;Save the return address in AR
+	D[AR] ROT[18.] MASK[18.] DEST[MA] JUMP[JRA1] NORM $
+		;Begin read of location containing what's to be restored into
+		;the AC (to invert a JSA)
+		;*$*$* (Finish instruction elsewhere)
+
+
+
+
+
+;------------------------------------------------------------------------------
+;
+;	Integer Add and Subtract
+;
+;------------------------------------------------------------------------------
+
+;These two macros make xxx,xxxI,xxxM,xxxB for instructions which map into a
+;single 2901 instruction involving AC and MEM.  OP is thing to put in the 
+;ALU field to do this 2901 instruction.
+;
+;ADOP and LOGOP differ only in that ADOP sets flags, and can get integer
+;overflow
+;
+.DEFINE ADOP [OP]
+BEGIN ADOP
+	FIXM1 $
+	ACSEL[AC] D[MEM] ALU[ OP ] DEST[AC MA] SPEC[CRYOV&MA_PC] JUMP[MAIN1] CYLEN[FIXM+1] $
+
+	ACSEL[AC] D[IR] MASK[18.] ALU[ OP ] DEST[AC MA] SPEC[CRYOV&MA_PC] JUMP[MAIN1] NORM $
+	NOP $
+
+	FIXM2 $
+	ACSEL[AC] D[MEM] ALU[ OP ] DEST[MEMSTO]
+	  SPEC[CRYOV] MEMST $
+
+	FIXM2 $
+	ACSEL[AC] D[MEM] ALU[ OP ] DEST[MEMSTO AC]
+	  SPEC[CRYOV] MEMST $
+END ADOP
+
+.DEFINE LOGOP [OP]
+BEGIN LOGOP
+	FIXM1 $
+	ACSEL[AC] D[MEM] ALU[ OP ] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] CYLEN[FIXM+1] $
+
+	ACSEL[AC] D[IR] MASK[18.] ALU[ OP ] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+	NOP $
+
+	FIXM2 $
+	ACSEL[AC] D[MEM] ALU[ OP ] DEST[MEMSTO]
+	 MEMST $
+
+	FIXM2 $
+	ACSEL[AC] D[MEM] ALU[ OP ] DEST[MEMSTO AC]
+	  MEMST $
+END LOGOP
+
+	.OPCODE[270]	;Opcodes 270-273: ADD,ADDI,ADDM,ADDB
+	ADOP[D+AC]
+		;Macro defines four instructions.  See above
+
+	.OPCODE[274]	;Opcodes 274-277: SUB,SUBI,SUBM,SUBB
+	ADOP[AC-D]
+		;Macro defines four instructions.  See above
+
+;------------------------------------------------------------------------------
+;
+;	Conditional Instructions
+;
+;	Instruction dispatch sends each group of eight instructions to one 
+;	place.  The condition JCOND looks at the IR to decide whether the
+;	condition specified by the low order three bits of the opcode has
+;	been satisfied.
+;
+;------------------------------------------------------------------------------
+
+;Compare AC to effective address
+	.OPCODE[300]	;CAI
+	D[IR] MASK[18.] ACSEL[AC] ALU[AC-D] COND[-JCOND] JUMP[MAIN] C600 $
+	DOSKIP $
+
+AREA260:	;Recover space from hole in instruction dispatch
+
+;Compare AC to memory
+	.OPCODE[310]	;CAM
+	FIXM1 $
+	D[MEM] ACSEL[AC] ALU[AC-D] COND[-JCOND] JUMP[MAIN] C600 $
+DOSKP1:	DOSKIP $
+
+AREA262:	;Recover space from hole in instruction dispatch
+
+;Jump on AC [compared with zero]
+	.OPCODE[320]	;JUMP
+	D[CONST 0] ACSEL[AC] ALU[AC+D] COND[-JCOND] JUMP[MAIN] C600 $
+	DOJUMP $
+
+AREA264:	;Recover space from hole in instruction dispatch
+
+;Skip on memory [compared with zero]
+	.OPCODE[330]	;SKIP
+	FIXM1 COND[AC=0] JUMP[SKIPX1] $
+		;Jump if AC not loaded as side effect
+	D[MEM] ALU[D-0] ACSEL[AC] DEST[AC] COND[-JCOND] JUMP[MAIN] C600 $
+		;AC field (in IR) is zero.  Just skip on appropriate condition
+	DOSKIP $
+SKIPX1:	D[MEM] ALU[D-0] COND[-JCOND] JUMP[MAIN] C600 $
+		;Load memory into AC as well as skipping on appropriate
+		;condition
+	DOSKIP $
+
+AREA266:	;Recover space from hole in instruction dispatch
+
+;Add One to AC and jump [on AC compared with zero]
+	.OPCODE[340]	;AOJ
+	ACSEL[AC] ALU[AC+1] DEST[AC] SPEC[CRYOV] COND[-JCOND] JUMP[MAIN] C600 $
+	DOJUMP $
+
+AREA270:	;Recover space from hole in instruction dispatch
+
+;Add One to Memory and skip [on memory compared to zero]
+	.OPCODE[350]	;AOS
+	FIXM2 COND[AC=0] JUMP[ASOS1]  $
+		;Finish fetch part of read-modify-write
+		;Jump if AC is not loaded as a side effect.
+	D[MEM] ALU[D+1] ACSEL[AC] DEST[AC MEMSTO] SPEC[CRYOV]
+			COND[JCOND] LBJUMP[ASOS2] C600 $
+		;(AC field (in IR) is non-zero.  Load AC as side effect.)
+		;Increment memory and store result in AC.
+		;Set flags (set overflow if memory was 377777,,777777)
+		;Decide where or not to skip before checking for store to AC
+	.PAIR
+ASOS2:	MEMST $
+		;Do not skip.  Finish store (checking for store to AC)
+	D[PC] ALU[D+1] DEST[PC] MEMST $
+		;Do skip.  Finish store.
+;	---
+ASOS1:	D[MEM] ALU[D+1] DEST[MEMSTO] SPEC[CRYOV]
+			COND[JCOND] LBJUMP[ASOS2] C600 $
+		;Simply increment memory location.  Otherwise, same as above.
+
+AREA272 = .	;Recover space from hole in instruction dispatch
+
+;Subtract One from AC and jump [on AC compared with zero]
+	.OPCODE[360]	;SOJ
+	ACSEL[AC] ALU[AC-1] DEST[AC] SPEC[CRYOV] COND[-JCOND] JUMP[MAIN] C600 $
+	DOJUMP $
+
+AREA274:	;Recover space from hole in instruction dispatch
+
+;Subtract One from Memory and skip [on memory compared to zero]
+	.OPCODE[370]	;SOS
+	FIXM2 COND[AC=0] JUMP[ASOS3] $
+		;Finish fetch part of read-modify-write
+		;Jump if AC is not loaded as a side effect.
+	D[MEM] ALU[D-1] ACSEL[AC] DEST[AC MEMSTO] SPEC[CRYOV]
+			COND[JCOND] LBJUMP[ASOS2] C600 $
+		;(AC field (in IR) is non-zero.  Load AC as side effect.)
+		;Decrement memory and store result in AC.
+		;Set flags (set overflow if memory was 400000,,0)
+		;Decide where or not to skip before checking for store to AC
+ASOS3:	D[MEM] ALU[D-1] DEST[MEMSTO] SPEC[CRYOV]
+			COND[JCOND] LBJUMP[ASOS2] C600 $
+		;Simply decrement memory location.  Otherwise, same as above.
+
+AREA276 = .	;Recover space from hole in instruction dispatch
+
+
+
+
+;------------------------------------------------------------------------------
+;
+;	Boolean Instructions
+;
+;------------------------------------------------------------------------------
+
+.DEFINE CLRAC [] [ ALU[0] ACSEL[AC] DEST[AC] NORM ]
+
+	.OPCODE[400]	;SETZ
+	CLRAC   JUMP[MAIN] $
+
+	.OPCODE[401]	;SETZI
+	CLRAC   JUMP[MAIN] $
+
+	.OPCODE[402]	;SETZM
+	  ALU[0] DEST[MEMSTO] MEMST $
+
+	.OPCODE[403]	;SETZB
+	  ALU[0] DEST[MEMSTO AC] MEMST $
+
+	.OPCODE[404]	;AND,ANDI,ANDM,ANDB
+		;Generates code for four instructions.  See ADD (ADOP)  
+	LOGOP[D&AC]
+
+	.OPCODE[410]	;ANDCA
+	FIXM1 $
+	ACSEL[AC] ALU[NOTAC] DEST[Q] JUMP[ANDCA1] CYLEN[FIXM+1] $
+
+	.OPCODE[411]	;ANDCAI
+	ALU[NOTAC] DEST[Q] ACSEL[AC] NORM $
+	D[IR] MASK[18.] ACSEL[AC] ALU[D&Q] DEST[AC MA] SPEC[MA_PC]
+			JUMP[MAIN1] NORM $
+
+	.OPCODE[412]	;ANDCAM
+	FIXM2 $
+	ACSEL[AC] ALU[NOTAC] DEST[Q] JUMP[ANDCA2] CYLEN[FIXM+1] $
+
+	.OPCODE[413]	;ANDCAB
+	FIXM2 $
+	ACSEL[AC] ALU[NOTAC] DEST[Q] JUMP[ANDCA3] CYLEN[FIXM+1] $
+
+	.OPCODE[414]	;SETM,SETMI,SETMM,SETMB
+SETM:	LOGOP[ D ]
+
+	.OPCODE[420]	;ANDCM,ANDCMI,ANDCMM,ANDCMB
+	LOGOP[-D&AC]
+
+	.OPCODE[424]	;SETA,SETAI,SETAM,SETAB
+	LOGOP[ AC ] $
+
+	.OPCODE[430]	;XOR,XORI,XORM,XORB
+	LOGOP[AC#D]
+
+	.OPCODE[434]	;IOR,IORI,IORM,IORB
+	LOGOP[DORAC]
+
+	.OPCODE[440]	;ANDCB
+	FIXM1 $
+	ACSEL[AC] ALU[DORAC] DEST[Q] D[MEM] JUMP[ACBI1] CYLEN[FIXM+1] $
+
+	.OPCODE[441]	;ANDCBI
+	  ACSEL[AC] D[IR] MASK[18.] ALU[DORAC] DEST[Q] NORM $
+ACBI1:	ACSEL[AC] ALU[NOTQ] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+
+	.OPCODE[442]	;ANDCBM
+	FIXM2 $
+	ACSEL[AC] ALU[DORAC] D[MEM] DEST[Q] JUMP[LOG2] CYLEN[FIXM+1] $
+
+	.OPCODE[443]	;ANDCBB
+	FIXM2 $
+	ACSEL[AC] ALU[DORAC] D[MEM] DEST[Q] JUMP[LOG3] CYLEN[FIXM+1] $
+
+	.OPCODE[444]	;EQV,EQVI,EQVM,EQVB
+	LOGOP[AC/#D]
+
+	.OPCODE[450]	;SETCA,SETCAI,SETCAM,SETCAB
+	LOGOP[NOTAC]
+
+	.OPCODE[454]	;ORCA
+	FIXM1 $
+	ACSEL[AC] D[MEM] ALU[-D&AC] DEST[Q] JUMP[OCAI1] CYLEN[FIXM+1] $
+
+	.OPCODE[455]	;ORCAI
+	  ACSEL[AC] D[IR] MASK[18.] ALU[-D&AC] DEST[Q] NORM $
+OCAI1:	ACSEL[AC] ALU[NOTQ] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+
+	.OPCODE[456]	;ORCAM
+	FIXM2 $
+	ACSEL[AC] ALU[-D&AC] D[MEM] DEST[Q] JUMP[LOG2] CYLEN[FIXM+1] $
+
+	.OPCODE[457]	;ORCAB
+	FIXM2 $
+	ACSEL[AC] ALU[-D&AC] D[MEM] DEST[Q] JUMP[LOG3] CYLEN[FIXM+1] $
+
+	.OPCODE[460]	;SETCM,SETCMI,SETCMM,SETCMB
+	LOGOP[NOTD]
+
+	.OPCODE[464]	;ORCM,ORCMI,ORCMM,ORCMB
+	FIXM1 $
+	D[MEM] ALU[NOTD] DEST[Q] JUMP[OCMI1] CYLEN[FIXM+1] $
+
+	.OPCODE[465]	;ORCMI
+	  D[IR] MASK[18.] ALU[NOTD] DEST[Q] NORM $
+OCMI1:	ACSEL[AC] ALU[QORAC] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+
+	.OPCODE[466]	;ORCMM
+	FIXM2 $
+	D[MEM] ALU[NOTD] DEST[Q] JUMP[ORCM2] CYLEN[FIXM+1] $
+
+	.OPCODE[467]	;ORCMB
+	FIXM2 $
+	D[MEM] ALU[NOTD] DEST[Q] JUMP[ORCM3] CYLEN[FIXM+1] $
+
+	.OPCODE[470]	;ORCB
+	FIXM1 $
+	ACSEL[AC] D[MEM] ALU[D&AC] DEST[Q] JUMP[OCBI1] CYLEN[FIXM+1] $
+
+	.OPCODE[471]	;ORCBI
+	  ACSEL[AC] D[IR] MASK[18.] ALU[D&AC] DEST[Q] NORM $
+OCBI1:	ACSEL[AC] ALU[NOTQ] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+
+	.OPCODE[472]	;ORCBM
+	FIXM2 $
+	ACSEL[AC] ALU[D&AC] D[MEM] DEST[Q] JUMP[LOG2] CYLEN[FIXM+1] $
+
+	.OPCODE[473]	;ORCBB
+	FIXM2 $
+	ACSEL[AC] ALU[D&AC] D[MEM] DEST[Q] JUMP[LOG3] CYLEN[FIXM+1] $
+
+	.OPCODE[474]	;SETO
+	ACSEL[AC] ALU[-1] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+
+	.OPCODE[475]	;SETOI
+	ACSEL[AC] ALU[-1] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+
+	.OPCODE[476]	;SETOM
+	ALU[-1] DEST[MEMSTO] MEMST     $
+
+	.OPCODE[477]	;SETOB
+	ALU[-1] ACSEL[AC] DEST[MEMSTO AC] MEMST $
+	NOP $
+
+
+
+
+;------------------------------------------------------------------------------
+;
+;	Half Word Instructions
+;
+;------------------------------------------------------------------------------
+
+.DEFINE MH1 [ RR MM SS RR2 D1 OP1 JJ CYL1 D2 SS1  ]
+[	FIXM1 $
+	D[MEM] ROT[ RR ] MASK[ MM ] SPEC[ SS ] ACSEL[AC] DEST[AC MA] JUMP[MAIN1] CYLEN[FIXM+1] $
+	D[MA] ROT[RR] MASK[ MM ] SPEC[ SS ] ACSEL[AC] DEST[AC MA] JUMP[MAIN1] NORM $
+	NOP $
+	D[MASK 22] ROT[ RR2 ] ACSEL[AC] ALU[D&AC] DEST[ D1 ] COND[-MA-AC] OP1 [ JJ ]  CYLEN[ CYL1 ] $
+	D[AR] ROT[18.] DEST[MEMSTO] MEMST $
+	ACSEL[MA] ALU[AC] COND[MA-AC] JUMP[ D2 ] DEST[FIXMAC-MAPF-WRT] MAPF[3] CYLEN[FIXM] $
+	D[MEM] ROT[ RR ] MASK[ MM ] SPEC[ SS1 ] DEST[MEMSTO] COND[-AC=0] LBJUMP[HSMN1] CYLEN[FIXM+1] $
+]
+
+.DEFINE MH2 [ RR MM SS CC OP DST RR2 DST2 CC2 OP2 JJ CYL2 RR3 DST3 CC4 ]
+[	FIXM1 $
+	D[MEM] ROT[ RR ] MASK[ MM ] SPEC[ SS ] ACSEL[AC] DEST[AC AR] COND[ CC ] OP [ DST ] CYLEN[FIXM+1] $
+	D[MA] ROT[ RR ] MASK[ MM ] SPEC[ SS ] ACSEL[AC] DEST[AC AR] COND[ CC ] OP [ DST ] NORM $
+	NOP $
+	D[MASK 22] ROT[ RR2 ] ACSEL[AC] ALU[DORAC] DEST[Q DST2 ] COND[ CC2 ] OP2[JJ] CYLEN[ CYL2 ] $
+	D[AR] ROT[RR3] DEST[MEMSTO] MEMST $
+	FIXM2 $
+	D[MEM] ROT[ RR ] DEST[Q AR] COND[ CC4 ] LBJUMP[ DST3] CYLEN[FIXM+1] $
+]
+
+.DEFINE MH3 [ RR MM SS JDST RR2 JDST2 DST OP1 JJ ]
+[	FIXM1 $
+	D[MEM] ROT[ RR ] MASK[ MM ] SPEC[ SS ] ACSEL[AC] DEST[O_AC AR] JUMP[ JDST ] CYLEN[FIXM+1] $
+	D[MA] ROT[ RR ] MASK[ MM ] SPEC[ SS ] ACSEL[AC] DEST[O_AC AR] JUMP[ JDST ] NORM $
+	NOP $
+	FIXM2 $
+	D[MASK 22] ROT[ RR2 ] ACSEL[AC] ALU[D&AC] DEST[Q AR] JUMP[ JDST2 ] CYLEN[FIXM+1] $
+	ACSEL[MA] ALU[AC] DEST[ DST ] MAPF[3] COND[-AC=0] OP1[JJ] CYLEN[FIXM] $
+	D[MEM] ROT[ RR ] MASK[ MM ] SPEC[ SS ] DEST[Q AR] COND[-AC=0] LBJUMP[HHS] CYLEN[FIXM+1] $
+]
+
+	.OPCODE[500]	;HLL,HLLI,HLLM,HLLS
+	MH3[ 0 0 LEFT HRAR 22 HLLM1 0 LBJUMP HMV ]
+;HRL
+	MH3[ 22 0 LEFT HRAR 0 HRLM1 FIXMAC-MAPF-WRT CONTA 0]
+;HLLZ
+	MH1[0 0 LEFT&MA_PC 22 MEMSTO LBJUMP MSMAIN NORM HLLZS1 LEFT]
+;HRLZ
+	MH1[22 0 LEFT&MA_PC 0 AR CONTA 0 NORM HRLZS1 LEFT]
+;HLLO
+	MH2[0 44 0 0 JUMP HOR 0 MEMSTO -MA-AC LBJUMP MSMAIN NORM 0 HLLOS1 -AC=0]
+;HRLO
+	MH2[22 44 0 0 JUMP HOR 22 AR 0 CONTA 0 NORM 22 HLLOS1 -AC=0]
+;HLLE
+	MH2[0 0 LEFT OBUS<0 LBJUMP HLSZ 0 AR -OBUS<0 JUMP HLLEM1 C550 0 HLLES1 OBUS<0 ]
+;HRLE
+	MH2[22 0 LEFT OBUS<0 LBJUMP HLSZ 22 AR -OBUS18 JUMP HRLEM1 C550 22 HLLES1 OBUS<0 ]
+;HRR
+	MH3[0 22 0 HLAR 0 HRRM1 0 LBJUMP HMV ]
+;HLR
+	MH3[22 22 0 HLAR 22 HLRM1 FIXMAC-MAPF-WRT CONTA 0]
+;HRRZ
+	MH1[0 22 MA_PC 0 MEMSTO LBJUMP MSMAIN NORM HRRZS1 0]
+;HLRZ
+	MH1[22 22 MA_PC 22 AR CONTA 0 NORM HLRZS1 0]
+;HRRO
+	MH2[0 44 0 0 JUMP HOL 22 MEMSTO -MA-AC LBJUMP MSMAIN NORM 0 HRROS1 -AC=0]
+;HLRO
+	MH2[22 44 0 0 JUMP HOL 0 AR 0 CONTA 0 NORM 22 HRROS1 -AC=0]
+;HRRE
+	MH2[0 22 0 OBUS18 LBJUMP HRSZ 22 AR -OBUS18 JUMP HRREM1 C550 0 HRRES1 OBUS18]
+;HLRE
+	MH2[22 22 0 OBUS18 LBJUMP HRSZ 0 AR -OBUS<0 JUMP HLREM1 C550 22 HRRES1 OBUS18]
+
+
+
+
+
+;------------------------------------------------------------------------------
+;
+;	Bit Test Instructions
+;
+;  Caution:	Instruction dispatch for these instructions is peculiar.
+;
+;------------------------------------------------------------------------------
+
+	.OPCODE[600]	;TRN GROUP
+	  D[IR] MASK[18.] ACSEL[AC] ALU[D&AC]
+	    SPEC[MA_PC] DEST[MA] COND[-JCOND] JUMP[MAIN1] C550 $
+	DOSKIP $
+
+	.OPCODE[601]	;TLN GROUP
+	  D[IR] ROT[18.] ACSEL[AC] ALU[D&AC]
+	    SPEC[LEFT&MA_PC] DEST[MA] COND[-JCOND] JUMP[MAIN1] C550 $
+	DOSKIP $
+
+   .DEFINE T2GRP [OP RR MM SS]
+[	ACSEL[AC] D[IR] ROT[RR] MASK[MM] SPEC[SS] ALU[OP] DEST[AC] NORM $
+	DOSKIP $
+]
+
+;Following code is NOT dispatched to, it is JUMPed to.
+TRZ1:	T2GRP [-D&AC 0 22 0 ]
+TLZ1:	T2GRP [-D&AC 22 0 LEFT]
+TRO1:	T2GRP [DORAC 0 22 0]
+TLO1:	T2GRP [DORAC 22 0 LEFT]
+TRC1:	T2GRP [D#AC 0 22 0]
+TLC1:	T2GRP [D#AC 22 0 LEFT]
+
+;(No space left before dispatch entry)
+
+	.OPCODE[610]	;TDN GROUP
+	FIXM1 $
+	D[MEM] ACSEL[AC] ALU[D&AC] COND[JCOND] LBJUMP[SKMAIN] C600 $
+	.OPCODE[611]	;TSN GROUP
+	FIXM1 $
+	D[MEM] ACSEL[AC] ROT[18.] ALU[D&AC] COND[JCOND] LBJUMP[SKMAIN] C600 $
+
+;(Following is not dispatched to.  It probably belongs with MSMAIN, etc.)
+	.PAIR
+SKMAIN:	SPEC[MA_PC] DEST[MA] JUMP[MAIN1] NORM $
+	DOSKIP $
+
+AREA342:	;Recover space from hole in instruction dispatch
+
+  .DEFINE T1GRP [OP RR MM SS1 SS2 D1]
+[	ACSEL[AC] D[IR] ROT[RR] MASK[MM] SPEC[SS1] ALU[D&AC] COND[JCOND] JUMP[D1] C550 $
+	ACSEL[AC] D[IR] ROT[RR] MASK[MM] SPEC[SS2] ALU[OP] DEST[AC MA] JUMP[MAIN1] NORM $
+]
+	.OPCODE[620]	;TRZ GROUP
+	T1GRP [-D&AC 0 22 0 MA_PC TRZ1]
+
+	.OPCODE[621]	;TLZ GROUP
+	T1GRP [-D&AC 22 0 LEFT LEFT&MA_PC TLZ1]
+
+AREA344:	;Recover space from hole in instruction dispatch
+
+	.OPCODE[630]	;TDZ
+	FIXM1 $
+	ALU[AC] ACSEL[AC] DEST[Q] JUMP[TDZ1] NORM $
+
+	.OPCODE[631]	;TSZ
+	FIXM1 $
+	ALU[AC] ACSEL[AC] DEST[Q] NORM $
+;	\ /
+;Following is not in instruction dispatch
+	ACSEL[AC] D[MEM] ROT[18.] ALU[-D&AC] DEST[AC] SHORT $
+TSZ2:	D[MEM] ROT[18.] ALU[D&Q] COND[JCOND] LBJUMP[SKMAIN] C600 $
+TDZ1:	ACSEL[AC] D[MEM] ALU[-D&AC] DEST[AC] SHORT $
+TDZ2:	D[MEM] ALU[D&Q] COND[JCOND] LBJUMP[SKMAIN] C600 $
+
+AREA346:	;Recover space from hole in instruction dispatch
+
+	.OPCODE[640]	;TRC GROUP
+	T1GRP [D#AC 0 22 0 MA_PC TRC1]
+
+	.OPCODE[641]	;TLC GROUP
+	T1GRP [D#AC 22 0 LEFT LEFT&MA_PC TLC1]
+
+AREA350:	;Recover space from hole in instruction dispatch
+
+	.OPCODE[650]	;TDC
+	FIXM1 $
+	ALU[AC] ACSEL[AC] DEST[Q] JUMP[TDC1] NORM $
+
+	.OPCODE[651]	;TSC
+	FIXM1 $
+	ALU[AC] ACSEL[AC] DEST[Q] NORM $
+	ACSEL[AC] D[MEM] ROT[18.] ALU[AC#D] DEST[AC] JUMP[TSZ2] NORM $
+TDC1:	ACSEL[AC] D[MEM] ALU[AC#D] DEST[AC] JUMP[TDZ2] NORM $
+
+AREA352:	;Recover space from hole in instruction dispatch
+
+	.OPCODE[660]	;TRO GROUP
+	T1GRP [DORAC 0 22 0 MA_PC TRO1]
+
+	.OPCODE[661]	;TLO GROUP
+	T1GRP [DORAC 22 0 LEFT LEFT&MA_PC TLO1]
+
+AREA354:	;Recover space from hole in instruction dispatch
+
+	.OPCODE[670]	;TDO GROUP
+	FIXM1 $
+	ALU[AC] ACSEL[AC] DEST[Q] JUMP[TDO1] NORM $
+
+	.OPCODE[671]	;TSO GROUP
+	FIXM1 $
+	ALU[AC] ACSEL[AC] DEST[Q] NORM $
+	ACSEL[AC] D[MEM] ROT[18.] ALU[DORAC] DEST[AC] JUMP[TSZ2] NORM $
+TDO1:	ACSEL[AC] D[MEM] ALU[DORAC] DEST[AC] JUMP[TDZ2] NORM $
+
+AREA356:	;Recover space from hole in instruction dispatch
+
+
+
+
+; IOT GROUP -- FOR NOW
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;									;;;;
+;;;;	CAUTION: Hardware currently does not check for User when doing	;;;;
+;;;;	IOTs.  Most, but not all, now check it in micro code.  The	;;;;
+;;;;	instruction dispatch hardware is probably the right place to	;;;;
+;;;;	check for this, but try to convince Poole of that...		;;;;
+;;;;									;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+.repeat 0[
+.DEFINE IOTDIS [ WHERE ]
+[	D[IR] ROT[15] MASK[4] DEST[Q] NORM $
+	D[IR] ROT[15] MASK[4] ALU[D+Q] DEST[Q] SHORT $
+	D[CONST WHERE] ROT[6] ALU[DORQ] SDISP CYLEN[C500] $
+]
+];repeat 0
+
+.DEFINE IOTDIS [ WHERE ]
+[	D[IR] ROT[16] MASK[5] DEST[Q] NORM $
+	D[CONST WHERE] ROT[6] ALU[DORQ] SDISP CYLEN[C500] $
+];.DEFINE IOTDIS
+	;Bit 14 is guaranteed zero by instruction decode process and therefore
+	;doubling can be obtained by extraction.   TVR-Apr80
+
+	.OPCODE[700]	;APR & PI
+	MAPF[2] D[CONST 6] DEST[DEV-ADR] COND[-USER] LBJUMP[APIOT] NORM $
+	NOP $
+
+.REPEAT 1 - KL [
+	.OPCODE[701]
+	ILGIOT $
+	NOP $
+
+	.OPCODE[702]	;UNUSED & MAP
+	MAPF[2] D[CONST 1] DEST[DEV-ADR] NORM $
+	D[IR] ROT[15] MASK[4] DEST[Q] COND[-USER] LBJUMP[MAPIOT] NORM $
+];.REPEAT 1 - KL
+.REPEAT KL [
+	.OPCODE[701]	;UNUSED & MAP
+	MAPF[2] D[CONST 1] DEST[DEV-ADR] NORM $
+	D[IR] ROT[15] MASK[4] DEST[Q] COND[-USER] LBJUMP[MAPIOT] NORM $
+
+	.OPCODE[702]
+	ILGIOT $
+	NOP $
+];.REPEAT KL
+
+.REPEAT 7 [ILGIOT $
+	NOP $
+	 ]
+
+	.OPCODE[712]	;CTY & LPT
+	MAPF[2] D[CONST 4] DEST[DEV-ADR] NORM COND[-USER] LBJUMP[CTYIOT] $
+	NOP $
+
+	ILGIOT $
+	 NOP $
+	ILGIOT $
+	 NOP $
+
+;DISK CTRL IOTS-- 140 - 174
+
+	.OPCODE[715]	;DISK CTRL IOTS-- OPCODES 715 TO 724
+	D[CONST 10] DEST[DEV-ADR] SPEC[IOB-IN] COND[USER] JUMP[UDSKST] $
+	 MAPF[0] D[IOD] DEST[MEMSTO] 
+		COND[-MA-AC] LBJUMP[SMAIN] $
+	D[CONST 10] DEST[DEV-ADR] SPEC[IOB-IN] COND[USER] JUMP[UDSKST] $
+	 MAPF[1] D[IOD] DEST[MEMSTO] 
+		COND[-MA-AC] LBJUMP[SMAIN] $
+	D[CONST 10] DEST[DEV-ADR] SPEC[IOB-IN] COND[USER] JUMP[UDSKST] $
+	 MAPF[2] D[IOD] DEST[MEMSTO] 
+		COND[-MA-AC] LBJUMP[SMAIN] $
+	D[CONST 10] DEST[DEV-ADR] SPEC[IOB-IN] COND[USER] JUMP[UDSKST] $
+	 MAPF[3] D[IOD] DEST[MEMSTO] 
+		COND[-MA-AC] LBJUMP[SMAIN] $
+	FIXML PUSHJ[SET-DSK-OUT] $ ;ld cmd -- opcode 721
+	 MAPF[4] d[ar] DEST[2]  DEST-A-MEM JUMP[MAIN] $
+	FIXML PUSHJ[SET-DSK-OUT] $
+	 MAPF[5] DEST[MA]  SPEC[MA_PC] 	JUMP[MAIN1] $
+	FIXML PUSHJ[SET-DSK-OUT] $
+	 MAPF[6] DEST[MA]  SPEC[MA_PC] 	JUMP[MAIN1] $
+	FIXML PUSHJ[SET-DSK-OUT] $
+	 MAPF[7] DEST[MA]  SPEC[MA_PC] 	JUMP[MAIN1] $
+	
+;TAPE IOTS - OPCODES 725 - 736 --Dispatch entries on page headed ";TAPE DISP"
+
+
+	.OPCODE[737]	;DLS iot's (DLS is device 370)
+ .REPEAT 1 - DLS [ 	;If DLS present, this entry is part of DLS code.
+	D[IR] ROT[12.] C550 COND[OBUS<0] JUMP[MAIN] $
+	  ;If it can't be a CONSZ, do nothing.
+	D[PC] ALU[D+1] DEST[PC] NORM JUMP[MAIN] $
+	  ;If it could be a CONSZ, assume it is and perform a skip.
+  ] ;1 - DLS
+
+   ;skip space for disk cono,coni, etc. OPS 740 - 743
+   ;locs 3700 to 3707
+	  ; these dispatch entries are on dsk page.
+
+	.OPCODE[744]	;Tymnet opcodes (or undefined)
+ .repeat 1 - Tymnet [
+	.repeat 4 [ ilgiot $  nop $  ;if no tymnet, 744-747 = nop
+		   ]
+		   ]
+
+.repeat tymnet [
+   ;skip space for TYMNET IOTS.  OPS 744 - 747
+	  ; these dispatch entries are on TYMNET page.
+    ]
+
+	.OPCODE[750]	 ;READ ECC INFO
+	D[11] A-MEM-APR DEST[MEMSTO] MEMST $
+	 ;Get info on last ECC error from A-MEM(1), store in eff. adr.
+	NOP $
+
+	.OPCODE[751]	;Undefined
+	ILGIOT $
+	NOP $
+
+	.OPCODE[752]	;
+.REPEAT 1 - VC [
+	ILGIOT $
+	NOP $
+];.REPEAT 1 - VC
+.REPEAT VC [		;Versatec
+	D[CONST VCDEV] DEST[DEV-ADR] NORM COND[-USER] LBJUMP[VCIOT] $
+		;Set micro device address for Versatec and check for
+		;IOT-User mode
+	NOP $
+];.REPEAT VC
+
+	.OPCODE[753]	;Undefined
+	ILGIOT $
+	NOP $
+
+	.OPCODE[754]	;Undefined
+	ILGIOT $
+	NOP $
+
+	.OPCODE[755]	;IMP (BBN), device code 550
+.REPEAT 1 - IMP [ILGIOT $
+	NOP $
+];1 - IMP
+
+.REPEAT IMP [	;Reserve space for the IMP IOT dispatch instructions
+IMP-IOT:
+];IMP
+
+	.OPCODE[756]	;Undefined
+.REPEAT (757 - 756 + 1) [ILGIOT $
+	NOP $
+ ]
+
+TIMER-IOTS:
+  
+	.OPCODE[760]	;760:765
+.REPEAT 0 * (1 - TIMER) * (765 - 760 + 1) [ILGIOT $
+	NOP $
+ ]
+;;; : TIMER-IOTS + 12.	;LEAVE SPACE FOR OPCODES 760-765
+;*** This is an unreasonably large waste of opcode space.  It should dispatch
+;*** on the AC field at least if normal PDP-10 I/O opcodes aren't suitable.
+;*** Furthermore, this kind of opcode has no chance of being properly
+;*** disassembled by DDT.					TVR-Apr80
+
+	.OPCODE[774]
+.REPEAT STANSW [			;OP 774
+	D[CONST GRN-UDEV] DEST[DEV-ADR] NORM COND[-USER] LBJUMP[GRNIOT] $
+		;Set micro device address for Grinnell and check for
+		;IOT-User mode
+	NOP $
+]
+.REPEAT 1 - STANSW [CURRENTLY-UNUSED[1]  JUMP[MAIN] $
+
+	NOP $
+]
+
+	.OPCODE[775]
+
+ .REPEAT 0 [
+	
+;CAM -- A COPY OF CAM WHICH HALTS IF IT DOESN'T SKIP.  WOW !
+	FIXM1 $
+	D[MEM] ACSEL[AC] ALU[AC-D] COND[JCOND] JUMP[DOSKP1] C600 $
+	D[MEM] CURRENTLY-UNUSED[1] JUMP[.] $
+
+;;DSKWT  -- DELAY UNTIL DISK NOT BUSY
+;	JUMP[DSKWT1] $		;OPCODE 775
+;	NOP $
+;	NOP $
+;	NOP $
+
+]
+	UAOP1
+	NOP $
+	UAOP1
+	NOP $
+		;OPCODES 775 AND 776 TRAP NOW - DON'T ALLOW USERS TO HANG MICROCODE
+.REPEAT 0 [ ILGIOT $
+			NOP $
+
+			ILGIOT $
+			NOP $  ]
+
+	.OPCODE[777]	;OPCODE 777 --- MAKE IT A UUO
+;;;	JUMP[MUUO] $
+	UAOP1 $		;Illegal instruction rather than an IOT.  It's an
+			;easy thing to stumble upon in buggy programs (or
+			;hardware), being it is most common negative integers
+
+
+
+
+
+;MSTART MSTRT1 BADPC ILDB1 ILDB2 IDPB1 IDPB2 ILDB3 LDB1 LDB5 LDB2 LDB4 DPB1 DPB5 DPB7 IDPB3 DPB2 DPB4 BIIH1 BIIH BII IBP1 IBT1
+;NON DISPATCH STUFF HERE
+
+	.ORG[RESTART-ORG]
+; INIT THINGS -- INITIALIZE MACHINE, POWER-UP COMES HERE.
+
+MSTART:
+JUMP[MSTRT1] $	;to help operator start from switches (KEEP THIS SIMPLE -- MLB)
+
+	.USE[NORMAL]
+MSTRT1:
+
+;******* This code to be made a subroutine to allow machine resetting *******
+;******* to be done by auto-loading and via CONO APR,20000  TVR-Mar80 *******
+
+.REPEAT 1 - CROCK [	;$*$*$ This crock will shortly vanish!
+;Set up vectors for unused devices 9JAN80 BO (23JAN MLB/TVR)
+;This code fills the zeroth location of all the AMEM blocks with a vector to
+;the address SPURIOUS-INTERRUPT, which should contain the handler for them.
+
+	.ORG[SPURIOUS-INTERRUPT-ORG]		;this is randomly here, it could be anywhere
+SPURIOUS-INTERRUPT:	JUMP[.] $	;here on spurious interrupts
+
+	.RELOC
+
+D[CONST (SPURIOUS-INTERRUPT / 100)] ROT[6] DEST[Q] $	;Put high 6 bits in Q
+..LOW6 = (SPURIOUS-INTERRUPT \ 100)
+.IF ..LOW6 /= 0 [	;assemble low order 6 bits if non-zero
+D[CONST ..LOW6] ALU[DORQ] DEST[Q] $
+]
+D[CONST 40] DEST[AR CLR-DEV-FROM-INTR] NORM $	;init AR for device num
+ALU[Q] DEST[0] DEST-A-MEM NORM $		;store vector 
+D[AR] ALU[D-1] DEST[AR DEV-ADR]			;decrement dev adr
+	COND[-OBUS<0] JUMP[. - 1] C550 $	;and loop
+];1 - CROCK
+
+
+;The following code sets up the AMEM zero vectors for various random devices.
+;this is a complete CROCK!  The device reset subroutines should do this!!
+;I plan to fix this soon (when I have time, ha ha)	-- MLB 23JAN80
+;$*$*$ Fix this soon.	TVR-Apr80
+
+	D[CONST 20] ROT[6] DEST[Q CLR-DEV-FROM-INTR] NORM $
+
+	.DEFINE AMLD2 [ DEV ALOC VAL ]
+[	D[CONST DEV] DEST[DEV-ADR] NORM $
+	D[CONST VAL] ALU[DORQ] DEST-A-MEM DEST[ALOC] NORM $
+]
+	AMLD2 [ 1 0 62 ] ; INTERRUPTS FROM DEV 1 (SWITCHES) GO TO 2062
+	D[CONST 21] ROT[6] DEST[Q] NORM $
+;;;	AMLD2 [ 4 0 30 ] ; INTERRUPTS FROM DEV 4 GO TO 2130 [Now set at CTYRST]
+	AMLD2 [ 5 0 34 ] ; INTRS FROM DEV 5 GO TO 2134
+	AMLD2 [ 6 0 41 ] ; INTS FROM DEV 6 GO TO 2141
+	AMLD2 [ 7 0 50 ] ; INTS FROM DEV 7 GO TO 2150
+	AMLD2 [ 10 0 56 ] ; INTS FROM DEV 10 GO TO 2156
+.REPEAT DLS [
+	AMLD2 [ DLSDEV 0 37 ] ; DLS GOES TO 2137
+];DLS
+;;	the IMP reset code takes care of this for itself!!
+
+;;; Moved code to set MAP-DISP to MAPRST (due to lack of space between
+;;; 4000:4777).						  TVR-Apr80
+	ALU[0] DEST[CRYOV] NORM $
+	ALU[0] DEST[CLR-MI-ERR] NORM $
+	D[CONST 0] DEST[3] SPEC[A-MEM-APR&DEST-A-MEM] NORM $
+	JUMP[RESLOP] NORM $
+
+BADPC:	BADLOC $
+
+;------------------------------------------------------------------------------
+;$*$*$*	THIS JUNK HAS GOT TO MOVE! TVR-Apr80
+;
+;Some of it also needs commenting but this must be postponed until after CCRMA
+;merge.
+;------------------------------------------------------------------------------
+
+	.USE[AREA260]
+	.PAIR	;Goes to second if HALF is not set
+ILDB1:
+.REPEAT 1 - KL [
+	D[AR] ROT[14] MASK[6] DEST[MASKR] JUMP[ILDB2] NORM $
+		;Extract S field.  Being HALF was set, don't increment
+];.REPEAT 1 - KL
+.REPEAT KL [
+	D[12] SPEC[A-MEM-APR] ROT[3] COND[OBUS<0] C550 JUMP[ILDBH] $
+		;JUMP IF FPD IS REALLY ON IN PC, ELSE FALL INTO REGULAR BYTE INSTRUCTION
+];.REPEAT KL
+	D[AR] ROT[14] MASK[6] DEST[AR MASKR] COND[BYTE-OVF] PUSHJ[IBT1] NORM $;GET S FLD, OVFL?
+		;Extract S field.  Increment word if byte overflow will happen
+	D[AR] ROT[36] ALU[Q-D] DEST[Q AR MEMSTO] COND[-MA-AC] JUMP[. + 2] NORM $;SUB S FROM P
+		;Increment byte pointer, no overflow possible now
+		;Store into memory, check for store into AC
+	ACSEL[MA] D[MEM] DEST[AC] CYLEN[MEMSTO] $
+		;Store is into an AC, write it there.
+ILDB2:	ALU[Q] DEST[MA] COND[-MEM-IDX-IND] LBJUMP[ILDB3] NORM $
+		;Fetch data, perhaps.  Maybe also do indexing or indirection
+.REPEAT KL [
+ILDBH:	D[AR] ROT[14] MASK[6] DEST[MASKR] JUMP[ILDB2] NORM $
+		;SAME AS AT ILDB1 FOR 1 - KL.
+];.REPEAT KL
+	.PAIR
+IDPB1:
+.REPEAT 1 - KL [
+	D[AR] ROT[14] MASK[6] DEST[MASKR] JUMP[IDPB2] NORM $
+];.REPEAT 1 - KL
+.REPEAT KL [
+	D[12] SPEC[A-MEM-APR] ROT[3] COND[OBUS<0] C550 JUMP[IDPBH] $
+		;JUMP IF FPD REALLY ON IN PC, ELSE FALL THRU AS IF HALF NOT ON
+];.REPEAT KL
+	D[AR] ROT[14] MASK[6] DEST[AR MASKR] COND[BYTE-OVF] PUSHJ[IBT1] NORM $;GET S FLD, OVFL?
+	D[AR] ROT[36] ALU[Q-D] DEST[Q AR MEMSTO] COND[-MA-AC] JUMP[. + 2] NORM $;SUB S FROM P
+	ACSEL[MA] D[MEM] DEST[AC] CYLEN[MEMSTO] $
+IDPB2:	ALU[Q] DEST[MA] COND[-MEM-IDX-IND] LBJUMP[IDPB3] NORM $
+.REPEAT KL [
+IDPBH:	D[AR] ROT[14] MASK[6] DEST[MASKR] JUMP[IDPB2] NORM $
+		;GET S IN MASK REGISTER, JUMP TO SECOND PART OF INSTRUCTION
+];.REPEAT KL
+
+	.PAIR	;Goes to second if not indexing or indirecting
+ILDB3:	MAPF[NORM-RD] PUSHJ[BIIH] NORM $;HANDLE IDX-IND
+	MAPF[BYTE-ILD] ACSEL[MA] ALU[AC] DEST[FIXMAC-MAPF-RD]
+			JUMP[LDB2] CYLEN[FIXM] $
+		;Finish read of data word, then go extract byte
+
+	.USE[AREA262]
+	.PAIR	;Goes to second if not indexing or indirecting
+LDB1:	MAPF[2] PUSHJ[BII] NORM $
+LDB5:	FIXM1 $	;Also gets here from XBY13
+	D[AR] ROT[14] MASK[6] DEST[MASKR] SHORT $
+		;GET S FLD
+	SPEC[CLR-HALF] D[CONST 44] DEST[Q] SHORT $
+	D[AR] ROT[6] MASK[6] ALU[Q-D] DEST[Q ROTR] SHORT $
+		;SUB P FLD FROM 44
+	D[AR] ROT[12.] MASK[6] ALU[Q-D] COND[-OBUS<0] JUMP[LDB4] C550 $
+		;Also, subtract S field.  If result is positive, then byte
+		;of size S fits with at least P bits remaining in the right
+		;side of the word
+	ALU[Q] DEST[MASKR] JUMP[LDB4] NORM $
+		;Byte does not fit!!!  We want only the stuff to the left
+		;of postion P, which is 36.-P bits, coincidentally, the same
+		;size as the rotation
+;S field is already set up.  Set up P field and extract data from word.
+LDB2:	SPEC[CLR-HALF] D[CONST 44] DEST[Q] SHORT $
+	D[AR] ROT[6] MASK[6] ALU[Q-D] DEST[ROTR] SHORT $
+		;SUB P FLD FROM 44
+LDB4:	D[MEM] ACSEL[AC] ROT[R] MASK[R] SPEC[MA_PC] DEST[MA AC] JUMP[MAIN1] NORM $; DO THE LDB
+
+
+	.PAIR
+DPB1:	MAPF[2] PUSHJ[BII] NORM $
+DPB5:		;Also gets here from XBY13
+;;;	FIXM2 $	;Wrong thing for WAITS.
+	  MAPF[BYTE-IDP] CYLEN[FIXM]
+			ACSEL[MA] ALU[AC] DEST[FIXMAC-MAPF-WRT] JUMP[DPB7] $
+		;KA/KL set half flag even on DPB.  They would also set read
+		;failure, not write, in the case of not in map; but we don't
+		;have time to be particular.  			TVR-Apr80
+
+	.USE[NORMAL]
+DPB7:	D[AR] ROT[12.] MASK[6] DEST[MASKR] SHORT $
+		;Fetch S field.
+	SPEC[CLR-HALF] D[AR] ROT[6] MASK[6] DEST[Q ROTR] SHORT $
+		;Fetch P field.
+	D[CONST 44] ALU[D-Q] DEST[Q] SHORT $
+		;Calculate 36-P, which is maximum number of bits in this byte
+	D[AR] ROT[12.] MASK[6] ALU[Q-D] COND[-OBUS<0] JUMP[DPB4] C550 $
+		;Does this byte fit?  I.e. 36-P-S is non-negative.  If so,
+		;use this mask field
+	ALU[Q] DEST[MASKR] JUMP[DPB4] NORM $
+		;Setup mask which is everything to the left of the position
+		;designated by P.
+
+	.USE[AREA266]
+	.PAIR
+IDPB3:	MAPF[2] PUSHJ[BIIH] NORM $;HANDLE IDX-IND
+	MAPF[BYTE-IDP] CYLEN[FIXM]
+		ACSEL[MA] ALU[AC] DEST[FIXMAC-MAPF-WRT] $
+	D[AR] ROT[14] MASK[6] DEST[MASKR] SHORT $
+DPB2:	SPEC[CLR-HALF] D[AR] ROT[6] MASK[6] DEST[Q ROTR] SHORT $
+DPB4:	D[2] MASK[R] ACSEL[AC] ALU[D&AC] DEST[AR] SHORT $;GET BYTE
+	D[MEM] DEST[Q] SHORT $; GET DEST WORD
+	D[2] MASK[R] ROT[R] ALU[-D&Q] DEST[Q] SHORT $;CLR DEST BYTE
+	D[AR] ROT[R] ALU[DORQ] DEST[MEMSTO] MEMST $;DO IT
+
+.DEFINE BIIMAC[BIMAPF BIIH BIIH1]
+[	D[AR] ROT[18.] MASK[4] DEST[AC-SEL] COND[OBUS=0] JUMP[BIIH1] C550 $;IDX FLD
+	D[MA] ACSEL[REG] MASK[18.] ALU[D+AC] DEST[MA] SHORT $;DO INDEXING
+	D[AR] ROT[16] MASK[1] MAPF[2] COND[OBUS=0] POPJ CYLEN[C500] $;LEAV IF NO IND
+BIIH1:	ACSEL[MA] ALU[AC] DEST[FIXMAC-MAPF-RD] MAPF[BIMAPF] CYLEN[FIXM] $
+	D[MEM] MASK[27] DEST[Q MA] COND[-MEM-IDX-IND] POPJ CYLEN[C500] $;GET INDIRECT WORD, LEAVE IF NO MORE IND OR IDX
+	D[AR] ROT[14] MASK[14] DEST[AR] MAPF[2] NORM $
+	D[AR] ROT[30] ALU[DORQ] DEST[Q AR] JUMP[BIIH] NORM $
+]
+	.USE[AREA264]
+BIIH:	BIIMAC [BYTE-IND BIIH BII1]
+BII:	BIIMAC [NORM-RD BII BII2]
+
+	.USE[NORMAL]
+.REPEAT KL [;HERE FOR KL CASE WHERE HALF FLAG IS SET
+IBP0:	D[12] SPEC[A-MEM-APR] ROT[3] COND[OBUS<0] C550 JUMP[MAIN] $
+		;IF FPD REALLY ON IN PC, THEN DON'T DO ANYTHING
+	D[MEM] DEST[Q AR] COND[AC=0] LBJUMP[IBP1] NORM $
+		;ON FOR SOME OTHER REASON, DO WHAT NORMALLY WHAT WOULD HAVE BEEN DONE IF HALF OFF.
+];.REPEAT KL
+	.PAIR	;Skip if AC=0
+IBP1:
+.REPEAT 1 - KL [;KA STYLE DOESN'T GET IT BECAUSE DON'T THINK THEREIS
+;ENOUGH SPACE.
+	UAOP1 $	;Non-zero AC implies ADJBP.  We don't, yet.
+];.REPEAT 1 - KL
+.REPEAT KL [
+	D[CONST 11] DEST[DEV-ADR] JUMP[ADJBP] NORM $
+		;SETUP FOR SCRATCH A-MEM REGISTERS AND GO DO IT.
+];.REPEAT KL
+	D[AR] ROT[14] MASK[6] DEST[AR] COND[BYTE-OVF] PUSHJ[IBT1] NORM $;GET S FLD, OVFL?
+		;Zero AC.  Do ordinary increment byte pointer.
+		;PUSHJ if we are about to overflow a word.
+	D[AR] ROT[36] ALU[Q-D] DEST[Q MEMSTO] MEMST $
+		;Finish updating byte position part of pointer
+
+;Increment byte pointer which crosses a word boundary
+IBT1:	D[MASK 36] ALU[D&Q] DEST[Q] SHORT $
+	D[CONST 44] ROT[36] ALU[D+Q+1] DEST[Q] POPJ NORM $
+		;NEW P FLD OF 44, ADD 1 TO ADR
+
+
+
+
+IMUL1:	ALU[0] DEST[AR O_AC] PUSHJ[DOIMUL] NORM $	;0 TO AC,AC TO AR
+	ALU[Q] DEST[AC] JUMP[MAIN] NORM $
+IMUL2:	ALU[0] DEST[AR O_AC] PUSHJ[DOIMUL] NORM $	;0 TO AC
+	D[AR] DEST[AC] NORM $
+	ALU[Q] DEST[MEMSTO] MEMST $
+
+IMUL3:	ALU[0] DEST[AR O_AC] PUSHJ[DOIMUL] NORM $
+	ALU[Q] DEST[AC MEMSTO] MEMST $
+
+MUL1:	ALU[0] DEST[AR O_AC] PUSHJ[DOMMUL] NORM $
+	ACSEL[AC+1] ALU[Q] DEST[AC] JUMP[MAIN] NORM $
+
+MUL2:	ALU[0] DEST[AR O_AC] PUSHJ[DOMMUL] NORM $
+	D[AR] DEST[O_AC MEMSTO] MEMST $
+MUL3:	ALU[0] DEST[AR O_AC] PUSHJ[DOMMUL] NORM $
+	ACSEL[AC+1] ALU[Q] DEST[AC] NORM $
+	ALU[AC] DEST[MEMSTO] MEMST $
+
+DOIMUL:	PUSHJ[DOMUL] NORM $
+	ALU[AC] COND[OBUS=0] POPJ CYLEN[C500] $; NO OV IF 0
+	ALU[NOTAC] COND[OBUS=0] POPJ CYLEN[C500] $; NO OV IF -1
+MSETOV:	D[PC] DEST[AC] SHORT $; GET FLAGS
+MSTOV1:	D[CONST 1] ROT[43] ALU[DORAC] DEST[CRYOV] NORM POPJ $; SET OV
+DOMMUL:	D[AR] ALU[D#Q] COND[-OBUS=0] JUMP[DOMUL] CYLEN[C500] $; NO OV IF DIFF OPERS
+	D[CONST 1] ROT[43] ALU[D#Q] COND[-OBUS=0] JUMP[DOMUL] CYLEN[C500] $; J IF NOT -2**35
+	PUSHJ[MSETOV] NORM $;SET OV
+	ALU[0] DEST[AC] SHORT $
+DOMUL:	D[CONST 42] LLOAD NORM $	;LOOP 35 TIMES
+
+DOMUL1:	D[AR] ALU[MULAC+D] DEST[D4] MASK[3]
+			LOOP[DOMUL1] NORM $ ;SHIFT, END-COND MUL; SOJGE, SH RT
+		;This shifts right, with the low order bit of the partial
+		;product being saved in Q.  At the same time, shift out of Q
+		;a bit of the multiplier (and somehow??? the hardware uses this
+		;to decide whether to add or not???)
+		;MASK field specifies what gets shifted into AC, in this case,
+		;(ALU OV) XOR (-OUT<0)
+	D[AR] ALU[MULAC+D] DEST[D4] MASK[3]
+			COND[-Q0-35] JUMP[. + 2] CYLEN[C450] $ ;J IF QUOT WAS +
+		;Do last step of multiply. Jump on sign of multiplier(?)
+	D[AR] ALU[MULAC-D] DEST[D7]
+			JUMP[. + 2] NORM $ ; DEST AC SH LFT, ALU=1, ALU S=0
+		;Multiplier was positive... ???: Shift left to make properly
+		;signed result, with low order bit coming from Q0 (i think???)
+	ALU[SH-AC] DEST[D7] NORM $ ;DEST AC SH LFT
+		;SINCE DEST IS >3, ALU[QORAC] IS ALU[AC]
+		;Multiplier was negative... ???
+	ALU[AC] COND[OBUS<0] LBJUMP[DOMUL4] CYLEN[C500] $
+		;Decide what sign should be in the low order result.
+
+	.PAIR
+DOMUL4:	D[MASK 35.] ALU[D&Q] DEST[Q] POPJ NORM $
+		;Positive.  Turn off Q0, which was copied into AC35.
+	D[CONST 1] ROT[35.] ALU[DORQ] DEST[Q] POPJ NORM $
+		;Negative.  Set Q0 so the number is negative (Q0 was copied into
+		;AC35).
+
+  CCC1	= SHORT $	;Apparently used as a NO-OP for macros below. TVR-Apr80
+  MEMST1 = MEMST $	;Store to memory. (Cause macro expansion now, rather
+			;than in macro call.)
+
+.DEFINE DMACFN [AA A2 D1 D2 OP1]
+[	ALU[AA] D[AR] DEST[O_AC AR] SHORT $
+	ACSEL[AC+1] D[AR] ALU[A2] DEST[D1 D2] OP1 $
+	ALU[AC] DEST[MEMSTO] MEMSTMA $
+]
+.DEFINE DMAC2 []
+[	D[MEM] ALU[D#AC] DEST[AR] PUSHJ[DODDIV] NORM $
+]
+.DEFINE DMAC1 []
+[	.PAIR
+	ALU[-1] DEST[AC] JUMP[. + 2] NORM $
+	ALU[0] DEST[AC] SHORT $
+	D[MEM] ALU[D#AC] DEST[AR] SHORT $
+	D[AR] ROT[1] MASK[1] DEST[IR-ADR] SHORT $
+	ALU[Q] DEST[AR] PUSHJ[DODIV] NORM $
+]
+
+IDIV1:	DMAC1
+	DMACFN[Q D AC MA DOM1]
+IDIV2:	DMAC1
+	DMACFN[D Q MEMSTO AR MEMST1]
+IDIV3:	DMAC1
+	DMACFN[Q D AC 0 CCC1]
+DIV1:	DMAC2
+	DMACFN[Q D AC MA DOM1]
+DIV2:	DMAC2
+	DMACFN[D Q MEMSTO AR MEMST1]
+DIV3:	DMAC2
+	DMACFN[Q D AC 0 CCC1]
+
+DODDIV:	D[AR] ROT[1] MASK[1] DEST[IR-ADR] SHORT $
+	ALU[SH-AC] DEST[AR D5] MASK[1] NORM $
+	D[AR] MASK[1] COND[OBUS=0] JUMP[. + 2] C550 $
+	D[CONST 1] ROT[43] ALU[DORQ] DEST[Q] JUMP[. + 2] NORM $
+	D[MASK 43] ALU[D&Q] DEST[Q] NORM $
+;------------------------------------------------------------------------------
+;
+;	Single Precision Divide (and continuation of double precision)
+;
+;	(Reminder: Quotient, Remainder = Dividend / Divisor)
+;
+;Where we get here:
+;    MEM	36 bit signed divisor
+;    AC		High order dividend (0 or -1 for single precision)
+;    Q		Low order dividend
+;    IR<35>	Sign of dividend XOR sign of divisor
+;    AR		Sign of dividend and original contents of AC
+;  
+;------------------------------------------------------------------------------
+DODIV:	D[MEM] COND[-OBUS<0] JUMP[DODIV1] C550 $
+		;Jump if divide by positive number
+	D[MEM] ALU[0-D] DEST[HOLD] SHORT $
+		;Take absolute value
+DODIV1:	ALU[AC] COND[-OBUS<0] JUMP[DODIV2] CYLEN[C450] $
+		;Check sign of high order word.  If positive, we're ready to go
+	ALU[0-Q] DEST[Q] COND[OBUS=0] JUMP[DODIV3] CYLEN[C500] $
+		;Double precision negate, low order word
+	ALU[NOTAC] DEST[AC] JUMP[DODIV2] NORM $
+		;High order word, no carry
+DODIV3:	ALU[0-AC] DEST[AC] NORM $
+		;High order word, with carry
+DODIV2:	D[CONST 44] LLOAD NORM $
+		;LOOP 37 TIMES
+;Now have:
+;   MEM		Absolute value of divisor
+;   AC		Absolute value of high order dividend
+;   Q		Absolute value of low order dividend
+;   R		Repeat count for division
+	D[MEM] ALU[AC-D] COND[OBUS<0] JUMP[DODIV7] C550 $
+		;Jump if not no divide case
+	D[PC] DEST[AC] SHORT $
+		;Get ready to set flags
+	D[CONST 1] ROT[23.] ALU[DORAC] DEST[AC] PUSHJ[MSTOV1] NORM $
+		;Set no divide
+	D[AR] DEST[AC] POPJ NORM $
+		;Fix clobbered AC
+
+	;$*$*$* NORMAL area runs of space for now.  TVR-Apr80
+	.USE[AREA216]
+DODIV7:	NORM PUSHJ[DODIV4] $
+	D[AR] COND[-OBUS<0] JUMP[. + 2] C550 $; J IF DIVIDEND WAS +
+	ALU[0-AC] DEST[AC] SHORT $
+	D[IR] MASK[1] COND[OBUS=0] POPJ C550 $ ;LEAVE IF RESULT SHOULD BE +
+	ALU[0-Q] DEST[Q] POPJ NORM $
+;On completion:
+;   MEM		Absolute value of divisor
+;   AC		Remainder
+;   Q		Quotient
+;   AR<0>	Sign of dividend
+;   IR<35>	Sign of dividend
+
+	.QUAD
+DODIV4:	D[MEM] ALU[DIVAC-D] DEST[D6] MASK[3] COND[OBUS<0] SLOOP[DODIV4] C600 $
+	ALU[SH-AC] DEST[D5] MASK[0] JUMP[DODIV6] NORM $ ; RE-SHIFT REMAINDER
+	D[MEM] ALU[DIVAC+D] DEST[D6] MASK[3] COND[OBUS<0] SLOOP[DODIV4] C600 $
+	ALU[SH-AC] DEST[D5] MASK[0] NORM $
+    ;end of .QUAD
+DODIV6:	D[CONST 1] ROT[43] ALU[D#AC] DEST[AC] COND[-OBUS<0] C550 POPJ $ 
+		;ADJUST REM SIGN, CHECK IT
+	D[MEM] ALU[D+AC] DEST[AC] NORM POPJ $ 
+		;ADJUST REM.
+
+	.USE[NORMAL]
+
+
+
+
+;JFFO1 JFFO2 JFFO3 JFFO5 JFFO4 ROTDO BIGLSH LSHPDO LSHDO LSHDO1 ASHDO1 BIGASH SETOV1 ASHDO ASHDOP
+; BIGAS2 ASHC1 ASHC8 ASHC6 ASHC9 ASHC4 ASHC2 ASHC7 ROTC1 ROTC2 LSHC1 LSHC2 SJMAIN PUSH1 POP1 POPJ1 PUSHJ1
+
+JFFO1:	ACSEL[AC+1] ALU[0] DEST[AC] JUMP[MAIN] NORM $
+JFFO2:	D[AR] ROT[6] MASK[6] COND[-OBUS=0] JUMP[JFFO3] C550 $
+	D[AR] ROT[6] DEST[AR] NORM $
+	D[CONST 6] ACSEL[AC+1] ALU[AC+D] DEST[AC] JUMP[JFFO2] NORM $
+JFFO3:	D[AR] COND[OBUS<0] JUMP[JFFO4] C550 $
+JFFO5:	ACSEL[AC+1] ALU[AC+1] DEST[AC] NORM $
+	D[AR] ROT[1] DEST[AR] COND[-OBUS<0] JUMP[JFFO5] C550 $
+JFFO4:	D[IR] DEST[PC MA] JUMP[MAIN1] NORM $; JUMP
+.DEFINE SH2ND [ TYP DST1 DST2 DST3 ]
+[TYP`PLS:	D[CONST 44] ALU[Q-D] COND[OBUS18] JUMP[DST3] C600 $
+	D[CONST 44] ALU[Q-D] DEST[Q ROTR] JUMP[DST1] NORM $
+TYP`NEG:	D[MASK 22] ROT[10] ALU[DORQ] DEST[Q ROTR] NORM $
+TYP`NN1:	D[CONST 44] ALU[D+Q] DEST[Q ROTR] COND[-OBUS18] JUMP[TYP`DO] C600 $
+	JUMP[DST2] NORM $
+]
+
+	.USE[AREA270]
+	SH2ND [ROT ROTPLS ROTNN1 ROTDO]
+ROTDO:	ACSEL[AC] ALU[AC] DEST[AR] SHORT $
+	D[AR] ROT[R] ACSEL[AC] SPEC[MA_PC] DEST[AC MA] JUMP[MAIN1] NORM $
+	SH2ND [LSH BIGLSH BIGLSH LSHPDO]
+
+	.USE[AREA272]
+BIGLSH:	ACSEL[AC] ALU[0] SPEC[MA_PC] DEST[AC MA] JUMP[MAIN1] NORM $
+
+LSHPDO:	D[CONST 44] ALU[D-Q] DEST[MASKR] SHORT $
+	D[2] MASK[R] ALU[D&AC] ACSEL[AC] DEST[AR] SHORT $
+	D[AR] ROT[R] ACSEL[AC] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+
+LSHDO:	ALU[Q] DEST[MASKR] SHORT $
+	ALU[AC] ACSEL[AC] DEST[AR] SHORT $
+LSHDO1:	D[AR] MASK[R] ROT[R] SPEC[MA_PC] DEST[AC MA] ACSEL[AC] JUMP[MAIN1] NORM $
+ASHDO1:	ALU[Q] DEST[MASKR] JUMP[LSHDO1] NORM $
+
+	.USE[NORMAL]
+	SH2ND [ASH BIGASH BIGAS2 ASHDOP]
+BIGASH:	ALU[AC] ACSEL[AC] COND[OBUS=0] JUMP[MAIN] CYLEN[C450] $
+	D[CONST 1] ROT[43] ACSEL[AC] ALU[D&AC] DEST[AC] SHORT $
+	D[PC] DEST[Q] SHORT $
+SETOV1:	D[CONST 1] ROT[43] ALU[DORQ] DEST[MA CRYOV] SPEC[MA_PC] NORM JUMP[MAIN1] $
+ASHDO:	ACSEL[AC] ALU[AC] DEST[AR] COND[-OBUS<0] JUMP[ASHDO1] CYLEN[C500] $
+	D[CONST 44] ALU[D-Q] DEST[MASKR] SHORT $
+	D[2] MASK[R] ROT[R] DEST[Q] SHORT $
+	D[AR] ROT[R] ALU[DORQ] SPEC[MA_PC] DEST[AC MA] ACSEL[AC] JUMP[MAIN1] NORM $
+ASHDOP:	D[CONST 43] ALU[D-Q] DEST[MASKR] SHORT $
+	ALU[Q] DEST[IR-ADR] SHORT $; SAVE SH AMT
+	D[CONST 1] ROT[43] ACSEL[AC] ALU[D&AC] DEST[Q] SHORT $ ;GET SIGN BIT
+	D[2] MASK[R] ACSEL[AC] ALU[D&AC] DEST[AR] SHORT $
+	D[AR] ROT[R] ACSEL[AC] ALU[DORQ] DEST[O_AC AR] SHORT $
+	D[IR] ALU[D+1] DEST[MASKR] SHORT $
+	D[AR] ROT[R] DEST[Q] SHORT $
+	D[2] MASK[R] ROT[43] ALU[D&Q] DEST[Q] COND[OBUS=0] JUMP[MAIN] C550 $
+	D[2] MASK[R] ROT[43] ALU[D#Q] COND[OBUS=0] JUMP[MAIN] C550 $
+	D[PC] DEST[Q] JUMP[SETOV1] NORM $
+BIGAS2:	ACSEL[AC] ALU[AC] COND[-OBUS<0] JUMP[BIGLSH] CYLEN[C450] $
+	ACSEL[AC] ALU[-1] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+
+ASHC1:	D[CONST 1] ROT[43] ALU[D&AC] ACSEL[AC] DEST[HOLD] NORM $ ; SAVE SIGN BIT
+	D[IR] MASK[18.] COND[OBUS18] JUMP[ASHC2] C550 $
+	D[IR] MASK[10] COND[OBUS=0] JUMP[MAIN] C550 $
+	ALU[0] ACSEL[AC+1] DEST[AC] SHORT $
+	D[IR] MASK[10] ALU[D-1] LLOAD NORM $
+ASHC8:	ALU[SH-AC] DEST[D6] MASK[1] ACSEL[AC] NORM $
+	ACSEL[AC] D[MEM] ALU[D#AC] COND[OBUS<0] JUMP[ASHC9] C550 $
+ASHC6:	LOOP[ASHC8] NORM $
+	D[PC] ACSEL[AC+1] ALU[DORAC] DEST[CRYOV] JUMP[ASHC7] NORM $
+ASHC9:	D[CONST 1] ROT[43] ACSEL[AC+1] DEST[AC] JUMP[ASHC6] NORM $
+
+.DEFINE SHLOOP [SHTYP DIR]
+[	D[IR] MASK[10] ALU[D-1] LLOAD NORM $
+	ALU[SH-AC] DEST[DIR] MASK[SHTYP] ACSEL[AC] LOOP[.] NORM $
+]
+
+ASHC4:	D[MEM] DEST[Q] SHORT $
+	D[AR] ROT[43] MASK[43] ALU[DORQ] ACSEL[AC+1] DEST[AC] NORM $
+	D[MASK 43] ACSEL[AC] ALU[D&AC] DEST[AC] SHORT $
+	ACSEL[AC] ALU[QORAC] DEST[AC] JUMP[MAIN] NORM $
+ASHC2:	D[IR] ALU[0-D] DEST[IR-ADR] NORM $
+	SHLOOP [ 1 D4 ]
+ASHC7:	ALU[Q] DEST[AR] JUMP[ASHC4] NORM $
+
+	.USE[AREA274]
+ROTC1:	D[IR] ALU[0-D] DEST[IR-ADR] JUMP[ROTC2] NORM $
+	D[IR] COND[OBUS=0] MASK[10] JUMP[MAIN] C550 $
+	SHLOOP[ 0 D6 ]
+	ALU[Q] DEST[AC] ACSEL[AC+1] JUMP[MAIN] NORM $
+ROTC2:	SHLOOP[ 0 D4 ]
+	ALU[Q] DEST[AC] ACSEL[AC+1] JUMP[MAIN] NORM $
+
+	.PAIR
+LSHC1:	D[IR] MASK[18.] ALU[0-D] DEST[IR-ADR] JUMP[LSHC2] NORM $
+	D[IR] MASK[10] COND[OBUS=0] JUMP[MAIN] C550 $
+	SHLOOP [ 2 D6 ]
+	ALU[Q] DEST[AC] ACSEL[AC+1] JUMP[MAIN] NORM $
+	.USE[AREA272]
+	debuguse = .		;See if it is still losing
+: 2735	;%$@#&@# SLOEXP didn't redefine AREA272 properly!!! $*$*$*
+LSHC2:	SHLOOP[ 2 D4 ]
+	ALU[Q] DEST[AC] ACSEL[AC+1] JUMP[MAIN] NORM $
+
+	.USE[AREA202]
+SJMAIN:	ACSEL[MA] D[MEM] DEST[AC] $
+	D[IR] DEST[MA PC] JUMP[MAIN1] $
+
+	.USE[NORMAL]
+.REPEAT 1 - KL [
+PUSH1:	ACSEL[AC] D[CONST 1,,1] ALU[D+AC] DEST[AC MA] COND[CRY0] JUMP[PDLO2] C600 $
+	D[AR] DEST[MEMSTO] MEMSTMA $
+
+POP1:	D[MEM] DEST[AR] SHORT $
+	D[IR] MASK[18.] DEST[MA] SHORT $
+	D[AR] DEST[MEMSTO] MEMST $
+
+POPJ1:	D[MEM] MASK[18.] DEST[PC MA] JUMP[MAIN1] NORM $
+
+PUSHJ1:	MAPF[MASTO] D[IR] MASK[18.] SPEC[CLR-HALF] DEST[PC] MEMST $
+];.REPEAT 1 - KL
+.REPEAT KL [
+PUSH1:	ACSEL[AC] D[CONST 1,,1] ALU[D+AC] DEST[AC MA] COND[CRY0] JUMP[PDLO2] C600 $
+	D[AR] DEST[MEMSTO] COND[-MA-AC] LBJUMP[PMSMAIN] NORM $
+
+POP1:	D[MEM] DEST[AR] SHORT $
+	D[IR] MASK[18.] DEST[MA] SHORT $
+	D[AR] DEST[MEMSTO] COND[-MA-AC] LBJUMP[PMSMAIN] NORM $
+
+POPJ1:	D[MEM] MASK[18.] DEST[PC MA] JUMP[MAIN1] NORM $
+
+PUSHJ0:	D[12] SPEC[A-MEM-APR] ROT[4] COND[-OBUS<0] JUMP[PUSHJA] C600 $
+		;JUMP IF FAKE OVERFLOW FLAG IS OFF.
+	D[CONST 1] ROT[35. - 0] ALU[DORQ] DEST[MEMSTO Q] COND[HALF] LBJUMP[PUSHJ1] NORM $
+		;FAKE OVERFLOW IS ON, OR IT INTO THE PC.
+PUSHJA:	ALU[Q] DEST[MEMSTO] COND[HALF] LBJUMP[PUSHJ1] NORM $
+		;FAKE OVERFLOW FLAG OFF, JUST STORE PC ON STACK.
+.PAIR
+;LBJUMP HERE FROM PUSHJ ON COND[HALF]
+PUSHJ1:	MAPF[PPOP] COND[-MA-AC] LBJUMP[PUSHJMSMAIN] CYLEN[MEMSTO] $
+		;WAIT FOR TRAP IF IT WILL HAPPEN, THEN RESET PC
+		;COND[-MA-AC] DOESN'T NEED C550 CYCLE.
+;HERE IF HALF FLAG ON IN OLD PC
+
+PUSHJ2:	MAPF[PPOP] D[12] SPEC[A-MEM-APR] ROT[3] COND[OBUS<0] C550 JUMP[PUSHJ1] $
+		;IF FPD ON IN AMEM, PC STORED WAS CORRECT
+	D[CONST 1] ROT[35. - 4.] ALU[-D&Q] DEST[MEMSTO] JUMP[PUSHJ1] $
+		;CLEAR FPD, DO THE STORE AGAIN, REJOIN REAL CODE
+.PAIR
+PUSHJMSMAIN:
+	ACSEL[MA] D[MEM] DEST[AC] NORM $
+		;IN CASE STACK WAS IN REGISTERS
+	D[IR] MASK[18.] SPEC[CLR-HALF] DEST[PC] JUMP[MAIN] NORM $
+		;NOW SET PC AND DO NEXT INSTRUCTION.
+.PAIR
+PMSMAIN: MAPF[PPOP] ACSEL[MA] D[MEM] DEST[AC] JUMP[MAIN] CYLEN[MEMSTO] $
+	MAPF[PPOP] JUMP[MAIN] CYLEN[MEMSTO] $
+];.REPEAT KL
+
+
+
+
+
+;BLTA2 BLT1 BLT7 BLT5 BLT3 BLT2 BLT9 BLT4 BLT6 BLT8 BLTA3 BLTL1 BLTA4 BLTA1 BLTAL2 BLTA10 BLTL2 BLTA12 ANDCA1 ANDCA2 ANDCA3 LOG2 LOG3 ORCM2 ORCM3
+	.PAIR
+BLTA2:	ACSEL[AC] ALU[AC] DEST[AR MA] JUMP[BLTA3] NORM $ ;SRC IS AC GET DEST ADR
+BLT1:	D[PC] DEST[O_AC AR] ACSEL[AC] SHORT $
+	D[AR] MASK[18.] DEST[Q PC] SHORT $
+	D[IR] MASK[18.] ALU[D-Q] DEST[Q] LLOAD NORM $;GET COUNT
+	ALU[Q] COND[OBUS<0] JUMP[BLT4] CYLEN[C450] $ ; J IF END PRECEDES STRT
+BLT7:	D[AR] MASK[18.] ROT[18.] DEST[Q MA AR] SHORT $; FETCH FIRST WORD
+BLT5:	DEST[FIXMAC-MAPF-RD] MAPF[BLT-RD] JUMP[BLT2] CYLEN[FIXM] $
+BLT3:	DEST[FIXMAC-MAPF-RD] MAPF[BLT-RD] SPEC[PC+1] CYLEN[FIXM] $
+BLT2:	D[MEM] SPEC[MA_PC] DEST[MEMSTO MA] COND[INTRPT] JUMP[BLT6] NORM $
+	ALU[Q+1] DEST[Q AR MA] LOOP[BLT3] MAPF[BLT-WRT] CYLEN[MEMSTO] $
+BLT9:	D[PC] MASK[18.] ACSEL[AC] DEST[O_AC PC] NORM $
+	ACSEL[AC] D[IR] MASK[18.] ALU[AC-D] COND[-OBUS<0] JUMP[MAIN] C550 $ ;J IF DONE
+	ACSEL[AC] ALU[AC+1] DEST[AC] SHORT $
+	D[IR] ACSEL[AC] ALU[D-AC] LLOAD NORM $ ;GET COUNT
+	D[PC] ACSEL[AC] DEST[O_AC PC] SHORT $
+	ALU[Q] DEST[MA] JUMP[BLT5] NORM $
+BLT4:	ALU[0] LLOAD NORM $
+	JUMP[BLT7] NORM $
+BLT6:	ALU[Q+1] DEST[Q AR] LOOP[BLT8] MAPF[BLT-WRT] CYLEN[MEMSTO] $
+	JUMP[BLT9] $
+BLT8:	ACSEL[AC] ALU[AC-1] DEST[AC] SPEC[PC+1] NORM $
+	ACSEL[AC] D[PC] MASK[18.] DEST[O_AC PC] SHORT $
+	D[AR] ROT[18.] SPEC[LEFT] ALU[DORAC] ACSEL[AC] DEST[AC] SHORT $
+	DISP[2320] SPEC[PC+1-IF&] CYLEN[DISP] $
+BLTA3:	D[AR] ROT[18.] DEST[AC-SEL] SHORT $ ;GET SRC ADR
+	D[IR] MASK[18.] DEST[Q] SHORT $
+	D[MA] MASK[18.] ALU[Q-D] DEST[Q] LLOAD NORM $
+	ALU[Q] COND[OBUS<0] PUSHJ[BLTA4] CYLEN[C450] $
+	D[AR] ROT[18.] MASK[18.] ALU[D+Q] DEST[Q] SHORT $
+	D[MASK 30] ROT[4] ALU[D&Q] COND[-OBUS=0] JUMP[BLTA10] C550  $;J IF SRC LEAVES AC'S
+BLTL1:	ACSEL[REG] ALU[AC] DEST[MEMSTO] NORM $
+	D[MA] ALU[D+1] DEST[MA A-MEM-CNTR&INC] MAPF[BLT-WRTA] LOOP[BLTL1] CYLEN[MEMSTO] $
+	SPEC[MA_PC] DEST[MA] JUMP[MAIN1] NORM $
+BLTA4:	ALU[0] DEST[Q] LLOAD NORM $
+	POPJ NORM $
+BLTA1:	D[MASK 16] ROT[26] ACSEL[AC] ALU[D&AC] COND[OBUS=0] JUMP[BLTA10] C550 $; DEST IS AC, J IF SRC AC?
+	D[IR] ROT[40] MASK[16] COND[-OBUS=0] JUMP[BLTA10] C550 $;J IF FINAL DEST NOT AC
+	ACSEL[AC] ALU[AC] DEST[AR AC-SEL] SHORT $;GET DEST ADR
+	D[IR] MASK[18.] DEST[Q] SHORT $
+	D[AR] MASK[18.] ALU[Q-D] DEST[Q] LLOAD NORM $;GET COUNT
+	ALU[Q] COND[OBUS<0] PUSHJ[BLTA4] CYLEN[C450] $;ADJUST IF CNT NEG.
+	D[AR] ROT[18.] MASK[18.] DEST[MA] SHORT $;GET SRC ADR
+BLTAL2:	DEST[FIXMAC-MAPF-RD AC] MAPF[BLT-RDA] D[MA] ALU[D+1] ACSEL[REG] CYLEN[FIXM] $
+	ACSEL[REG] D[MEM] DEST[O_AC MA A-MEM-CNTR&INC] LOOP[BLTAL2] NORM $
+	SPEC[MA_PC] DEST[MA] JUMP[MAIN1] NORM $
+BLTA10:	ACSEL[AC] ALU[AC] DEST[AR] SHORT $
+BLTL2:	D[AR] ROT[18.] MASK[18.] DEST[MA] SHORT $;GET WORD
+	ACSEL[MA] ALU[AC] DEST[FIXMAC-MAPF-RD] MAPF[BLT-RDA] CYLEN[FIXM] $
+	D[MEM] DEST[HOLD Q] SHORT $
+	D[AR] MASK[18.] DEST[MA STRT-WRT] SHORT $
+	MAPF[BLT-WRTA] COND[-MA-AC] JUMP[. + 2] C500 $
+	ALU[Q] ACSEL[MA] DEST[AC] SHORT $
+	D[AR] MASK[18.] DEST[Q] NORM $
+	D[IR] MASK[18.] ALU[Q-D] MAPF[BLT-WRTA] COND[-OBUS<0] JUMP[MAIN] C600 $
+	D[CONST 1,,1] DEST[Q]  NORM $
+	D[AR] ALU[D+Q] DEST[AR] JUMP[BLTL2] NORM $;*** TEST FOR INTERRUPT HERE?
+BLTA12:	MEMST $
+
+	.USE[AREA276]
+
+ANDCA1:	D[MEM] ACSEL[AC] ALU[D&Q] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+
+ANDCA2:	D[MEM] ALU[D&Q] DEST[MEMSTO] MEMST $
+
+ANDCA3:	D[MEM] ACSEL[AC] ALU[D&Q] DEST[AC MEMSTO] MEMST $
+
+LOG2:	ALU[NOTQ] DEST[MEMSTO] MEMST $
+
+LOG3:	ACSEL[AC] ALU[NOTQ] DEST[AC MEMSTO] MEMST $
+
+ORCM2:	ACSEL[AC] ALU[QORAC] DEST[MEMSTO] MEMST $
+
+ORCM3:	ACSEL[AC] ALU[QORAC] DEST[AC MEMSTO] MEMST $
+
+	.USE[NORMAL]
+
+
+
+
+;SWINT NORSW NOSW RESW1 RESET RESET RESLOP DOHALT STPLOP STPLP1 NORSW2 RESW2 STRTSW CONSW DEPTSW
+; DEPNSW DEPSW1 EXMTSW EXMNSW SETLTS EXMSW1 BRPNT MOVSS1 MOVNS1 HLLZS1 HRLZS1 HRRZS1 HLRZS1 HRAR
+; HLAR HLLEM1 HRLEM1 HLREM1 HRREM1 HSMAIN HSMN1 HLLOS1 HRROS1 HLLES1 HRRES1 HLLES2 HMV HHS HLSZ HOR
+; HRSZ HOL HRLM1 HLLM1 HLRM1 HRRM1 JRST1 JRST4 JRST5 JRST9 JRST8 JRST2 JRST3 JFCL1 JSR2 JSA1 JRA1 MUJSR MUJSP
+;  MUJSA MUJSYS MUJSM1
+;;;RESW1:
+	.ORG[2062]	;*$*$* No REAL reason for this
+: 2062	;SWITCH INTERRUPTS COME HERE
+SWINT:	DEST[CLR-DEV-FROM-INTR] SHORT $
+	ALU[0] DEST[DEV-ADR] SPEC[IOB-IN] SHORT $
+	D[IOD] DEST[AR] MAPF[4] CYLEN[IOB-IN] $ 		;GET SW BITS
+	D[CONST 15] ROT[1] DEST[Q] SPEC[IOB-OUT] SHORT $
+	D[AR] ROT[14] ALU[D&Q] MAPF[4] COND[OBUS=0] JUMP[NOSW] C550 $	;CHECK FOR RELEVANT SW, & CLR FF.
+	D[AR] ROT[10] MASK[1] COND[-OBUS=0] JUMP[RESW1] C550 $	;J IF RESET SW
+NORSW:	D[AR] ROT[13. + 1] MASK[1] ALU[NOTD] DEST[MAP-DISABLE] NORM $
+		;IF SWITCH 13 IS OFF, DISABLE MAP, ELSE ENABLE IT IF MAPPING IS ON.
+	D[AR] ROT[13] MASK[1] COND[-OBUS=0] PUSHJ[EXMTSW] C550 $
+		;PUSHJ IF EXAM THIS
+	D[AR] ROT[11] MASK[1] COND[-OBUS=0] PUSHJ[DEPTSW] C550 $
+		;PUSHJ IF DEPO THIS
+	ALU[0] DEST[MAP-DISABLE] JUMP[UINT-DISMISS] NORM $
+		;ENABLE MAPPING AGAIN, IF IT WAS TURNED ON.
+area206 = .	;Sigh...
+	.RELOC
+NOSW:
+UINT-DISMISS:
+	D[12] SPEC[A-MEM-APR] ROT[2] MASK[2] DEST[AR CLR-DEV-FROM-INTR] COND[-HALF] JUMP[MAIN] NORM $
+		;IF HALF FLAG NOT ON, NO TRAP IS IN PROGRESS
+	D[AR] COND[OBUS=0] C550 JUMP[MAIN] $
+		;IF TRAP FLAGS ARE ZERO, NO TRAP IN PROGRESS, JUST RESTART INSTRUCTION
+
+	D[PC] ALU[D+1] DEST[PC] JUMP[DOTRPX] NORM $
+		;TRAP GOT INTERRUPTED - INCREMENT PC, SINCE IT POINTED TO
+		; INSTRUCTION BEFORE NEXT TO BE EXECUTED, AND RE-EXECUTE THE
+		; TRAP INSTRUCTION.
+
+RESW1:	SPEC[IOB-IN] SHORT $
+	D[IOD] DEST[AR]  CYLEN[IOB-IN] $	;DOUBLE CHECK RESET SW
+	D[AR] ROT[10] MASK[1] COND[OBUS=0] JUMP[NORSW] CYLEN[C650] $	;DOUBLE CHECK RESET SW
+
+;******* This code to be made a subroutine to allow machine resetting *******
+;******* to be done by auto-loading and via CONO APR,20000  TVR-Mar80 *******
+
+.REPEAT F2SW [
+RESET:	D[CONST 0] DEST[IOD] SPEC[IOB-OUT] NORM $
+  ]  ;END F2SW
+
+.REPEAT 1 - F2SW [
+RESET:	D[CONST 1] DEST[IOD] SPEC[IOB-OUT] NORM $
+  ]  ;END 1 - F2SW
+;*** Disable ECC interrupts on F3's?????
+
+	MAPF[10] ALU[0] DEST[CRYOV] CYLEN[IOB-OUT] $
+		;CLR MAP-IN-USE & PC FLAGS & AR INT ENBL, ETC.
+.REPEAT KL [
+	D[12] SPEC[A-MEM-APR] MASK[36. - 5] DEST[Q] NORM $
+		;CLEAR OUT BITS 0-4 IN AMEM[2]
+	ALU[Q] DEST[2] SPEC[A-MEM-APR&DEST-A-MEM] NORM $
+		;(THE SHADOW PC FLAGS, AND JRSTF TRAP FLAG)
+];.REPEAT KL
+	DEST[CLR-MI-ERR] JUMP[RESLOP] NORM $
+RESLOP:	ALU[0] DEST[HI-ABS-MA] NORM $
+	DEST[CLR-DEV-FROM-INTR] $
+	D[CONST 0] DEST[DEV-ADR] PUSHJ[APRRST] NORM $
+	D[CONST 1] DEST[DEV-ADR] PUSHJ[MAPRST] NORM $
+	D[CONST 4] DEST[DEV-ADR] PUSHJ[CTYRST] NORM $
+	D[CONST 10] DEST[DEV-ADR] PUSHJ[DSKRST] NORM $
+	D[CONST 7] DEST[DEV-ADR] PUSHJ[TAPRST] NORM $
+.REPEAT DLS [; 9 JAN 80  BO
+	D[CONST DLSDEV] DEST[DEV-ADR] PUSHJ[DLSRST] NORM $
+];DLS
+.REPEAT VC [ ; 24 AUG 80  BO
+	D[CONST VCDEV] DEST[DEV-ADR] PUSHJ[VCRST] NORM $
+] ; VC
+.REPEAT IMP [; 23JAN80 MLB
+	D[CONST 16] DEST[DEV-ADR] PUSHJ[IMPRST] NORM $
+];IMP
+.REPEAT LPT [
+.REPEAT STANSW [
+	D[CONST 15] DEST[DEV-ADR] PUSHJ[LPTRST] NORM $
+		;Hardware is trapping to wrong place!!!
+];.REPEAT STANSW
+	D[CONST 35] DEST[DEV-ADR] PUSHJ[LPTRST] NORM $
+];LPT
+.REPEAT STANSW [;Mar80 TVR
+	D[CONST 30] DEST[DEV-ADR] PUSHJ[PANRST] NORM $
+	D[CONST 30] DEST[DEV-ADR] PUSHJ[GRNRST] NORM $
+];REPEAT STANSW
+	D[CONST 6] DEST[DEV-ADR] PUSHJ[CLKRST] NORM $
+	D[CONST 6] DEST[DEV-ADR] PUSHJ[TYMRST] NORM $
+	D[CONST 6] DEST[DEV-ADR] PUSHJ[PI-RESET] NORM $
+DOHALT:	DEST[CLR-DEV-FROM-INTR] NORM $
+STPLOP:	D[CONST 1] DEST[DEV-ADR] SPEC[IOB-IN] NORM $
+	MAPF[4] D[IOD] DEST[Q] CYLEN[IOB-IN] $
+	ALU[0] DEST[DEV-ADR] SHORT $
+	D[CONST 10] ALU[DORQ] DEST[IOD] SPEC[IOB-OUT] NORM $
+	MAPF[10] CYLEN[IOB-OUT] $; SET PROG HALT LIGHT
+	ALU[0] DEST[DEV-ADR MA] SPEC[MA_PC] NORM $
+	FIXM1 SPEC[IOB-OUT] $
+	D[MEM] MAPF[6] CYLEN[LONG] $
+	SPEC[IOB-IN] NORM $
+	D[IOD] DEST[AR] MAPF[4] CYLEN[IOB-IN] $
+	D[AR] COND[OBUS<0] JUMP[BRPNT] C600 $; J IF BRK POINT SW
+	SPEC[IOB-IN] NORM $
+STPLP1:	D[IOD] DEST[AR] MAPF[4] CYLEN[IOB-IN] $	;GET SW BITS
+	D[AR] ROT[10] MASK[1] COND[-OBUS=0] JUMP[RESW2] C550 $	;J IF RESET SW
+	D[AR] ROT[14] MASK[11] DEST[Q] NORM $
+	D[CONST 7] ROT[4] ALU[-D&Q] COND[OBUS=0] SPEC[IOB-IN] JUMP[STPLP1] C600 $; LOOP IF NO SW
+	SPEC[IOB-OUT] NORM $
+	MAPF[4] CYLEN[IOB-OUT] $    	;CLR SW FF'S
+	.DEFINE SWTEST [ RAMT DIS ADR ]
+[	D[AR] ROT[RAMT] MASK[1] COND[-OBUS=0] DIS [ ADR ] C550 $
+]
+NORSW2:	SWTEST[4 JUMP CONSW]
+	SWTEST[5 JUMP STRTSW]
+	D[AR] ROT[13. + 1] MASK[1] ALU[NOTD] DEST[MAP-DISABLE] NORM $
+		;IF ADDRESS SWITCH 13 IS CLEAR, DISABLE MAP FOR NOW
+	SWTEST[11 PUSHJ DEPTSW]
+	SWTEST[12 PUSHJ DEPNSW]
+	SWTEST[13 PUSHJ EXMTSW]
+	SWTEST[14 PUSHJ EXMNSW]
+	ALU[0] DEST[MAP-DISABLE] NORM $
+		;RE-ENABLE MAP IF IT WAS ON
+	D[CONST 0] DEST[DEV-ADR] SPEC[IOB-IN] JUMP[STPLP1] NORM $	;LOOP
+
+RESW2:	SPEC[IOB-IN] SHORT $
+	D[IOD] DEST[AR]  CYLEN[IOB-IN] $	;DOUBLE CHECK RESET SW
+	D[AR] ROT[10] MASK[1] COND[OBUS=0] JUMP[NORSW2] CYLEN[IOB-IN] $	;DOUBLE CHECK RESET SW
+	JUMP[RESET] NORM $
+STRTSW:	D[AR] MASK[23] DEST[PC] NORM $
+CONSW:	ALU[0] SPEC[MA_PC] DEST[MA HI-ABS-MA] NORM $
+	D[CONST 1] DEST[DEV-ADR] SPEC[IOB-IN] NORM $
+	MAPF[4] D[IOD] DEST[Q] CYLEN[IOB-IN] $
+	ALU[0] DEST[DEV-ADR] NORM $
+	D[CONST 7] ALU[D&Q] DEST[IOD] SPEC[IOB-OUT] NORM $
+	MAPF[10] CYLEN[IOB-OUT] $; CLEAR PROG HALT LIGHT
+	ACSEL[MA] ALU[AC] DEST[FIXMAC-MAPF-RD] MAPF[1] CYLEN[FIXM] $
+	D[MEM] DEST[IR-ALL AR MA] DISP[2174] SPEC[PC+1-IF] CYLEN[DISP] $; IGNORE STOP SW
+
+DEPTSW:	D[AR] MASK[23] DEST[MA HI-ABS-MA] SPEC[IOB-IN] JUMP[DEPSW1] NORM $
+DEPNSW:	D[MA] ALU[D+1] DEST[MA] NORM SPEC[IOB-IN] $
+DEPSW1:	D[IOD] DEST[MEMSTO] MAPF[2] CYLEN[IOB-IN] $
+	MAPF[TEMP] COND[-MA-AC] POPJ CYLEN[MEMSTO] $
+	ACSEL[MA] D[MEM] DEST[AC] POPJ NORM $
+
+EXMTSW:	D[AR] MASK[23] DEST[MA HI-ABS-MA] JUMP[EXMSW1] NORM $
+EXMNSW:	D[MA] ALU[D+1] DEST[MA] JUMP[EXMSW1] NORM $
+;NOTE: This subroutine is called by DATAO PI, which displays in the lights
+SETLTS:	FIXM1 $			;Take page faults, if any.
+EXMSW1:	ACSEL[MA] ALU[AC] DEST[FIXMAC-MAPF-RD] MAPF[TEMP] CYLEN[FIXM] $
+	SPEC[IOB-OUT] NORM $
+	D[MEM] MAPF[2] CYLEN[LONG] POPJ $
+BRPNT:	D[AR] MASK[27] DEST[Q] NORM $
+	D[PC] MASK[27] ALU[D-Q] COND[-OBUS=0] JUMP[CONSW] C600 $
+	SPEC[IOB-IN] JUMP[STPLP1] NORM $
+
+	.USE[AREA276]
+MOVSS1:	D[MEM] ROT[18.] ACSEL[AC] DEST[AC MEMSTO] MEMST $
+
+MOVNS1:	D[MEM] ALU[0-D] ACSEL[AC] DEST[AC MEMSTO] MEMST $
+
+HLLZS1:	ACSEL[MA] D[MEM] COND[AC=0] DEST[AC AR MA] SPEC[LEFT&MA_PC] LBJUMP[HSMAIN] NORM $
+
+HRLZS1:	ACSEL[MA] D[MEM] ROT[18.] COND[AC=0] DEST[AC AR MA] SPEC[LEFT&MA_PC] LBJUMP[HSMAIN] NORM $
+
+HRRZS1:	ACSEL[MA] D[MEM] MASK[18.] COND[AC=0] DEST[AC AR MA] SPEC[MA_PC] LBJUMP[HSMAIN] NORM $
+
+HLRZS1:	ACSEL[MA] D[MEM] ROT[18.] MASK[18.] COND[AC=0] DEST[AC AR MA] SPEC[MA_PC] LBJUMP[HSMAIN] NORM $
+
+	.USE[AREA342]
+HRAR:	D[AR] MASK[18.] ALU[DORAC] ACSEL[AC] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+
+HLAR:	D[AR] SPEC[LEFT&MA_PC] MASK[0] ALU[DORAC] ACSEL[AC] DEST[AC MA] JUMP[MAIN1] NORM $
+
+HLLEM1:	D[AR] MASK[0] SPEC[LEFT] DEST[MEMSTO] MEMST $
+
+HRLEM1:	D[AR] ROT[18.] MASK[0] SPEC[LEFT] DEST[MEMSTO] MEMST $
+
+HLREM1:	D[AR] ROT[18.] MASK[18.] DEST[MEMSTO] MEMST $
+
+HRREM1:	D[AR] MASK[18.] DEST[MEMSTO] MEMST $
+
+	.USE[AREA344]
+	.PAIR
+HSMAIN:	ACSEL[AC] D[AR] DEST[AC] NORM $
+	FIXM1 JUMP[MAIN2] $
+	.PAIR
+HSMN1:	SPEC[MA_PC] DEST[MA] JUMP[MAIN1] CYLEN[MEMSTO] $
+	D[MEM] ACSEL[AC] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] CYLEN[MEMSTO] $
+	.PAIR
+HLLOS1:	D[MASK 22] ALU[DORQ] DEST[MEMSTO] MEMST $
+	D[MASK 22] ALU[DORQ] DEST[MEMSTO AC] ACSEL[AC] MEMST $
+	.PAIR
+HRROS1:	D[MASK 22] ROT[18.] ALU[DORQ] DEST[MEMSTO] MEMST $
+	D[MASK 22] ROT[18.] ALU[DORQ] DEST[MEMSTO AC] ACSEL[AC] MEMST $
+	.PAIR
+HLLES1:	D[MASK 22] ROT[18.] ALU[D&Q] DEST[Q] COND[-AC=0] LBJUMP[HLLES2] NORM $
+	COND[-AC=0] LBJUMP[HLLOS1] NORM $
+	.PAIR
+HRRES1:	D[MASK 22] ALU[D&Q] DEST[Q] COND[-AC=0] LBJUMP[HLLES2] NORM $
+	COND[-AC=0] LBJUMP[HRROS1] NORM $
+	.USE[AREA346]
+	.PAIR
+HLLES2:	ALU[Q] DEST[MEMSTO] MEMST $
+	ALU[Q] ACSEL[AC] DEST[MEMSTO AC] MEMST $
+	.PAIR
+HMV:	JUMP[MAIN] NORM $
+	JUMP[MOVE] NORM $
+	.PAIR
+HHS:	D[AR] ROT[18.] ALU[DORQ] DEST[MEMSTO] MEMST $
+	D[AR] ROT[18.] ALU[DORQ] ACSEL[AC] DEST[MEMSTO AC] MEMST $
+	.USE[AREA352]
+	.PAIR
+HLSZ:	SPEC[MA_PC] DEST[MA] JUMP[MAIN1] NORM $
+HOR:	D[MASK 22] ACSEL[AC] ALU[DORAC] SPEC[MA_PC] DEST[MA AC] JUMP[MAIN1] NORM $
+	.PAIR
+HRSZ:	SPEC[MA_PC] DEST[MA] JUMP[MAIN1] NORM $
+HOL:	D[MASK 22] ACSEL[AC] ROT[18.] ALU[DORAC] SPEC[MA_PC] DEST[MA AC] JUMP[MAIN1] NORM $
+	.PAIR
+HRLM1:	D[AR] ROT[18.] DEST[Q] NORM $
+HLLM1:	D[MEM] MASK[18.] ALU[DORQ] DEST[MEMSTO] MEMST $
+	.PAIR	;(??) Added TVR-Apr80
+HLRM1:	D[AR] ROT[18.] DEST[Q] NORM $
+HRRM1:	D[MEM] MASK[0] SPEC[LEFT] ALU[DORQ] DEST[MEMSTO] MEMST $
+
+.REPEAT 1 - KL [
+	.USE[AREA350]
+	.PAIR
+JRST1:	COND[USER] JUMP[JRST8] NORM $; ILLEGAL IF USER MODE
+	D[IR] ROT[14] MASK[1] COND[-OBUS=0] JUMP[JRST2] C550 $
+	JUMP[JRST4] NORM $
+JRST4:	D[IR] ROT[15] MASK[1] COND[-OBUS=0] JUMP[JRST3] C550 $
+JRST5:	D[IR] ROT[13] MASK[1] COND[-OBUS=0] JUMP[JRST9] C550 $;J TO STOP SWITCH IF HALT
+	D[IR] ROT[12] MASK[1] COND[-OBUS=0] JUMP[PI-DISMISS] C550 $; J IF DISMISS BIT ON
+	JUMP[MAIN1] NORM SPEC[MA_PC] DEST[MA] $
+JRST9:	COND[EXEC] JUMP[DOHALT] NORM $; HALT IF EXEC MODE
+JRST8:	MUUO1
+
+JRST2:	D[PC] DEST[Q] SHORT $
+	D[CONST 1] ROT[36] ALU[D&Q] DEST[Q] SHORT $
+	D[AR] ALU[DORQ] DEST[CRYOV] JUMP[JRST4] NORM $
+	.USE[AREA354]
+JRST3:	D[CONST 1] ROT[36] DEST[Q] SHORT $
+	D[PC] ALU[DORQ] DEST[CRYOV] JUMP[JRST5] NORM $
+];.REPEAT 1 - KL
+.REPEAT KL [
+;HERE WITH RH(PC) SETUP TO NEW PC, AR CONTAINS 36 BIT NEW PC WORD
+; LEFT FROM EFFECTIVE ADDRESS CALCULATION.
+; GET HERE VIA LBJUMP ON THE 10 BIT IN AC FIELD
+
+
+	.USE[AREA53]
+.PAIR
+
+JRST1:	COND[USER] JUMP[MUUO] NORM $;JRST 1X ILLEGAL IN USER MODE, IT TRAPS
+	D[IR] ROT[10.] COND[OBUS<0] JUMP[JRSTH] C550 $
+		;JUMP IF THIS IS HALT.
+	D[IR] ROT[11.] COND[OBUS<0] JUMP[JRSTF] C550 $
+		;JUMP IF THIS IS JRSTF
+JRST2:	D[IR] ROT[9.] COND[OBUS<0] JUMP[PI-DISMISS] C550 $
+		;IF ITS JRST 10 CAN'T BE USER, DO PI DISMISS
+	JUMP[MAIN] NORM $
+		;DO NORMAL JUMP.
+
+JRSTH:	COND[EXEC] JUMP[DOHALT] NORM $
+		;HALT IF EXEC MODE
+	JUMP[MUUO] NORM $
+		;ELSE TRAP
+
+JRSTF:	D[AR] MASK[35.] DEST[Q] COND[EXEC] JUMP[JRSTF0] NORM $
+		;GET NEW PC INTO Q, MASK OFF OVERFLOW BIT,
+		; JUMP IF EXEC MODE DID THIS INSTRUCTION
+		;AR STILL CONTAINS ORIGINAL USER ARGUMENT TO JRSTF,
+		; AND WILL FOR THE REST OF JRSTF CODE.
+	D[CONST 1] ROT[35. - 5.] ALU[DORQ] DEST[Q] SHORT $
+		;FROM USR MODE, FORCE USR MODE BIT ON
+	D[PC] ROT[6] COND[OBUS<0] C550 JUMP[JRSTF0] $
+		;IF USER IOT ON ON OLD PC, DON'T FORCE CLEARING IT IN NEW PC
+	D[CONST 1] ROT[35. - 6.] ALU[-D&Q] DEST[Q] NORM $
+		;AND FORCE USER IOT BIT OFF.
+JRSTF0:	D[CONST 1] ROT[35. - 9.] ALU[-D&Q] DEST[CRYOV] $
+		;SET PC FLAGS, CLEARING 9 (TRAP FLAG)
+JRSTF1:	D[12] SPEC[A-MEM-APR] DEST[Q] NORM $
+		;GET WORD WITH OVERFLOW BIT IN IT
+	D[AR] ROT[0] COND[-OBUS<0] C550 JUMP[JRSTF1A] $
+		;JUMP IF HES NOT TRYING TO SET OVERFLOW
+	D[CONST 1] ROT[35. - 4] ALU[DORQ] DEST[2] SPEC[A-MEM-APR&DEST-A-MEM]
+	   JUMP[JRSTF1B] NORM $
+		;SET FAKE OVERFLOW BIT AND REJOIN.
+JRSTF1A:D[CONST 1] ROT[35. - 4] ALU[-D&Q] DEST[2] SPEC[A-MEM-APR&DEST-A-MEM]
+	  NORM $
+		;CLEAR FAKE OVERFLOW BIT.
+JRSTF1B:D[AR] ROT[10. + 1] MASK[2] DEST[Q] COND[OBUS=0] JUMP[JRSTF3] C550 $
+		;JUMP IF NOT SETTING TRAP FLAGS
+	D[CONST 1] ROT[35. - 0.] ALU[DORQ] DEST[AR] SHORT $
+		;SET THE JRSTF TRAP FLAG IN SIGN BIT
+	D[12] SPEC[A-MEM-APR] MASK[36. - 4.] DEST[Q] COND[-HALF] JUMP[JRSTF2] NORM $
+		;GET AMEM LOC WITH THE BITS IN IT
+		;JUMP IF HALF IS OFF IN PC
+	D[CONST 1] ROT[35. - 3.] ALU[DORQ] DEST[Q] NORM $
+		;FPD ON IN NEW PC, SO SET IT IN AMEM DATA
+	
+JRSTF2:	D[AR] ROT[35. - 1.] ALU[DORQ] DEST[2] SPEC[A-MEM-APR&DEST-A-MEM] PUSHJ[SETHLF] NORM $
+		;ADJUST BITS TO BE TP0,TP1,JRSTT AND OR THEM INTO AMEM
+		; AND SET HALF FLAG IN CASE IT ISN'T SET
+	JUMP[JRST2] NORM $
+		;AND GO SEE IF NEED TO DO A JEN FUNCTION
+
+JRSTF3:	D[12] SPEC[A-MEM-APR] DEST[Q] COND[HALF] JUMP[JRSTF4] NORM $
+		;GET BITS IN CASE NEED TO CLEAR FPD, JUMP IF HAVE TO SET IT.
+	D[CONST 1] ROT[35. - 3] ALU[-D&Q] DEST[2] SPEC[A-MEM-APR&DEST-A-MEM] JUMP[JRST2] NORM $
+		;CLEAR FPD (HALF ALREADY CLEARED FROM DEST[CRYOV] ABOVE
+		; AND GO SEE IF HAVE TO DO JEN
+
+JRSTF4:	PUSHJ[SETFPD] NORM $
+		;SET THE BIT IN AMEM
+	JUMP[JRST2] SHORT $
+		;AND GO CHECK FOR JEN
+;ROUTINE CALLED WITH PC IN AR IF HALF FLAG IS SET
+; FROM THE ROUTINE THAT INTERPRETS THE JSX INSTRUCTIONS WHEN
+; THEY ARE EXECUTED FROM THE PI VECTOR LOCATIONS.
+; ALSO CALLED FROM PAGE FAULT IF HALF IS ON TO ADJUST PC AND CLEAR THE
+; AMEM FLAGS.
+; COPIES FPD, TI1 AND TI2 FROM AMEM[2] TO PC IN AR, CLEARS THE JRSTF
+; TRAP FLAG AND TI1, TI2, FPD.
+; ALSO INCREMENTS THE PC IF THE TRAP FLAGS IN AMEM ARE SET, SINCE IF WE
+; ARE INTERRUPTING A TRAP CYCLE, THE PC WAS DECREMENTED EITHER BY
+; DOTRPX IF TRAP INSTRUCTIONS DISPATCH HASN'T HAPPENED YET, OR BY
+; PAGE FAIL IF DISPATCH ON TRAP HAS HAPPENED, OR BY THE TRAP INSTRUCTION
+; CODE THAT PREPARES TO BE INTERRUPTED (SUCH AS XCT, WHICH MUST DECREMENT
+; PC AGAIN BEFORE DOING A DISPATCH SO THAT IF IT GETS INTERRUPTED
+; THE XCT WILL BE RESTARTED PROPERLY.
+
+
+TPCFIX:	D[AR] DEST[Q] NORM $
+		;SAVE PC IN Q FOR AWHILE
+	D[12] SPEC[A-MEM-APR] ROT[2] MASK[2] DEST[AR] COND[OBUS=0] C550 JUMP[TPCFI1] $
+
+		;GET TI1 AND TI2 IN 34 AND 35 OF AR
+		; AND JUMP IF NEITHER IS SET
+	D[12] SPEC[A-MEM-APR] ROT[2] COND[OBUS<0] C550 JUMP[TPCFI1] $
+		;IF JRSTT SET, THEN WE ARE HERE FROM INTERRUPT INSTRUCTION
+		; THAT WAS STARTED AFTER A JRSTF SETTING TRAP FLAGS BUT
+		; BEFORE DOTRPX WAS CALLED, SO PC NOT DECREMENTED. DON'T INCREMENT
+		; IT, THEREFORE.
+	ALU[Q+1] DEST[Q] SHORT $
+		;MUST INCREMENT PC, TRAP IS IN PROGRESS
+TPCFI1:	D[AR] ROT[35. - 10.] ALU[DORQ] DEST[Q AR] NORM $
+		;SET TI1 AND TI2 INTO PC, RESULTS IN Q AND AR
+	D[12] SPEC[A-MEM-APR] ROT[3] COND[OBUS<0] C550 JUMP[TPCFI2] $
+		;JUMP IF FPD ON IN AMEM (ALREADY SET IN PC, SO PC OK)
+	D[CONST 1] ROT[35. - 4.] ALU[-D&Q] DEST[AR] NORM $
+		;CLEAR FPD IN OLD PC, STORE IN AR
+TPCFI2:D[12] SPEC[A-MEM-APR] MASK[36. - 4.] DEST[Q] NORM $
+		;CLEAR THE JRSTF TRAP FLAG, SINCE MAY HAVE GOTTEN
+		; AN INTERRUPT RIGHT AFTER A JEN OR JRSTF SET IT,
+		; IN WHICH CASE TRAP FLAGS ARE ON.
+	ALU[Q] DEST[2] SPEC[A-MEM-APR&DEST-A-MEM] POPJ NORM $
+		;STORE CLEARED BITS AND RETURN
+		; (DOESN'T HURT TO CLEAR TI FLAGS, MAIN1 WILL CLEAR
+		; THEM ANYWAY. ALSO, MAKES ROUTINE USEFUL FOR PAGE FAULT)
+;ROUTINE TO SET THE FIRST PART DONE BIT IN THE "VIRTUAL" PC,
+; MEANING SET HALF BY CALLING SETHLF AND SET THE FPD BIT
+; IN AMEM[2]. USES Q.
+
+SETFPD:	D[12] SPEC[A-MEM-APR] DEST[Q] NORM $
+		;GET BITS
+	D[CONST 1] ROT[35. - 3.] ALU[DORQ] DEST[Q 2] SPEC[A-MEM-APR&DEST-A-MEM] COND[HALF] POPJ NORM $
+		;SET FPD. IF HALF ON ALREADY, DONE.
+	D[MASK 33.] ALU[D&Q] DEST[2] SPEC[A-MEM-APR&DEST-A-MEM] JUMP[SETHLF] NORM $
+		;CLEAR OUT TI1 TI2 AND JRSTT, GO SET HALF.
+	.USE[AREA354]
+];.REPEAT KL
+
+
+.REPEAT KL [;ON KL MUST OR IN OVERFLOW FROM AMEM[2]
+	.USE[NORMAL]
+JFCL1:	D[AR] ROT[40] COND[-OBUS<0] C550 JUMP[JFCL2] $
+		;JUMP IF NOT SELECTING OVERFLOW
+	D[12] SPEC[A-MEM-APR] ROT[4] COND[-OBUS<0] C550 JUMP[JFCL2] $
+		;JUMP IF SELECTING OVERFLOW BUT ITS NOT ON IN AMEM
+		; AND STORE THE DATA IN HOLD
+		; (IF TRAPS OFF STILL WILL DEAL WITH REAL OVERFLOW ON BELOW.)
+	D[AR] ROT[40] ALU[-D&Q] DEST[CRYOV] SHORT $
+		;CLEAR THE REST OF THE FLAGS NOW AND FREE UP Q.
+	D[12] SPEC[A-MEM-APR] DEST[Q] NORM $
+		;GET AMEM WORD SO CAN CLEAR OUT OVERFLOW FLAG
+	D[CONST 1] ROT[35. - 4] ALU[-D&Q] DEST[2] SPEC[A-MEM-APR&DEST-A-MEM] NORM $
+		;CLEAR OUT FAKE OVERFLOW BIT IN AMEM AND THEN
+	DOJUMP $
+	.USE[AREA354]
+];.REPEAT KL
+.REPEAT 1 - KL [
+JFCL1:
+];.REPEAT 1 - KL
+
+JFCL2:	D[AR] ROT[40] ALU[D&Q] COND[OBUS=0] JUMP[MAIN] C550 $;TEST SELECTED FLAGS
+	D[AR] ROT[40] ALU[-D&Q] DEST[CRYOV] SHORT $;CLEAR FLAGS
+	DOJUMP $
+JSR1:	D[12] SPEC[A-MEM-APR] ROT[4] COND[OBUS<0] C550 JUMP[JSR1B] $
+		;JUMP IF FAKE OVERFLOW ON IN AMEM
+	D[PC] DEST[AR MEMSTO] COND[MA-AC] JUMP[JSR2] NORM $
+		;Write PC (and flags) into effective address.
+		;Watch for special case of store into AC
+JSR1A:	MAPF[STO] D[MA] ALU[D+1] DEST[PC] CYLEN[MEMSTO] $
+		;STORE PC. CON'T CLEAR HALF YET, MAY BE IN TRAP CYCLE.
+	SPEC[CLR-HALF] JUMP[MAIN] NORM $
+		;NO PAGE TRAP, SO CAN CLEAR HALF FLAG NOW.
+		;Set PC into one after effective address (where we stored old
+		;PC) and take next instruction from there.
+		;Make sure some nurd hasn't left the BIS flag on. (*** i assume
+		;  that's what going on here.  TVR-Apr80)
+
+;HERE IF FAKE OVERFLOW FLAG IS ON IN AMEM.
+JSR1B:	D[CONST 1] ROT[35. - 0] DEST[Q] SHORT $
+	D[PC] ALU[DORQ] DEST[AR MEMSTO] COND[-MA-AC] JUMP[JSR1A] $
+		;SET FAKE OVEFLOW IN PC, STORE IN MEMORY AND AR, JUMP
+		; IF NOT AC REF, ELSE FALL INTO JSR2
+JSR2:	D[MA] ALU[D+1] DEST[PC] SPEC[CLR-HALF] MAPF[STO] NORM $
+	ACSEL[MA] D[MEM] DEST[AC MA] SPEC[MA_PC] JUMP[MAIN1] NORM $
+
+	.USE[NORMAL]
+
+JSA1:	D[MA] ROT[18.] SPEC[LEFT] ALU[DORAC] ACSEL[AC] DEST[AC] NORM $
+		;Put effective address into right half, i.e. were the old
+		;contents of the AC is stored.
+		;(This is the FORTRAN subroutine call, in case you were
+		; wondering why it was so wierd...)
+	D[MA] ALU[D+1] DEST[PC] SHORT $
+	D[AR] DEST[MEMSTO] MEMST $
+
+
+JRA1:	FIXM1 $
+	ACSEL[AC] D[MEM] DEST[AC] CYLEN[FIXM+1] $
+	D[IR] MASK[18.] DEST[PC MA] JUMP[MAIN1] NORM $
+
+	.USE[NORMAL]
+.REPEAT 1 - KL [
+MUJSR:	D[MEM] DEST[IR-ALL MA] NORM $; GET INSTR.
+	D[AR] DEST[MEMSTO] COND[MA-AC] JUMP[JSR2] NORM $
+	D[MA] ALU[D+1] DEST[MA PC] MAPF[STO] SPEC[CLR-HALF] JUMP[MAIN1] CYLEN[MEMSTO] $
+MUJSP:	D[MEM] DEST[IR-ALL MA] NORM $; GET INSTR.
+	D[AR] ACSEL[AC] DEST[AC] JUMP[JSP1] NORM $
+MUJSA:	D[MEM] DEST[IR-ALL MA] NORM $; GET INSTR.
+	D[AR] ACSEL[AC] DEST[O_AC AR] JUMP[JSA1] NORM $
+MUJSYS:	D[MEM] DEST[IR-ALL MA] SHORT $
+	D[IR] ROT[33] MASK[11] COND[OBUS=0] JUMP[JSYS3] C550 $; J IF EX JSYS
+MUJSM1:	ACSEL[MA] ALU[AC] DEST[FIXMAC-MAPF-RD] MAPF[MAPFTR] CYLEN[FIXM] $
+	D[MEM] MASK[18.] DEST[PC] NORM $; JUMP TO RIGHT HALF
+	D[MEM] ROT[18.] MASK[18.] DEST[MA] SHORT $; GET READY TO STORE
+	D[AR] DEST[MEMSTO] MEMSTMA $
+
+];.REPEAT 1 - KL
+.REPEAT KL [
+MUJSR:	PUSHJ[MAPOF] NORM $
+		;INTERRUPT JSR HAS TO STORE IN PHYSICAL SPACE, ELSE
+		; COULD GET PAGE REFILL AND NO WAY TO RESTART THE INTERRUPT
+	D[MEM] DEST[MA] COND[HALF] PUSHJ[TPCFIX] NORM $
+		;GET INSTRUCTION AND
+		;AND FIX PC UP IN AR IF HALF IS ON
+	D[AR] DEST[MEMSTO Q] NORM $
+		;START PC WORD GOING TO MEMORY.
+	D[12] SPEC[A-MEM-APR] ROT[4] COND[-OBUS<0] JUMP[MUJSR0] C550 $
+		;IF FAKE OVERFLOW BIT IS ON,
+	D[CONST 1] ROT[35. - 0] ALU[DORQ] DEST[AR MEMSTO] NORM $
+		;SET OVERFLOW BIT IN PC AND START STORING INTO MEMORY
+MUJSR0:	PUSHJ[MAPON] CYLEN[MEMSTO] $	;TURN MAP BACK ON
+	COND[MA-AC] JUMP[JSR2] NORM $ ;IF AC REF, DO REST OF INSTRUCTION WITH SPECIAL AC CODE
+	D[MA] ALU[D+1] DEST[MA PC] SPEC[CLR-HALF] JUMP[MAIN1] NORM $
+		;FINISH.
+
+;HERE ON NORMAL JSR IF HALF FLAG WAS ON IN PC BUT FPD WAS OFF.
+		;TURN ON MAP AGAIN (WAS OFF IF FROM MUJSR)
+MUJSP:	D[MEM] DEST[IR-ALL MA] COND[HALF] PUSHJ[TPCFIX] NORM $; GET INSTR.
+		;AND FIX PC UP IN AR IF HALF FLAG IS ON
+	D[12] SPEC[A-MEM-APR] ROT[4] COND[-OBUS<0] C550 JUMP[MUJSP1] $
+		;JUMP IF FAKE OVERFLOW NOT ON IN AMEM
+	D[CONST 1] ROT[35. - 0] DEST[Q] SHORT $
+	D[AR] ACSEL[AC] ALU[DORQ] DEST[AC] JUMP[JSP1] NORM $
+		;JUST LIKE INSTRUCTION AT MUJSP1 EXCEPT OR IN BIT 0 (OVERFLOW).
+MUJSP1:	D[AR] ACSEL[AC] DEST[AC] JUMP[JSP1] NORM $
+MUJSA:	D[MEM] DEST[IR-ALL MA] NORM $; GET INSTR.
+	D[AR] ACSEL[AC] DEST[O_AC AR] JUMP[JSA1] NORM $
+];.REPEAT KL
+
+
+
+  N@Wª

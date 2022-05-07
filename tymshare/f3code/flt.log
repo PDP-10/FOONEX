@@ -1,0 +1,21 @@
+
+proj code: 
+type job number to attach, job 6, or c.r. to login: 
+
+tymshare  1515  30-oct-1980
+NOVEMBER 5,1980 WEDNESDAY MOM SOCCI'S BIRTHDAY (17)
+NOVEMBER 1,1980 SATURDAY 0:00 RENT,LESSONS (24)
+
+.ATTACH 6
+FROM JOB 1
+
+.CONT
+
+- Reading file DSK:CFMAIN.FLT[3,222635] 
+page 32 line 150         MAPF[5] D[IOD] ROT[34. + 1] MASK[1] DEST[AR] CYLEN[IOB-IN] POPJ $
+?ERROR - memory location  2140 is already used
+Lookup failure 0 for DSK:CFKNYP.SLO[3,222635]
+^C
+
+.193.38 tru
+terminal time: 0:43:15
